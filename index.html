@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
+<button onclick="loginGoogle()">Iniciar sesión con Google</button>
+  <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>BriCloset</title>
@@ -667,6 +668,39 @@ function escapeHtml(text){ return String(text || "").replaceAll("&","&amp;").rep
 window.switchView = switchView; window.populateCategoryOptions = populateCategoryOptions; window.saveGarment = saveGarment; window.resetForm = resetForm; window.renderWardrobe = renderWardrobe; window.exportData = exportData; window.importData = importData; window.editGarment = editGarment; window.toggleFavorite = toggleFavorite; window.toggleVinted = toggleVinted; window.deleteGarment = deleteGarment; window.openSelector = openSelector; window.selectGarmentForSlot = selectGarmentForSlot; window.removeFromLook = removeFromLook; window.removeAccessory = removeAccessory; window.clearLook = clearLook; window.saveCurrentLook = saveCurrentLook; window.generateQuickLook = generateQuickLook; window.saveQuickLook = saveQuickLook; window.copyQuickToManual = copyQuickToManual; window.generateLook = generateLook; window.repeatLastLook = repeatLastLook; window.saveRandomLook = saveRandomLook; window.copyRandomToManual = copyRandomToManual; window.loadSavedLook = loadSavedLook; window.toggleLookFavorite = toggleLookFavorite; window.deleteSavedLook = deleteSavedLook;
 try { loadData(); populateStaticSelects(); resetForm(); generateQuickLook(); refreshAll(); }
 catch (e) { alert("Había un error cargando la app. Error: " + e.message); console.error(e); }
+</script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
+  import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+  import { getFirestore } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCThGwBnZfhIeN9T1woIjJH5JFiBWc7fkQ",
+    authDomain: "armario---bricloset.firebaseapp.com",
+    projectId: "armario---bricloset",
+    storageBucket: "armario---bricloset.firebasestorage.app",
+    messagingSenderId: "34156505129",
+    appId: "1:34156505129:web:54d67023e9994cc6409438"
+  };
+
+  const app = initializeApp(firebaseConfig);
+
+  // 🔐 AUTH
+  const auth = getAuth();
+  const provider = new GoogleAuthProvider();
+
+  window.loginGoogle = () => {
+    signInWithPopup(auth, provider);
+  };
+
+  // 👀 Detectar usuario
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      console.log("Usuario logueado:", user.email);
+    } else {
+      console.log("No logueado");
+    }
+  });
 </script>
 </body>
 </html>
