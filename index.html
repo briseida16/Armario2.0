@@ -10,7 +10,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="BriCloset">
 <meta name="theme-color" content="#d98fb3">
-<script>if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');</script>
+<script>
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
+</script>
 
 <style>
 * { box-sizing: border-box; }
@@ -47,6 +49,25 @@ header {
 }
 h1 { margin:0; font-size:clamp(1.8rem,4vw,2.5rem); letter-spacing:-0.03em; }
 .subtitle { margin-top:6px; color:var(--muted); font-size:1rem; }
+
+.top-actions {
+  position:absolute;
+  top:16px;
+  right:16px;
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+.mini-badge {
+  background:rgba(255,255,255,0.9);
+  border:1px solid var(--line);
+  border-radius:999px;
+  padding:6px 10px;
+  font-size:0.75rem;
+  font-weight:700;
+  color:var(--muted);
+  box-shadow:var(--shadow);
+}
 
 .tabs {
   display:flex;
@@ -109,11 +130,27 @@ button,select,input,textarea,a.btn-link { font:inherit; }
   padding:12px 16px;
   box-shadow:0 10px 20px rgba(191,111,151,0.22);
 }
-.ghost-btn { background:#fff; color:var(--text); padding:12px 16px; border:1px solid var(--line); }
-.small-btn { background:#fff; color:var(--text); padding:9px 11px; border:1px solid var(--line); font-size:0.9rem; }
-.danger-btn { background:#fff2f4; color:#a74f69; border:1px solid #f1cad6; }
-
-.primary-btn:hover,.ghost-btn:hover,.small-btn:hover,.tab-btn:hover,.occasion-btn:hover,.btn-link:hover { transform:translateY(-1px); }
+.ghost-btn {
+  background:#fff;
+  color:var(--text);
+  padding:12px 16px;
+  border:1px solid var(--line);
+}
+.small-btn {
+  background:#fff;
+  color:var(--text);
+  padding:9px 11px;
+  border:1px solid var(--line);
+  font-size:0.9rem;
+}
+.danger-btn {
+  background:#fff2f4;
+  color:#a74f69;
+  border:1px solid #f1cad6;
+}
+.primary-btn:hover,.ghost-btn:hover,.small-btn:hover,.tab-btn:hover,.occasion-btn:hover,.btn-link:hover {
+  transform:translateY(-1px);
+}
 
 .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:14px; }
 .item-card {
@@ -140,6 +177,7 @@ button,select,input,textarea,a.btn-link { font:inherit; }
   font-size:0.78rem;
   font-weight:700;
 }
+
 .form-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; }
 .field { display:flex; flex-direction:column; gap:6px; }
 .field label { font-size:0.92rem; font-weight:700; }
@@ -167,22 +205,58 @@ button,select,input,textarea,a.btn-link { font:inherit; }
 .slot img { width:100%; border-radius:14px; aspect-ratio:1/1; object-fit:cover; background:#f2edf0; }
 
 .occasion-list { display:grid; grid-template-columns:repeat(auto-fit,minmax(132px,1fr)); gap:10px; }
-.occasion-btn { padding:18px 12px; background:rgba(255,255,255,0.9); color:var(--text); border:1px solid var(--line); box-shadow:var(--shadow); }
+.occasion-btn {
+  padding:18px 12px;
+  background:rgba(255,255,255,0.9);
+  color:var(--text);
+  border:1px solid var(--line);
+  box-shadow:var(--shadow);
+}
 
-.empty { text-align:center; padding:22px; color:var(--muted); background:rgba(255,255,255,0.7); border-radius:18px; }
+.empty {
+  text-align:center;
+  padding:22px;
+  color:var(--muted);
+  background:rgba(255,255,255,0.7);
+  border-radius:18px;
+}
 
 .mini-outfit { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-top:14px; }
-.mini-card { background:rgba(255,255,255,0.85); border-radius:20px; padding:10px; box-shadow:var(--shadow); }
-.mini-card img { width:100%; aspect-ratio:1/1; object-fit:cover; border-radius:14px; background:#f2edf0; margin-bottom:8px; }
+.mini-card {
+  background:rgba(255,255,255,0.85);
+  border-radius:20px;
+  padding:10px;
+  box-shadow:var(--shadow);
+}
+.mini-card img {
+  width:100%;
+  aspect-ratio:1/1;
+  object-fit:cover;
+  border-radius:14px;
+  background:#f2edf0;
+  margin-bottom:8px;
+}
 .mini-title { font-weight:800; margin-bottom:3px; font-size:0.92rem; }
 
 .hidden { display:none !important; }
-.summary-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:10px; margin-top:10px; }
-.summary-box { background:rgba(255,255,255,0.8); border-radius:18px; padding:14px; border:1px solid var(--line); }
+
+.summary-row {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:10px;
+  margin-top:10px;
+}
+.summary-box {
+  background:rgba(255,255,255,0.8);
+  border-radius:18px;
+  padding:14px;
+  border:1px solid var(--line);
+}
 .summary-number { font-size:1.35rem; font-weight:900; margin-bottom:4px; }
 
 .stats-panels { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:14px; }
 .stats-list { display:grid; gap:10px; }
+
 .rank-card {
   display:flex;
   gap:10px;
@@ -192,7 +266,14 @@ button,select,input,textarea,a.btn-link { font:inherit; }
   border-radius:18px;
   padding:10px;
 }
-.rank-card img { width:64px; height:64px; object-fit:cover; border-radius:14px; background:#f2edf0; flex:0 0 64px; }
+.rank-card img {
+  width:64px;
+  height:64px;
+  object-fit:cover;
+  border-radius:14px;
+  background:#f2edf0;
+  flex:0 0 64px;
+}
 .rank-title { font-weight:800; font-size:0.95rem; margin-bottom:3px; }
 .rank-meta { color:var(--muted); font-size:0.84rem; }
 
@@ -206,55 +287,16 @@ button,select,input,textarea,a.btn-link { font:inherit; }
   background:rgba(255,255,255,0.88);
   border-radius:14px;
 }
-.acc-item img { width:48px; height:48px; object-fit:cover; border-radius:10px; background:#f2edf0; flex:0 0 48px; }
+.acc-item img {
+  width:48px;
+  height:48px;
+  object-fit:cover;
+  border-radius:10px;
+  background:#f2edf0;
+  flex:0 0 48px;
+}
 
 .footer-space { height:30px; }
-
-.top-actions {
-  position:absolute;
-  top:16px;
-  right:16px;
-  display:flex;
-  flex-direction:column;
-  align-items:flex-end;
-  gap:8px;
-}
-
-.top-actions-row {
-  display:flex;
-  gap:8px;
-}
-
-.mini-btn {
-  background:rgba(255,255,255,0.9);
-  border:1px solid var(--line);
-  border-radius:999px;
-  padding:6px 10px;
-  font-size:0.75rem;
-  font-weight:700;
-  cursor:pointer;
-  box-shadow:var(--shadow);
-  transition:0.2s;
-  color:var(--text);
-}
-.mini-btn:hover {
-  transform:translateY(-1px);
-  background:var(--primary);
-  color:white;
-}
-
-.auth-status {
-  font-size:0.72rem;
-  color:var(--muted);
-  background:rgba(255,255,255,0.8);
-  border:1px solid var(--line);
-  padding:5px 10px;
-  border-radius:999px;
-  max-width:220px;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-}
 
 @media (max-width:680px) {
   main { padding:14px 10px 30px; }
@@ -263,15 +305,8 @@ button,select,input,textarea,a.btn-link { font:inherit; }
   .rank-card img { width:56px; height:56px; flex-basis:56px; }
   .top-actions {
     position:static;
-    margin-top:12px;
-    align-items:center;
-  }
-  .top-actions-row {
     justify-content:center;
-    flex-wrap:wrap;
-  }
-  .auth-status {
-    max-width:none;
+    margin-top:12px;
   }
 }
 </style>
@@ -280,14 +315,8 @@ button,select,input,textarea,a.btn-link { font:inherit; }
 <header>
   <h1>BriCloset ✨</h1>
   <div class="subtitle">🌸 Toda tu ropa en un solo armario virtual, crea looks diferentes y utiliza todo lo que tienes para explotar tu potencial 🌸</div>
-
   <div class="top-actions">
-    <div class="top-actions-row">
-      <button id="loginBtn" class="mini-btn" type="button" onclick="loginGoogle()">Login</button>
-      <button id="logoutBtn" class="mini-btn hidden" type="button" onclick="logoutGoogle()">Salir</button>
-      <button class="mini-btn" type="button" onclick="saveToCloud()">Guardar nube</button>
-    </div>
-    <div id="authStatus" class="auth-status">No logueada</div>
+    <div class="mini-badge">Modo local</div>
   </div>
 
   <div class="tabs">
@@ -302,190 +331,190 @@ button,select,input,textarea,a.btn-link { font:inherit; }
 </header>
 
 <main>
-  <section id="inicio" class="view active">
-    <div class="card hero">
-      <h2 class="section-title">¿Qué te parece este look?😎</h2>
-      <p id="quickLookTitle" class="muted">¿No tienes tiempo de pensar mucho?, arriesgate con esta propuesta 😉.</p>
-      <div id="quickLookGrid" class="mini-outfit"></div>
-      <div class="button-row" style="margin-top:14px;">
-        <label class="muted" style="display:flex;align-items:center;gap:8px;margin-right:auto;">
-          <input type="checkbox" id="quickNoCoat" onchange="generateQuickLook()">
-          Look sin abrigo
-        </label>
-        <button class="primary-btn" type="button" onclick="saveQuickLook()">Me lo quedo</button>
-        <button class="ghost-btn" type="button" onclick="generateQuickLook()">Otro look</button>
-        <button class="ghost-btn" type="button" onclick="copyQuickToManual()">Editar este look</button>
+<section id="inicio" class="view active">
+  <div class="card hero">
+    <h2 class="section-title">¿Qué te parece este look?😎</h2>
+    <p id="quickLookTitle" class="muted">¿No tienes tiempo de pensar mucho?, arriesgate con esta propuesta 😉.</p>
+    <div id="quickLookGrid" class="mini-outfit"></div>
+    <div class="button-row" style="margin-top:14px;">
+      <label class="muted" style="display:flex;align-items:center;gap:8px;margin-right:auto;">
+        <input type="checkbox" id="quickNoCoat" onchange="generateQuickLook()">
+        Look sin abrigo
+      </label>
+      <button class="primary-btn" type="button" onclick="saveQuickLook()">Me lo quedo</button>
+      <button class="ghost-btn" type="button" onclick="generateQuickLook()">Otro look</button>
+      <button class="ghost-btn" type="button" onclick="copyQuickToManual()">Editar este look</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 class="section-title">Resumen de mi armario</h2>
+    <div class="summary-row">
+      <div class="summary-box"><div class="summary-number" id="sumGarments">0</div><div class="muted">Prendas guardadas</div></div>
+      <div class="summary-box"><div class="summary-number" id="sumFavorites">0</div><div class="muted">Favoritas</div></div>
+      <div class="summary-box"><div class="summary-number" id="sumLooks">0</div><div class="muted">Looks guardados</div></div>
+      <div class="summary-box"><div class="summary-number" id="sumVinted">0</div><div class="muted">En Vinted</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 class="section-title">¡Atencion mudanza virtual!</h2>
+    <div class="button-row">
+      <button class="primary-btn" type="button" onclick="exportData()">Exportar armario</button>
+      <button class="ghost-btn" type="button" onclick="document.getElementById('importFile').click()">Importar armario</button>
+      <input id="importFile" type="file" accept=".json,application/json" class="hidden" onchange="importData(event)">
+    </div>
+    <p class="muted" style="margin-bottom:0">Recuerda exportar tu armario antes de cualquier cambio en el código para no perder ninguna prenda ni look☝🏼.</p>
+  </div>
+
+  <div class="card">
+    <h2 class="section-title">Tus prendas más usadas y olvidadas</h2>
+    <div class="stats-panels">
+      <div>
+        <p class="muted" style="margin-top:0">Top 5 más usadas</p>
+        <div id="topUsedGrid" class="stats-list"></div>
+      </div>
+      <div>
+        <p class="muted" style="margin-top:0">Top 5 olvidadas</p>
+        <div id="forgottenGrid" class="stats-list"></div>
       </div>
     </div>
+  </div>
+</section>
 
-    <div class="card">
-      <h2 class="section-title">Resumen de mi armario</h2>
-      <div class="summary-row">
-        <div class="summary-box"><div class="summary-number" id="sumGarments">0</div><div class="muted">Prendas guardadas</div></div>
-        <div class="summary-box"><div class="summary-number" id="sumFavorites">0</div><div class="muted">Favoritas</div></div>
-        <div class="summary-box"><div class="summary-number" id="sumLooks">0</div><div class="muted">Looks guardados</div></div>
-        <div class="summary-box"><div class="summary-number" id="sumVinted">0</div><div class="muted">En Vinted</div></div>
-      </div>
+<section id="armario" class="view">
+  <div class="card">
+    <h2 class="section-title">Mi armario</h2>
+    <div class="filter-row">
+      <input id="searchInput" type="text" placeholder="Buscar por nombre, color, categoría..." oninput="renderWardrobe()"/>
+      <select id="filterGroup" onchange="renderWardrobe()"><option value="">Todos los grupos</option></select>
+      <select id="filterCategory" onchange="renderWardrobe()"><option value="">Todas las categorías</option></select>
+      <select id="filterOccasion" onchange="renderWardrobe()"><option value="">Todas las ocasiones</option></select>
+      <select id="filterFavorite" onchange="renderWardrobe()">
+        <option value="">Favoritas y no favoritas</option>
+        <option value="true">Solo favoritas</option>
+        <option value="false">Solo no favoritas</option>
+      </select>
     </div>
+  </div>
+  <div id="wardrobeGrid" class="grid"></div>
+</section>
 
-    <div class="card">
-      <h2 class="section-title">¡Atencion mudanza virtual!</h2>
-      <div class="button-row">
-        <button class="primary-btn" type="button" onclick="exportData()">Exportar armario</button>
-        <button class="ghost-btn" type="button" onclick="document.getElementById('importFile').click()">Importar armario</button>
-        <input id="importFile" type="file" accept=".json,application/json" class="hidden" onchange="importData(event)">
-      </div>
-      <p class="muted" style="margin-bottom:0">Recuerda exportar tu armario antes de cualquier cambio en el código para no perder ninguna prenda ni look☝🏼.</p>
+<section id="anadir" class="view">
+  <div class="card">
+    <h2 class="section-title" id="formTitle">Añadir prenda</h2>
+    <div class="form-grid">
+      <div class="field"><label>Nombre</label><input id="nombre" type="text" placeholder="Ej. Blazer rosa palo" /></div>
+      <div class="field"><label>Grupo</label><select id="grupo" onchange="populateCategoryOptions(this.value)"></select></div>
+      <div class="field"><label>Categoría</label><select id="categoria"></select></div>
+      <div class="field"><label>Color</label><input id="color" type="text" placeholder="Ej. beige" /></div>
+      <div class="field"><label>Ocasión</label><select id="ocasion"></select></div>
+      <div class="field"><label>Estado</label><select id="estado"><option value="nuevo">Nuevo</option><option value="muy bueno">Muy bueno</option><option value="bueno">Bueno</option><option value="regular">Regular</option></select></div>
+      <div class="field"><label>Opinión</label><select id="opinion"><option value="me encanta">Me encanta</option><option value="no me gusta">No me gusta</option><option value="me queda grande">Me queda grande</option><option value="me queda pequeña">Me queda pequeña</option></select></div>
+      <div class="field"><label>Talla</label><input id="talla" type="text" placeholder="Ej. M" /></div>
+      <div class="field"><label>Ubicación</label><input id="ubicacion" type="text" placeholder="Ej. armario dormitorio" /></div>
+      <div class="field"><label>Foto</label><input id="foto" type="file" accept="image/*" /></div>
+      <div class="field"><label>Favorita</label><select id="favorito"><option value="false">No</option><option value="true">Sí</option></select></div>
+      <div class="field"><label>Disponible</label><select id="disponible"><option value="true">Sí</option><option value="false">No</option></select></div>
+      <div class="field"><label>En Vinted</label><select id="enVinted"><option value="false">No</option><option value="true">Sí</option></select></div>
+      <div class="field"><label>Vendida</label><select id="vendida"><option value="false">No</option><option value="true">Sí</option></select></div>
+      <div class="field" style="grid-column: 1 / -1;"><label>Complementos relacionados</label><textarea id="complementos" placeholder="Ej. bolso nude, pendientes dorados..."></textarea></div>
     </div>
-
-    <div class="card">
-      <h2 class="section-title">Tus prendas más usadas y olvidadas</h2>
-      <div class="stats-panels">
-        <div>
-          <p class="muted" style="margin-top:0">Top 5 más usadas</p>
-          <div id="topUsedGrid" class="stats-list"></div>
-        </div>
-        <div>
-          <p class="muted" style="margin-top:0">Top 5 olvidadas</p>
-          <div id="forgottenGrid" class="stats-list"></div>
-        </div>
-      </div>
+    <div class="button-row" style="margin-top:14px;">
+      <button class="primary-btn" type="button" onclick="saveGarment()">Guardar prenda</button>
+      <button class="ghost-btn" type="button" onclick="resetForm()">Limpiar formulario</button>
     </div>
-  </section>
+  </div>
+</section>
 
-  <section id="armario" class="view">
-    <div class="card">
-      <h2 class="section-title">Mi armario</h2>
-      <div class="filter-row">
-        <input id="searchInput" type="text" placeholder="Buscar por nombre, color, categoría..." oninput="renderWardrobe()"/>
-        <select id="filterGroup" onchange="renderWardrobe()"><option value="">Todos los grupos</option></select>
-        <select id="filterCategory" onchange="renderWardrobe()"><option value="">Todas las categorías</option></select>
-        <select id="filterOccasion" onchange="renderWardrobe()"><option value="">Todas las ocasiones</option></select>
-        <select id="filterFavorite" onchange="renderWardrobe()">
-          <option value="">Favoritas y no favoritas</option>
-          <option value="true">Solo favoritas</option>
-          <option value="false">Solo no favoritas</option>
-        </select>
-      </div>
+<section id="crearLook" class="view">
+  <div class="card">
+    <h2 class="section-title">Crear look manual</h2>
+    <div class="button-row">
+      <button class="ghost-btn" type="button" onclick="openSelector('abrigo')">Elegir abrigo</button>
+      <button class="ghost-btn" type="button" onclick="openSelector('parte_superior')">Elegir parte superior</button>
+      <button class="ghost-btn" type="button" onclick="openSelector('parte_inferior')">Elegir parte inferior</button>
+      <button class="ghost-btn" type="button" onclick="openSelector('vestido')">Elegir vestido</button>
+      <button class="ghost-btn" type="button" onclick="openSelector('calzado')">Elegir calzado</button>
+      <button class="ghost-btn" type="button" onclick="openSelector('bolso')">Elegir bolso</button>
+      <button class="ghost-btn" type="button" onclick="openSelector('accesorios')">Añadir accesorio +</button>
     </div>
-    <div id="wardrobeGrid" class="grid"></div>
-  </section>
+  </div>
 
-  <section id="anadir" class="view">
-    <div class="card">
-      <h2 class="section-title" id="formTitle">Añadir prenda</h2>
-      <div class="form-grid">
-        <div class="field"><label>Nombre</label><input id="nombre" type="text" placeholder="Ej. Blazer rosa palo" /></div>
-        <div class="field"><label>Grupo</label><select id="grupo" onchange="populateCategoryOptions(this.value)"></select></div>
-        <div class="field"><label>Categoría</label><select id="categoria"></select></div>
-        <div class="field"><label>Color</label><input id="color" type="text" placeholder="Ej. beige" /></div>
-        <div class="field"><label>Ocasión</label><select id="ocasion"></select></div>
-        <div class="field"><label>Estado</label><select id="estado"><option value="nuevo">Nuevo</option><option value="muy bueno">Muy bueno</option><option value="bueno">Bueno</option><option value="regular">Regular</option></select></div>
-        <div class="field"><label>Opinión</label><select id="opinion"><option value="me encanta">Me encanta</option><option value="no me gusta">No me gusta</option><option value="me queda grande">Me queda grande</option><option value="me queda pequeña">Me queda pequeña</option></select></div>
-        <div class="field"><label>Talla</label><input id="talla" type="text" placeholder="Ej. M" /></div>
-        <div class="field"><label>Ubicación</label><input id="ubicacion" type="text" placeholder="Ej. armario dormitorio" /></div>
-        <div class="field"><label>Foto</label><input id="foto" type="file" accept="image/*" /></div>
-        <div class="field"><label>Favorita</label><select id="favorito"><option value="false">No</option><option value="true">Sí</option></select></div>
-        <div class="field"><label>Disponible</label><select id="disponible"><option value="true">Sí</option><option value="false">No</option></select></div>
-        <div class="field"><label>En Vinted</label><select id="enVinted"><option value="false">No</option><option value="true">Sí</option></select></div>
-        <div class="field"><label>Vendida</label><select id="vendida"><option value="false">No</option><option value="true">Sí</option></select></div>
-        <div class="field" style="grid-column: 1 / -1;"><label>Complementos relacionados</label><textarea id="complementos" placeholder="Ej. bolso nude, pendientes dorados..."></textarea></div>
-      </div>
-      <div class="button-row" style="margin-top:14px;">
-        <button class="primary-btn" type="button" onclick="saveGarment()">Guardar prenda</button>
-        <button class="ghost-btn" type="button" onclick="resetForm()">Limpiar formulario</button>
-      </div>
+  <div class="card">
+    <div class="outfit-grid">
+      <div class="slot" id="slot_abrigo"></div>
+      <div class="slot" id="slot_parte_superior"></div>
+      <div class="slot" id="slot_parte_inferior"></div>
+      <div class="slot" id="slot_vestido"></div>
+      <div class="slot" id="slot_calzado"></div>
+      <div class="slot" id="slot_bolso"></div>
+      <div class="slot" id="slot_accesorios"></div>
     </div>
-  </section>
-
-  <section id="crearLook" class="view">
-    <div class="card">
-      <h2 class="section-title">Crear look manual</h2>
-      <div class="button-row">
-        <button class="ghost-btn" type="button" onclick="openSelector('abrigo')">Elegir abrigo</button>
-        <button class="ghost-btn" type="button" onclick="openSelector('parte_superior')">Elegir parte superior</button>
-        <button class="ghost-btn" type="button" onclick="openSelector('parte_inferior')">Elegir parte inferior</button>
-        <button class="ghost-btn" type="button" onclick="openSelector('vestido')">Elegir vestido</button>
-        <button class="ghost-btn" type="button" onclick="openSelector('calzado')">Elegir calzado</button>
-        <button class="ghost-btn" type="button" onclick="openSelector('bolso')">Elegir bolso</button>
-        <button class="ghost-btn" type="button" onclick="openSelector('accesorios')">Añadir accesorio +</button>
-      </div>
+    <div class="button-row" style="margin-top:14px;">
+      <button class="primary-btn" type="button" onclick="saveCurrentLook()">Guardar look</button>
+      <button class="ghost-btn" type="button" onclick="clearLook()">Limpiar look</button>
     </div>
+  </div>
 
-    <div class="card">
-      <div class="outfit-grid">
-        <div class="slot" id="slot_abrigo"></div>
-        <div class="slot" id="slot_parte_superior"></div>
-        <div class="slot" id="slot_parte_inferior"></div>
-        <div class="slot" id="slot_vestido"></div>
-        <div class="slot" id="slot_calzado"></div>
-        <div class="slot" id="slot_bolso"></div>
-        <div class="slot" id="slot_accesorios"></div>
-      </div>
-      <div class="button-row" style="margin-top:14px;">
-        <button class="primary-btn" type="button" onclick="saveCurrentLook()">Guardar look</button>
-        <button class="ghost-btn" type="button" onclick="clearLook()">Limpiar look</button>
-      </div>
+  <div class="card hidden" id="selectorCard">
+    <h2 class="section-title">Selecciona una prenda</h2>
+    <div id="selectorGrid" class="grid"></div>
+  </div>
+</section>
+
+<section id="looks" class="view">
+  <div class="card">
+    <h2 class="section-title">Looks para...</h2>
+    <div class="button-row" style="margin-bottom:14px;">
+      <label class="muted" style="display:flex;align-items:center;gap:8px;">
+        <input type="checkbox" id="randomNoCoat">
+        Look sin abrigo
+      </label>
     </div>
-
-    <div class="card hidden" id="selectorCard">
-      <h2 class="section-title">Selecciona una prenda</h2>
-      <div id="selectorGrid" class="grid"></div>
+    <div class="occasion-list" id="occasionButtons"></div>
+    <div class="button-row" style="margin-top:14px;">
+      <button class="primary-btn" type="button" onclick="generateLook(lastOccasion || 'casual', true)">Atrévete</button>
     </div>
-  </section>
+  </div>
 
-  <section id="looks" class="view">
-    <div class="card">
-      <h2 class="section-title">Looks para...</h2>
-      <div class="button-row" style="margin-bottom:14px;">
-        <label class="muted" style="display:flex;align-items:center;gap:8px;">
-          <input type="checkbox" id="randomNoCoat">
-          Look sin abrigo
-        </label>
-      </div>
-      <div class="occasion-list" id="occasionButtons"></div>
-      <div class="button-row" style="margin-top:14px;">
-        <button class="primary-btn" type="button" onclick="generateLook(lastOccasion || 'casual', true)">Atrévete</button>
-      </div>
+  <div class="card">
+    <h2 class="section-title">Resultado del look aleatorio</h2>
+    <p id="randomLookTitle" class="muted">Todavía no has generado ningún look.</p>
+    <div class="outfit-grid">
+      <div class="slot" id="random_abrigo"></div>
+      <div class="slot" id="random_parte_superior"></div>
+      <div class="slot" id="random_parte_inferior"></div>
+      <div class="slot" id="random_vestido"></div>
+      <div class="slot" id="random_calzado"></div>
+      <div class="slot" id="random_bolso"></div>
+      <div class="slot" id="random_accesorios"></div>
     </div>
-
-    <div class="card">
-      <h2 class="section-title">Resultado del look aleatorio</h2>
-      <p id="randomLookTitle" class="muted">Todavía no has generado ningún look.</p>
-      <div class="outfit-grid">
-        <div class="slot" id="random_abrigo"></div>
-        <div class="slot" id="random_parte_superior"></div>
-        <div class="slot" id="random_parte_inferior"></div>
-        <div class="slot" id="random_vestido"></div>
-        <div class="slot" id="random_calzado"></div>
-        <div class="slot" id="random_bolso"></div>
-        <div class="slot" id="random_accesorios"></div>
-      </div>
-      <div class="button-row" style="margin-top:14px;">
-        <button class="primary-btn" type="button" onclick="saveRandomLook()">Guardar look</button>
-        <button class="ghost-btn" type="button" onclick="repeatLastLook()">Volver a generar</button>
-        <button class="ghost-btn" type="button" onclick="copyRandomToManual()">Editar manualmente</button>
-      </div>
+    <div class="button-row" style="margin-top:14px;">
+      <button class="primary-btn" type="button" onclick="saveRandomLook()">Guardar look</button>
+      <button class="ghost-btn" type="button" onclick="repeatLastLook()">Volver a generar</button>
+      <button class="ghost-btn" type="button" onclick="copyRandomToManual()">Editar manualmente</button>
     </div>
-  </section>
+  </div>
+</section>
 
-  <section id="favoritos" class="view">
-    <div class="card"><h2 class="section-title">Prendas favoritas</h2><div id="favoritesGrid" class="grid"></div></div>
-    <div class="card"><h2 class="section-title">Looks favoritos</h2><div id="favoriteLooksGrid" class="grid"></div></div>
-    <div class="card"><h2 class="section-title">Últimos 10 looks usados</h2><div id="recentLooksGrid" class="grid"></div></div>
-    <div class="card"><h2 class="section-title">Todos los looks guardados</h2><div id="savedLooksGrid" class="grid"></div></div>
-  </section>
+<section id="favoritos" class="view">
+  <div class="card"><h2 class="section-title">Prendas favoritas</h2><div id="favoritesGrid" class="grid"></div></div>
+  <div class="card"><h2 class="section-title">Looks favoritos</h2><div id="favoriteLooksGrid" class="grid"></div></div>
+  <div class="card"><h2 class="section-title">Últimos 10 looks usados</h2><div id="recentLooksGrid" class="grid"></div></div>
+  <div class="card"><h2 class="section-title">Todos los looks guardados</h2><div id="savedLooksGrid" class="grid"></div></div>
+</section>
 
-  <section id="vinted" class="view">
-    <div class="card hero">
-      <h2 class="section-title">Mi perfil real de Vinted</h2>
-      <p class="muted">Abre tu perfil directo desde aquí.</p>
-      <a class="btn-link" href="https://www.vinted.es/member/24042028" target="_blank" rel="noopener noreferrer">Ir a mi perfil de Vinted</a>
-    </div>
-    <div class="card"><h2 class="section-title">Mi armario Vinted</h2><div id="vintedGrid" class="grid"></div></div>
-  </section>
+<section id="vinted" class="view">
+  <div class="card hero">
+    <h2 class="section-title">Mi perfil real de Vinted</h2>
+    <p class="muted">Abre tu perfil directo desde aquí.</p>
+    <a class="btn-link" href="https://www.vinted.es/member/24042028" target="_blank" rel="noopener noreferrer">Ir a mi perfil de Vinted</a>
+  </div>
+  <div class="card"><h2 class="section-title">Mi armario Vinted</h2><div id="vintedGrid" class="grid"></div></div>
+</section>
 
-  <div class="footer-space"></div>
+<div class="footer-space"></div>
 </main>
 
 <script>
@@ -898,6 +927,9 @@ function saveGarment(){
     reader.onload = e => {
       data.foto = e.target.result;
       finishSave(data);
+    };
+    reader.onerror = () => {
+      alert("No he podido leer la foto.");
     };
     reader.readAsDataURL(file);
   } else {
@@ -1329,37 +1361,6 @@ function escapeHtml(text){
     .replaceAll("'","&#039;");
 }
 
-function updateAuthUI(user){
-  const loginBtn = document.getElementById("loginBtn");
-  const logoutBtn = document.getElementById("logoutBtn");
-  const authStatus = document.getElementById("authStatus");
-
-  if (!loginBtn || !logoutBtn || !authStatus) return;
-
-  if (user) {
-    loginBtn.classList.add("hidden");
-    logoutBtn.classList.remove("hidden");
-    authStatus.textContent = `Logueada: ${user.email || "Usuario"}`;
-  } else {
-    loginBtn.classList.remove("hidden");
-    logoutBtn.classList.add("hidden");
-    authStatus.textContent = "No logueada";
-  }
-}
-
-window.getAppData = function () {
-  return { garments, savedLooks, recentLooks };
-};
-
-window.setAppData = function (data) {
-  garments = Array.isArray(data.garments) ? data.garments.map(migrateGarment) : [];
-  savedLooks = Array.isArray(data.savedLooks) ? data.savedLooks.map(look => ({ ...look, accesorios: normalizeAccessories(look.accesorios) })) : [];
-  recentLooks = Array.isArray(data.recentLooks) ? data.recentLooks.map(look => ({ ...look, accesorios: normalizeAccessories(look.accesorios) })) : [];
-  persist();
-  refreshAll();
-};
-
-window.updateAuthUI = updateAuthUI;
 window.switchView = switchView;
 window.populateCategoryOptions = populateCategoryOptions;
 window.saveGarment = saveGarment;
@@ -1394,118 +1395,10 @@ try {
   resetForm();
   generateQuickLook();
   refreshAll();
-  updateAuthUI(null);
 } catch (e) {
   alert("Había un error cargando la app. Error: " + e.message);
   console.error(e);
 }
-</script>
-
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyCThGwBnZfhIeN9T1woIjJH5JFiBWc7fkQ",
-  authDomain: "armario---bricloset.firebaseapp.com",
-  projectId: "armario---bricloset",
-  storageBucket: "armario---bricloset.firebasestorage.app",
-  messagingSenderId: "34156505129",
-  appId: "1:34156505129:web:54d67023e9994cc6409438"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
-
-let currentUser = null;
-
-async function saveUserDataToCloud() {
-  if (!currentUser) {
-    alert("Primero inicia sesión con Google.");
-    return;
-  }
-
-  try {
-    const appData = window.getAppData ? window.getAppData() : { garments: [], savedLooks: [], recentLooks: [] };
-
-    await setDoc(doc(db, "users", currentUser.uid), {
-      garments: appData.garments || [],
-      savedLooks: appData.savedLooks || [],
-      recentLooks: appData.recentLooks || [],
-      updatedAt: new Date().toISOString(),
-      email: currentUser.email || ""
-    });
-
-    alert("Guardado en la nube ✅");
-    console.log("Datos guardados en Firestore");
-  } catch (error) {
-    console.error("Error guardando en Firestore:", error);
-    alert("Error al guardar en la nube");
-  }
-}
-
-async function loadUserDataFromCloud(user) {
-  try {
-    const ref = doc(db, "users", user.uid);
-    const snap = await getDoc(ref);
-
-    if (snap.exists()) {
-      const data = snap.data();
-
-      if (window.setAppData) {
-        window.setAppData({
-          garments: data.garments || [],
-          savedLooks: data.savedLooks || [],
-          recentLooks: data.recentLooks || []
-        });
-      }
-
-      console.log("Datos cargados desde la nube");
-    } else {
-      console.log("No hay datos todavía en Firestore para este usuario");
-    }
-  } catch (error) {
-    console.error("Error cargando desde Firestore:", error);
-  }
-}
-
-window.loginGoogle = async () => {
-  try {
-    const result = await signInWithPopup(auth, provider);
-    alert("Sesión iniciada: " + result.user.email);
-  } catch (error) {
-    console.error("Error login:", error);
-    alert("Error al iniciar sesión con Google");
-  }
-};
-
-window.logoutGoogle = async () => {
-  try {
-    await signOut(auth);
-    alert("Sesión cerrada");
-  } catch (error) {
-    console.error("Error logout:", error);
-    alert("Error al cerrar sesión");
-  }
-};
-
-window.saveToCloud = saveUserDataToCloud;
-
-onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    currentUser = user;
-    if (window.updateAuthUI) window.updateAuthUI(user);
-    await loadUserDataFromCloud(user);
-    console.log("Usuario logueado:", user.email);
-  } else {
-    currentUser = null;
-    if (window.updateAuthUI) window.updateAuthUI(null);
-    console.log("No logueado");
-  }
-});
 </script>
 </body>
 </html>
