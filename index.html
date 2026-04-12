@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>BriCloset</title>
+
+<link rel="manifest" href="/manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="BriCloset">
+<meta name="theme-color" content="#d98fb3">
+<script>if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');</script>
+
+<style>
+* { box-sizing: border-box; }
+:root {
+--bg: #fff7fb; --card: rgba(255,255,255,0.88); --text: #3f2e3a; --muted: #8a7080;
+--primary: #d98fb3; --primary-dark: #bf6f97; --line: #efd9e5;
+--shadow: 0 10px 30px rgba(191,111,151,0.12);
+--gradient: linear-gradient(135deg, #ffd9ea 0%, #ffeedd 100%);
+}
+body {
+margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; color:var(--text);
+background: radial-gradient(circle at top left,#ffe3ef 0,transparent 28%), radial-gradient(circle at top right,#fff0df 0,transparent 22%), linear-gradient(180deg,#fff9fc 0%,#fff4f8 100%);
+min-height:100vh;
+}
+header {
+padding:24px 16px 14px; text-align:center; position:sticky; top:0; z-index:30;
+backdrop-filter:blur(14px); background:rgba(255,255,255,0.65); border-bottom:1px solid rgba(255,255,255,0.5);
+}
+h1 { margin:0; font-size:clamp(1.8rem,4vw,2.5rem); letter-spacing:-0.03em; }
+.subtitle { margin-top:6px; color:var(--muted); font-size:1rem; }
+.tabs { display:flex; gap:10px; overflow-x:auto; padding:14px 16px 4px; justify-content:center; scrollbar-width:none; }
+.tabs::-webkit-scrollbar { display:none; }
+.tab-btn {
+border:none; background:rgba(255,255,255,0.7); color:var(--text); padding:12px 16px; border-radius:999px;
+font-weight:700; cursor:pointer; white-space:nowrap; box-shadow:var(--shadow); transition:.2s ease;
+}
+.tab-btn.active { background:var(--primary); color:#fff; transform:translateY(-1px); }
+main { max-width:1220px; margin:0 auto; padding:18px 14px 40px; }
+.view { display:none; }
+.view.active { display:block; }
+.card {
+background:var(--card); border:1px solid rgba(255,255,255,0.7); border-radius:24px; padding:18px;
+box-shadow:var(--shadow); margin-bottom:16px; backdrop-filter:blur(10px);
+}
+.hero { background:var(--gradient); border:1px solid #ffd3e7; }
+.section-title { margin:0 0 12px; font-size:1.15rem; letter-spacing:-0.02em; }
+.muted { color:var(--muted); font-size:0.95rem; }
+.button-row,.filter-row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+button,select,input,textarea,a.btn-link { font:inherit; }
+.primary-btn,.ghost-btn,.small-btn,.occasion-btn,.btn-link {
+border:none; border-radius:16px; cursor:pointer; transition:.2s ease; text-decoration:none;
+display:inline-flex; align-items:center; justify-content:center; font-weight:700;
+}
+.primary-btn,.btn-link {
+background:linear-gradient(135deg,var(--primary) 0%,var(--primary-dark) 100%);
+color:#fff; padding:12px 16px; box-shadow:0 10px 20px rgba(191,111,151,0.22);
+}
+.ghost-btn { background:#fff; color:var(--text); padding:12px 16px; border:1px solid var(--line); }
+.small-btn { background:#fff; color:var(--text); padding:9px 11px; border:1px solid var(--line); font-size:0.9rem; }
+.danger-btn { background:#fff2f4; color:#a74f69; border:1px solid #f1cad6; }
+.primary-btn:hover,.ghost-btn:hover,.small-btn:hover,.tab-btn:hover,.occasion-btn:hover,.btn-link:hover { transform:translateY(-1px); }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:14px; }
+.item-card {
+background:rgba(255,255,255,0.95); border-radius:22px; overflow:hidden; box-shadow:var(--shadow);
+border:1px solid rgba(255,255,255,0.85); display:flex; flex-direction:column;
+}
+.item-card img { width:100%; aspect-ratio:1/1; object-fit:cover; background:#f4edf2; }
+.item-body { padding:12px; }
+.item-name { margin:0 0 8px; font-size:0.98rem; font-weight:800; }
+.meta { margin:2px 0; color:var(--muted); font-size:0.87rem; }
+.pill { display:inline-block; margin-top:8px; margin-right:6px; padding:5px 9px; border-radius:999px; background:#f9e8f0; color:#8d5d73; font-size:0.78rem; font-weight:700; }
+.form-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; }
+.field { display:flex; flex-direction:column; gap:6px; }
+.field label { font-size:0.92rem; font-weight:700; }
+.field input,.field select,.field textarea { border:1px solid var(--line); border-radius:16px; padding:12px 13px; background:rgba(255,255,255,0.95); color:var(--text); }
+.field textarea { min-height:96px; resize:vertical; }
+.outfit-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; }
+.slot {
+background:rgba(255,255,255,0.75); border:2px dashed #ead2df; border-radius:20px; padding:12px;
+min-height:230px; display:flex; flex-direction:column; gap:8px;
+}
+.slot-title { font-weight:800; color:#6e5361; }
+.slot img { width:100%; border-radius:14px; aspect-ratio:1/1; object-fit:cover; background:#f2edf0; }
+.occasion-list { display:grid; grid-template-columns:repeat(auto-fit,minmax(132px,1fr)); gap:10px; }
+.occasion-btn { padding:18px 12px; background:rgba(255,255,255,0.9); color:var(--text); border:1px solid var(--line); box-shadow:var(--shadow); }
+.empty { text-align:center; padding:22px; color:var(--muted); background:rgba(255,255,255,0.7); border-radius:18px; }
+.mini-outfit { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-top:14px; }
+.mini-card { background:rgba(255,255,255,0.85); border-radius:20px; padding:10px; box-shadow:var(--shadow); }
+.mini-card img { width:100%; aspect-ratio:1/1; object-fit:cover; border-radius:14px; background:#f2edf0; margin-bottom:8px; }
+.mini-title { font-weight:800; margin-bottom:3px; font-size:0.92rem; }
+.hidden { display:none !important; }
+.summary-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:10px; margin-top:10px; }
+.summary-box { background:rgba(255,255,255,0.8); border-radius:18px; padding:14px; border:1px solid var(--line); }
+.summary-number { font-size:1.35rem; font-weight:900; margin-bottom:4px; }
+.stats-panels { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:14px; }
+.stats-list { display:grid; gap:10px; }
+.rank-card {
+display:flex; gap:10px; align-items:center; background:rgba(255,255,255,0.92);
+border:1px solid rgba(255,255,255,0.85); border-radius:18px; padding:10px;
+}
+.rank-card img { width:64px; height:64px; object-fit:cover; border-radius:14px; background:#f2edf0; flex:0 0 64px; }
+.rank-title { font-weight:800; font-size:0.95rem; margin-bottom:3px; }
+.rank-meta { color:var(--muted); font-size:0.84rem; }
+.acc-list { display:grid; gap:8px; }
+.acc-item {
+display:flex; gap:8px; align-items:center; padding:8px; border:1px solid var(--line);
+background:rgba(255,255,255,0.88); border-radius:14px;
+}
+.acc-item img { width:48px; height:48px; object-fit:cover; border-radius:10px; background:#f2edf0; flex:0 0 48px; }
+.footer-space { height:30px; }
+@media (max-width:680px) {
+main { padding:14px 10px 30px; } .card { padding:14px; border-radius:20px; } .tabs { justify-content:flex-start; }
+.rank-card img { width:56px; height:56px; flex-basis:56px; }
+}
+</style>
+</head>
+<body>
+<header>
+<h1>BriCloset ✨</h1>
+<div class="subtitle">🌸 Toda tu ropa en un solo armario virtual, crea looks diferentes y utiliza todo lo que tienes para explotar tu potencial 🌸</div>
+<div class="tabs">
+<button class="tab-btn active" type="button" onclick="switchView('inicio', this)">Inicio</button>
+<button class="tab-btn" type="button" onclick="switchView('armario', this)">Mi armario</button>
+<button class="tab-btn" type="button" onclick="switchView('anadir', this)">Añadir prenda</button>
+<button class="tab-btn" type="button" onclick="switchView('crearLook', this)">Crear look</button>
+<button class="tab-btn" type="button" onclick="switchView('looks', this)">Looks para...</button>
+<button class="tab-btn" type="button" onclick="switchView('favoritos', this)">Favoritos</button>
+<button class="tab-btn" type="button" onclick="switchView('vinted', this)">En venta</button>
+</div>
+</header>
+<main>
+<section id="inicio" class="view active">
+<div class="card hero">
+<h2 class="section-title">¿Qué te parece este look?😎</h2>
+<p id="quickLookTitle" class="muted">¿No tienes tiempo de pensar mucho?, arriesgate con esta propuesta 😉.</p>
+<div id="quickLookGrid" class="mini-outfit"></div>
+<div class="button-row" style="margin-top:14px;">
+<label class="muted" style="display:flex;align-items:center;gap:8px;margin-right:auto;">
+<input type="checkbox" id="quickNoCoat" onchange="generateQuickLook()">
+Look sin abrigo
+</label>
+<button class="primary-btn" type="button" onclick="saveQuickLook()">Me lo quedo</button>
+<button class="ghost-btn" type="button" onclick="generateQuickLook()">Otro look</button>
+<button class="ghost-btn" type="button" onclick="copyQuickToManual()">Editar este look</button>
+</div>
+</div>
+<div class="card">
+<h2 class="section-title">Resumen de mi armario</h2>
+<div class="summary-row">
+<div class="summary-box"><div class="summary-number" id="sumGarments">0</div><div class="muted">Prendas guardadas</div></div>
+<div class="summary-box"><div class="summary-number" id="sumFavorites">0</div><div class="muted">Favoritas</div></div>
+<div class="summary-box"><div class="summary-number" id="sumLooks">0</div><div class="muted">Looks guardados</div></div>
+<div class="summary-box"><div class="summary-number" id="sumVinted">0</div><div class="muted">En Vinted</div></div>
+</div>
+</div>
+<div class="card">
+<h2 class="section-title">¡Atencion mudanza virtual!</h2>
+<div class="button-row">
+<button class="primary-btn" type="button" onclick="exportData()">Exportar armario</button>
+<button class="ghost-btn" type="button" onclick="document.getElementById('importFile').click()">Importar armario</button>
+<input id="importFile" type="file" accept=".json,application/json" class="hidden" onchange="importData(event)">
+</div>
+<p class="muted" style="margin-bottom:0">Recuerda exportar tu armario antes de cualquier cambio en el código para no perder ninguna prenda ni look☝🏼.</p>
+</div>
+<div class="card">
+<h2 class="section-title">Tus prendas más usadas y olvidadas</h2>
+<div class="stats-panels">
+<div>
+<p class="muted" style="margin-top:0">Top 5 más usadas</p>
+<div id="topUsedGrid" class="stats-list"></div>
+</div>
+<div>
+<p class="muted" style="margin-top:0">Top 5 olvidadas</p>
+<div id="forgottenGrid" class="stats-list"></div>
+</div>
+</div>
+</div>
+</section>
+<section id="armario" class="view">
+<div class="card">
+<h2 class="section-title">Mi armario</h2>
+<div class="filter-row">
+<input id="searchInput" type="text" placeholder="Buscar por nombre, color, categoría..." oninput="renderWardrobe()"/>
+<select id="filterGroup" onchange="renderWardrobe()"><option value="">Todos los grupos</option></select>
+<select id="filterCategory" onchange="renderWardrobe()"><option value="">Todas las categorías</option></select>
+<select id="filterOccasion" onchange="renderWardrobe()"><option value="">Todas las ocasiones</option></select>
+<select id="filterFavorite" onchange="renderWardrobe()">
+<option value="">Favoritas y no favoritas</option>
+<option value="true">Solo favoritas</option>
+<option value="false">Solo no favoritas</option>
+</select>
+</div>
+</div>
+<div id="wardrobeGrid" class="grid"></div>
+</section>
+<section id="anadir" class="view">
+<div class="card">
+<h2 class="section-title" id="formTitle">Añadir prenda</h2>
+<div class="form-grid">
+<div class="field"><label>Nombre</label><input id="nombre" type="text" placeholder="Ej. Blazer rosa palo" /></div>
+<div class="field"><label>Grupo</label><select id="grupo" onchange="populateCategoryOptions(this.value)"></select></div>
+<div class="field"><label>Categoría</label><select id="categoria"></select></div>
+<div class="field"><label>Color</label><input id="color" type="text" placeholder="Ej. beige" /></div>
+<div class="field"><label>Ocasión</label><select id="ocasion"></select></div>
+<div class="field"><label>Estado</label><select id="estado"><option value="nuevo">Nuevo</option><option value="muy bueno">Muy bueno</option><option value="bueno">Bueno</option><option value="regular">Regular</option></select></div>
+<div class="field"><label>Opinión</label><select id="opinion"><option value="me encanta">Me encanta</option><option value="no me gusta">No me gusta</option><option value="me queda grande">Me queda grande</option><option value="me queda pequeña">Me queda pequeña</option></select></div>
+<div class="field"><label>Talla</label><input id="talla" type="text" placeholder="Ej. M" /></div>
+<div class="field"><label>Ubicación</label><input id="ubicacion" type="text" placeholder="Ej. armario dormitorio" /></div>
+<div class="field"><label>Foto</label><input id="foto" type="file" accept="image/*" /></div>
+<div class="field"><label>Favorita</label><select id="favorito"><option value="false">No</option><option value="true">Sí</option></select></div>
+<div class="field"><label>Disponible</label><select id="disponible"><option value="true">Sí</option><option value="false">No</option></select></div>
+<div class="field"><label>En Vinted</label><select id="enVinted"><option value="false">No</option><option value="true">Sí</option></select></div>
+<div class="field"><label>Vendida</label><select id="vendida"><option value="false">No</option><option value="true">Sí</option></select></div>
+<div class="field" style="grid-column: 1 / -1;"><label>Complementos relacionados</label><textarea id="complementos" placeholder="Ej. bolso nude, pendientes dorados..."></textarea></div>
+</div>
+<div class="button-row" style="margin-top:14px;">
+<button class="primary-btn" type="button" onclick="saveGarment()">Guardar prenda</button>
+<button class="ghost-btn" type="button" onclick="resetForm()">Limpiar formulario</button>
+</div>
+</div>
+</section>
+<section id="crearLook" class="view">
+<div class="card">
+<h2 class="section-title">Crear look manual</h2>
+<div class="button-row">
+<button class="ghost-btn" type="button" onclick="openSelector('abrigo')">Elegir abrigo</button>
+<button class="ghost-btn" type="button" onclick="openSelector('parte_superior')">Elegir parte superior</button>
+<button class="ghost-btn" type="button" onclick="openSelector('parte_inferior')">Elegir parte inferior</button>
+<button class="ghost-btn" type="button" onclick="openSelector('vestido')">Elegir vestido</button>
+<button class="ghost-btn" type="button" onclick="openSelector('calzado')">Elegir calzado</button>
+<button class="ghost-btn" type="button" onclick="openSelector('bolso')">Elegir bolso</button>
+<button class="ghost-btn" type="button" onclick="openSelector('accesorios')">Añadir accesorio +</button>
+</div>
+</div>
+<div class="card">
+<div class="outfit-grid">
+<div class="slot" id="slot_abrigo"></div>
+<div class="slot" id="slot_parte_superior"></div>
+<div class="slot" id="slot_parte_inferior"></div>
+<div class="slot" id="slot_vestido"></div>
+<div class="slot" id="slot_calzado"></div>
+<div class="slot" id="slot_bolso"></div>
+<div class="slot" id="slot_accesorios"></div>
+</div>
+<div class="button-row" style="margin-top:14px;">
+<button class="primary-btn" type="button" onclick="saveCurrentLook()">Guardar look</button>
+<button class="ghost-btn" type="button" onclick="clearLook()">Limpiar look</button>
+</div>
+</div>
+<div class="card hidden" id="selectorCard">
+<h2 class="section-title">Selecciona una prenda</h2>
+<div id="selectorGrid" class="grid"></div>
+</div>
+</section>
+<section id="looks" class="view">
+<div class="card">
+<h2 class="section-title">Looks para...</h2>
+<div class="button-row" style="margin-bottom:14px;">
+<label class="muted" style="display:flex;align-items:center;gap:8px;">
+<input type="checkbox" id="randomNoCoat">
+Look sin abrigo
+</label>
+</div>
+<div class="occasion-list" id="occasionButtons"></div>
+<div class="button-row" style="margin-top:14px;">
+<button class="primary-btn" type="button" onclick="generateLook(lastOccasion || 'casual', true)">Atrévete</button>
+</div>
+</div>
+<div class="card">
+<h2 class="section-title">Resultado del look aleatorio</h2>
+<p id="randomLookTitle" class="muted">Todavía no has generado ningún look.</p>
+<div class="outfit-grid">
+<div class="slot" id="random_abrigo"></div>
+<div class="slot" id="random_parte_superior"></div>
+<div class="slot" id="random_parte_inferior"></div>
+<div class="slot" id="random_vestido"></div>
+<div class="slot" id="random_calzado"></div>
+<div class="slot" id="random_bolso"></div>
+<div class="slot" id="random_accesorios"></div>
+</div>
+<div class="button-row" style="margin-top:14px;">
+<button class="primary-btn" type="button" onclick="saveRandomLook()">Guardar look</button>
+<button class="ghost-btn" type="button" onclick="repeatLastLook()">Volver a generar</button>
+<button class="ghost-btn" type="button" onclick="copyRandomToManual()">Editar manualmente</button>
+</div>
+</div>
+</section>
+<section id="favoritos" class="view">
+<div class="card"><h2 class="section-title">Prendas favoritas</h2><div id="favoritesGrid" class="grid"></div></div>
+<div class="card"><h2 class="section-title">Looks favoritos</h2><div id="favoriteLooksGrid" class="grid"></div></div>
+<div class="card"><h2 class="section-title">Últimos 10 looks usados</h2><div id="recentLooksGrid" class="grid"></div></div>
+<div class="card"><h2 class="section-title">Todos los looks guardados</h2><div id="savedLooksGrid" class="grid"></div></div>
+</section>
+<section id="vinted" class="view">
+<div class="card hero">
+<h2 class="section-title">Mi perfil real de Vinted</h2>
+<p class="muted">Abre tu perfil directo desde aquí.</p>
+<a class="btn-link" href="https://www.vinted.es/member/24042028" target="_blank" rel="noopener noreferrer">Ir a mi perfil de Vinted</a>
+</div>
+<div class="card"><h2 class="section-title">Mi armario Vinted</h2><div id="vintedGrid" class="grid"></div></div>
+</section>
+<div class="footer-space"></div>
+</main>
+<script>
+const placeholderImg = "data:image/svg+xml;utf8," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500"><rect width="100%" height="100%" fill="#efe7eb"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#9b8691" font-size="24" font-family="Arial">Sin imagen</text></svg>`);
+const storage = {
+  memory: {},
+  get(key){ try { return localStorage.getItem(key); } catch(e){ return this.memory[key] ?? null; } },
+  set(key,val){ try { localStorage.setItem(key,val); } catch(e){ this.memory[key] = val; } }
+};
+const STORAGE_GARMENTS = "garments_armario_seguro_18";
+const STORAGE_LOOKS = "savedLooks_armario_seguro_18";
+const STORAGE_RECENT = "recentLooks_armario_seguro_18";
+const categoryOptions = {
+  partes_arriba_abrigo: [["abrigo","Abrigo"],["chaqueta","Chaqueta"]],
+  partes_arriba_exterior: [["sudadera","Sudadera"],["blazer","Blazer"],["jersey","Jersey"],["rebeca","Rebeca"]],
+  partes_arriba_interior: [["camiseta","Camiseta"],["camisa","Camisa"],["blusa","Blusa"],["top","Top"]],
+  pantalones: [["vaqueros","Vaqueros"],["anchos","Pantalón ancho"],["leggings","Leggings"],["cortos","Pantalón corto"],["chandal","Chándal"]],
+  faldas: [["falda_larga","Falda larga"],["falda_midi","Falda midi"],["falda_corta","Falda corta"]],
+  vestidos: [["vestido_largo","Vestido largo"],["vestido_midi","Vestido midi"]],
+  bikinis: [["bikini","Bikini"],["banador","Bañador"],["salida_playa","Salida de playa"]],
+  bolsos: [["bolso","Bolso"]],
+  calzado: [["bota","Bota"],["tacones","Tacones"],["planos","Planos"],["deportivas","Deportivas"],["sandalias","Sandalias"],["zapatos","Zapatos"]],
+  accesorios: [["pendiente","Pendiente"],["anillo","Anillo"],["collar","Collar"],["pulsera","Pulsera"],["bufanda","Bufanda"],["cinturon","Cinturón"],["orejeras","Orejeras"],["guantes","Guantes"],["panuelo","Pañuelo"],["gorro","Gorro"],["gorra","Gorra"],["reloj","Reloj"]]
+};
+const occasions = [["oficina","Oficina"],["gimnasio","Gimnasio"],["paseo","Paseo"],["amigas","Amigas"],["comida familiar","Comida familiar"],["fiesta","Fiesta"],["boda","Boda"],["viaje","Viaje"],["casual","Casual"],["comodo","Cómodo"],["playa_piscina","Playa / piscina"]];
+const slotTitles = { abrigo:"Abrigo", parte_superior:"Parte superior", parte_inferior:"Parte inferior", vestido:"Vestido", calzado:"Calzado", bolso:"Bolso", accesorios:"Accesorios" };
+const categorySlotMap = {
+  abrigo:"abrigo", chaqueta:"abrigo", blazer:"parte_superior", sudadera:"parte_superior", rebeca:"parte_superior", jersey:"parte_superior",
+  camiseta:"parte_superior", camisa:"parte_superior", blusa:"parte_superior", top:"parte_superior",
+  vaqueros:"parte_inferior", anchos:"parte_inferior", leggings:"parte_inferior", cortos:"parte_inferior", chandal:"parte_inferior",
+  falda_larga:"parte_inferior", falda_midi:"parte_inferior", falda_corta:"parte_inferior",
+  vestido_largo:"vestido", vestido_midi:"vestido", bikini:"vestido", banador:"vestido", salida_playa:"vestido",
+  bota:"calzado", tacones:"calzado", planos:"calzado", deportivas:"calzado", sandalias:"calzado", zapatos:"calzado",
+  bolso:"bolso",
+  pendiente:"accesorios", anillo:"accesorios", collar:"accesorios", pulsera:"accesorios", bufanda:"accesorios", cinturon:"accesorios", orejeras:"accesorios", guantes:"accesorios", panuelo:"accesorios", gorro:"accesorios", gorra:"accesorios", reloj:"accesorios"
+};
+function uid(){ try { return crypto.randomUUID(); } catch(e){ return String(Date.now()) + Math.random().toString(16).slice(2); } }
+function emptyLook(){ return { abrigo:null, parte_superior:null, parte_inferior:null, vestido:null, calzado:null, bolso:null, accesorios:[] }; }
+function safeParse(s, fallback){ try { return JSON.parse(s) ?? fallback; } catch(e){ return fallback; } }
+function migrateGarment(g){
+  const item = {...g};
+  if (item.ocasion === "playa") item.ocasion = "playa_piscina";
+  if (item.grupo === "partes_arriba") {
+    if (["abrigo","chaqueta"].includes(item.categoria)) item.grupo = "partes_arriba_abrigo";
+    else if (["sudadera","blazer","jersey","rebeca"].includes(item.categoria)) item.grupo = "partes_arriba_exterior";
+    else item.grupo = "partes_arriba_interior";
+  }
+  if (["bikini","banador","salida_playa"].includes(item.categoria)) { item.grupo = "bikinis"; item.ocasion = "playa_piscina"; }
+  item.usos = item.usos || 0;
+  return item;
+}
+function normalizeAccessories(value){ if (Array.isArray(value)) return value; if (value == null) return []; return [value]; }
+function demoGarments(){
+  return [
+    { id: uid(), nombre: "Blazer beige", grupo: "partes_arriba_exterior", categoria: "blazer", color: "beige", ocasion: "oficina", estado: "muy bueno", opinion: "me encanta", talla: "M", favorito: true, disponible: true, en_vinted: false, vendida: false, ubicacion: "armario dormitorio", complementos_relacionados: "bolso camel", foto: placeholderImg, usos: 0 },
+    { id: uid(), nombre: "Camiseta blanca básica", grupo: "partes_arriba_interior", categoria: "camiseta", color: "blanco", ocasion: "casual", estado: "muy bueno", opinion: "me encanta", talla: "M", favorito: true, disponible: true, en_vinted: false, vendida: false, ubicacion: "cajón 1", complementos_relacionados: "", foto: placeholderImg, usos: 0 },
+    { id: uid(), nombre: "Abrigo camel", grupo: "partes_arriba_abrigo", categoria: "abrigo", color: "camel", ocasion: "oficina", estado: "muy bueno", opinion: "me encanta", talla: "M", favorito: false, disponible: true, en_vinted: false, vendida: false, ubicacion: "armario", complementos_relacionados: "", foto: placeholderImg, usos: 0 }
+  ];
+}
+let garments = [];
+let savedLooks = [];
+let recentLooks = [];
+let editingGarmentId = null;
+let currentLook = emptyLook();
+let randomLook = emptyLook();
+let quickLook = emptyLook();
+let currentSlot = null;
+let lastOccasion = null;
+let lastBold = false;
+function persist(){ storage.set(STORAGE_GARMENTS, JSON.stringify(garments)); storage.set(STORAGE_LOOKS, JSON.stringify(savedLooks)); storage.set(STORAGE_RECENT, JSON.stringify(recentLooks)); }
+function loadData(){
+  garments = safeParse(storage.get(STORAGE_GARMENTS), demoGarments()).map(migrateGarment);
+  savedLooks = safeParse(storage.get(STORAGE_LOOKS), []).map(look => ({...look, accesorios: normalizeAccessories(look.accesorios)}));
+  recentLooks = safeParse(storage.get(STORAGE_RECENT), []).map(look => ({...look, accesorios: normalizeAccessories(look.accesorios)}));
+  persist();
+}
+function switchView(viewId, clickedBtn){
+  document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+  document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
+  const view = document.getElementById(viewId);
+  if (view) view.classList.add("active");
+  if (clickedBtn) clickedBtn.classList.add("active");
+  else {
+    const match = Array.from(document.querySelectorAll(".tab-btn")).find(btn => btn.getAttribute("onclick")?.includes("'" + viewId + "'"));
+    if (match) match.classList.add("active");
+  }
+}
+function populateStaticSelects(){
+  document.getElementById("grupo").innerHTML = `<option value="partes_arriba_abrigo">Partes de arriba · Abrigo</option><option value="partes_arriba_exterior">Partes de arriba · Exterior</option><option value="partes_arriba_interior">Partes de arriba · Interior</option><option value="pantalones">Pantalones</option><option value="faldas">Faldas</option><option value="vestidos">Vestidos</option><option value="bikinis">Bikinis y bañadores</option><option value="bolsos">Bolsos</option><option value="calzado">Calzado</option><option value="accesorios">Accesorios</option>`;
+  document.getElementById("ocasion").innerHTML = occasions.map(([v,l]) => `<option value="${v}">${l}</option>`).join("");
+  document.getElementById("occasionButtons").innerHTML = occasions.map(([v,l]) => `<button class="occasion-btn" type="button" onclick="generateLook('${v}', false)">${l}</button>`).join("");
+  populateCategoryOptions(document.getElementById("grupo").value || "partes_arriba_abrigo");
+}
+function populateCategoryOptions(group, selected = ""){
+  const select = document.getElementById("categoria");
+  const options = categoryOptions[group] || [];
+  select.innerHTML = options.map(([value,label]) => `<option value="${value}" ${value===selected ? "selected" : ""}>${label}</option>`).join("");
+}
+function resetForm(){
+  editingGarmentId = null;
+  ["nombre","color","talla","ubicacion","complementos"].forEach(id => document.getElementById(id).value = "");
+  ["grupo","ocasion","estado","opinion","favorito","disponible","enVinted","vendida"].forEach(id => document.getElementById(id).selectedIndex = 0);
+  document.getElementById("foto").value = "";
+  populateCategoryOptions(document.getElementById("grupo").value || "partes_arriba_abrigo");
+  document.getElementById("formTitle").textContent = "Añadir prenda";
+}
+function formatGroup(key){ const map = { partes_arriba_abrigo:"Partes de arriba · Abrigo", partes_arriba_exterior:"Partes de arriba · Exterior", partes_arriba_interior:"Partes de arriba · Interior", pantalones:"Pantalones", faldas:"Faldas", vestidos:"Vestidos", bikinis:"Bikinis y bañadores", bolsos:"Bolsos", calzado:"Calzado", accesorios:"Accesorios" }; return map[key] || key; }
+function formatCategory(key){ const all = Object.values(categoryOptions).flat(); const found = all.find(x => x[0] === key); return found ? found[1] : key; }
+function formatOccasion(key){ const found = occasions.find(x => x[0] === key); return found ? found[1] : key; }
+function updateSummary(){
+  document.getElementById("sumGarments").textContent = garments.length;
+  document.getElementById("sumFavorites").textContent = garments.filter(g => g.favorito).length;
+  document.getElementById("sumLooks").textContent = savedLooks.length;
+  document.getElementById("sumVinted").textContent = garments.filter(g => g.en_vinted).length;
+}
+function fillFilterOptions(){
+  const groups = [...new Set(garments.map(g => g.grupo).filter(Boolean))];
+  const categories = [...new Set(garments.map(g => g.categoria).filter(Boolean))];
+  const occasionsUsed = [...new Set(garments.map(g => g.ocasion).filter(Boolean))];
+  document.getElementById("filterGroup").innerHTML = '<option value="">Todos los grupos</option>' + groups.map(g => `<option value="${g}">${formatGroup(g)}</option>`).join("");
+  document.getElementById("filterCategory").innerHTML = '<option value="">Todas las categorías</option>' + categories.map(c => `<option value="${c}">${formatCategory(c)}</option>`).join("");
+  document.getElementById("filterOccasion").innerHTML = '<option value="">Todas las ocasiones</option>' + occasionsUsed.map(o => `<option value="${o}">${formatOccasion(o)}</option>`).join("");
+}
+function garmentCard(g){
+  return `<div class="item-card"><img src="${g.foto || placeholderImg}" alt="${escapeHtml(g.nombre)}"><div class="item-body"><p class="item-name">${escapeHtml(g.nombre)}</p><p class="meta">Grupo: ${escapeHtml(formatGroup(g.grupo))}</p><p class="meta">Categoría: ${escapeHtml(formatCategory(g.categoria))}</p><p class="meta">Color: ${escapeHtml(g.color || "-")}</p><p class="meta">Ocasión: ${escapeHtml(formatOccasion(g.ocasion))}</p><p class="meta">Usos: ${g.usos || 0}</p>${g.favorito ? '<span class="pill">Favorita</span>' : ''}${g.en_vinted ? '<span class="pill">Vinted</span>' : ''}${g.vendida ? '<span class="pill">Vendida</span>' : ''}<div class="button-row" style="margin-top:10px"><button class="small-btn" type="button" onclick="editGarment('${g.id}')">Editar</button><button class="small-btn" type="button" onclick="toggleFavorite('${g.id}')">${g.favorito ? 'Quitar ♥' : 'Favorita ♥'}</button><button class="small-btn" type="button" onclick="toggleVinted('${g.id}')">${g.en_vinted ? 'Quitar Vinted' : 'Mover a Vinted'}</button><button class="small-btn" type="button" onclick="deleteGarment('${g.id}')">Eliminar</button></div></div></div>`;
+}
+function rankCard(g){
+  return `<div class="rank-card"><img src="${g.foto || placeholderImg}" alt="${escapeHtml(g.nombre)}"><div><div class="rank-title">${escapeHtml(g.nombre)}</div><div class="rank-meta">${escapeHtml(formatCategory(g.categoria))}</div><div class="rank-meta">Usos: ${g.usos || 0}</div></div></div>`;
+}
+function renderWardrobe(){
+  const q = document.getElementById("searchInput").value.trim().toLowerCase();
+  const group = document.getElementById("filterGroup").value;
+  const category = document.getElementById("filterCategory").value;
+  const occasion = document.getElementById("filterOccasion").value;
+  const favorite = document.getElementById("filterFavorite").value;
+  const filtered = garments.filter(g => {
+    const haystack = `${g.nombre} ${g.color} ${g.categoria} ${g.ocasion}`.toLowerCase();
+    return (!q || haystack.includes(q)) && (!group || g.grupo === group) && (!category || g.categoria === category) && (!occasion || g.ocasion === occasion) && (favorite === "" || String(!!g.favorito) === favorite);
+  });
+  document.getElementById("wardrobeGrid").innerHTML = filtered.length ? filtered.map(garmentCard).join("") : `<div class="empty">No hay prendas con esos filtros.</div>`;
+}
+function renderUsageStats(){
+  const top = [...garments].sort((a,b) => (b.usos||0)-(a.usos||0)).slice(0,5);
+  const forgotten = [...garments].sort((a,b) => (a.usos||0)-(b.usos||0)).slice(0,5);
+  document.getElementById("topUsedGrid").innerHTML = top.length ? top.map(rankCard).join("") : `<div class="empty">Aún no hay prendas para analizar.</div>`;
+  document.getElementById("forgottenGrid").innerHTML = forgotten.length ? forgotten.map(rankCard).join("") : `<div class="empty">Aún no hay prendas para analizar.</div>`;
+}
+function findGarment(id){ return garments.find(g => g.id === id) || null; }
+function sumarUso(id){ const g = garments.find(x => x.id === id); if (g) g.usos = (g.usos || 0) + 1; }
+function sumarUsosLook(lookObj){ Object.entries(lookObj).forEach(([slot, value]) => { if (slot === "accesorios") { (value || []).forEach(g => { if (g && g.id) sumarUso(g.id); }); } else if (value && value.id) { sumarUso(value.id); } }); }
+function exportData(){
+  const backup = { version: 1, exportado_en: new Date().toISOString(), garments, savedLooks, recentLooks };
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = `armario-backup-${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+}
+function importData(event){
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data || !Array.isArray(data.garments)) { alert("El archivo no parece un backup válido."); return; }
+      garments = (data.garments || []).map(migrateGarment);
+      savedLooks = Array.isArray(data.savedLooks) ? data.savedLooks.map(look => ({...look, accesorios: normalizeAccessories(look.accesorios)})) : [];
+      recentLooks = Array.isArray(data.recentLooks) ? data.recentLooks.map(look => ({...look, accesorios: normalizeAccessories(look.accesorios)})) : [];
+      persist(); refreshAll(); alert("Armario importado correctamente ✅");
+    } catch (err) { alert("No he podido importar el archivo."); console.error(err); }
+    finally { event.target.value = ""; }
+  };
+  reader.readAsText(file);
+}
+function editGarment(id){
+  const g = findGarment(id); if (!g) return;
+  editingGarmentId = id;
+  document.getElementById("nombre").value = g.nombre || "";
+  document.getElementById("grupo").value = g.grupo || "partes_arriba_interior";
+  populateCategoryOptions(document.getElementById("grupo").value, g.categoria || "");
+  document.getElementById("color").value = g.color || "";
+  document.getElementById("ocasion").value = g.ocasion || "casual";
+  document.getElementById("estado").value = g.estado || "bueno";
+  document.getElementById("opinion").value = g.opinion || "me encanta";
+  document.getElementById("talla").value = g.talla || "";
+  document.getElementById("ubicacion").value = g.ubicacion || "";
+  document.getElementById("favorito").value = String(!!g.favorito);
+  document.getElementById("disponible").value = String(!!g.disponible);
+  document.getElementById("enVinted").value = String(!!g.en_vinted);
+  document.getElementById("vendida").value = String(!!g.vendida);
+  document.getElementById("complementos").value = g.complementos_relacionados || "";
+  document.getElementById("formTitle").textContent = "Editar prenda";
+  switchView("anadir");
+}
+function saveGarment(){
+  const fotoInput = document.getElementById("foto");
+  const file = fotoInput.files[0];
+  const data = {
+    id: editingGarmentId || uid(),
+    nombre: document.getElementById("nombre").value.trim(),
+    grupo: document.getElementById("grupo").value,
+    categoria: document.getElementById("categoria").value,
+    color: document.getElementById("color").value.trim(),
+    ocasion: document.getElementById("ocasion").value,
+    estado: document.getElementById("estado").value,
+    opinion: document.getElementById("opinion").value,
+    talla: document.getElementById("talla").value.trim(),
+    favorito: document.getElementById("favorito").value === "true",
+    disponible: document.getElementById("disponible").value === "true",
+    en_vinted: document.getElementById("enVinted").value === "true",
+    vendida: document.getElementById("vendida").value === "true",
+    ubicacion: document.getElementById("ubicacion").value.trim(),
+    complementos_relacionados: document.getElementById("complementos").value.trim(),
+    foto: findGarment(editingGarmentId)?.foto || placeholderImg,
+    usos: findGarment(editingGarmentId)?.usos || 0
+  };
+  if (!data.nombre) { alert("Pon al menos un nombre a la prenda."); return; }
+  const finishSave = (finalData) => {
+    if (editingGarmentId) { const index = garments.findIndex(g => g.id === editingGarmentId); if (index !== -1) garments[index] = finalData; }
+    else { garments.unshift(finalData); }
+    persist(); resetForm(); refreshAll(); switchView("armario");
+  };
+  if (file) { const reader = new FileReader(); reader.onload = e => { data.foto = e.target.result; finishSave(data); }; reader.readAsDataURL(file); }
+  else finishSave(data);
+}
+function toggleFavorite(id){ const g = findGarment(id); if (!g) return; g.favorito = !g.favorito; persist(); refreshAll(); }
+function toggleVinted(id){ const g = findGarment(id); if (!g) return; g.en_vinted = !g.en_vinted; persist(); refreshAll(); }
+function deleteGarment(id){ const g = findGarment(id); if (!g) return; if (!confirm(`¿Eliminar "${g.nombre}"?`)) return; garments = garments.filter(x => x.id !== id); persist(); refreshAll(); }
+function inferSlotFromGarment(garment){ return categorySlotMap[garment.categoria] || "parte_superior"; }
+function renderSlot(slotId, garment, prefix){
+  const el = document.getElementById(`${prefix}_${slotId}`); if (!el) return;
+  if (slotId === "accesorios") {
+    const items = Array.isArray(garment) ? garment : normalizeAccessories(garment);
+    if (!items.length) { el.innerHTML = `<div class="slot-title">Accesorios</div><div class="muted">Vacío</div>`; return; }
+    el.innerHTML = `<div class="slot-title">Accesorios (${items.length}/10)</div><div class="acc-list">${items.map((g, i) => `<div class="acc-item"><img src="${g.foto || placeholderImg}" alt="${escapeHtml(g.nombre)}"><div style="flex:1"><div><strong>${escapeHtml(g.nombre)}</strong></div><div class="muted">${escapeHtml(formatCategory(g.categoria))}</div></div>${prefix === "slot" ? `<button class="small-btn danger-btn" type="button" onclick="removeAccessory(${i})">Quitar</button>` : ""}</div>`).join("")}</div>${prefix === "slot" && items.length < 10 ? `<button class="small-btn" type="button" onclick="openSelector('accesorios')">+ Añadir accesorio</button>` : ""}`;
+    return;
+  }
+  if (!garment) { el.innerHTML = `<div class="slot-title">${slotTitles[slotId]}</div><div class="muted">Vacío</div>`; return; }
+  el.innerHTML = `<div class="slot-title">${slotTitles[slotId]}</div><img src="${garment.foto || placeholderImg}" alt="${escapeHtml(garment.nombre)}"><div><strong>${escapeHtml(garment.nombre)}</strong></div><div class="muted">${escapeHtml(formatCategory(garment.categoria))} · ${escapeHtml(garment.color || "-")}</div>${prefix === "slot" ? `<button class="small-btn" type="button" onclick="removeFromLook('${slotId}')">Quitar</button>` : ""}`;
+}
+function renderCurrentLook(){ Object.keys(currentLook).forEach(slot => renderSlot(slot, currentLook[slot], "slot")); }
+function renderRandomLook(){
+  document.getElementById("randomLookTitle").textContent = lastOccasion ? `Look generado para: ${formatOccasion(lastOccasion)}${lastBold ? " · modo Atrévete" : ""}` : "Todavía no has generado ningún look.";
+  Object.keys(randomLook).forEach(slot => renderSlot(slot, randomLook[slot], "random"));
+}
+function removeFromLook(slotId){ if (slotId === "accesorios") currentLook[slotId] = []; else currentLook[slotId] = null; renderCurrentLook(); }
+function removeAccessory(index){ if (!Array.isArray(currentLook.accesorios)) currentLook.accesorios = []; currentLook.accesorios.splice(index, 1); renderCurrentLook(); }
+function clearLook(){ currentLook = emptyLook(); renderCurrentLook(); document.getElementById("selectorCard").classList.add("hidden"); }
+function openSelector(slotId){
+  currentSlot = slotId;
+  document.getElementById("selectorCard").classList.remove("hidden");
+  let matching = garments.filter(g => g.disponible && !g.vendida && inferSlotFromGarment(g) === slotId);
+  if (slotId !== "vestido") matching = matching.filter(g => g.ocasion !== "playa_piscina" && !["bikini","banador","salida_playa"].includes(g.categoria));
+  document.getElementById("selectorGrid").innerHTML = matching.length ? matching.map(g => `<div class="item-card"><img src="${g.foto || placeholderImg}" alt="${escapeHtml(g.nombre)}"><div class="item-body"><p class="item-name">${escapeHtml(g.nombre)}</p><p class="meta">${escapeHtml(formatCategory(g.categoria))} · ${escapeHtml(formatOccasion(g.ocasion))}</p><button class="small-btn" type="button" onclick="selectGarmentForSlot('${g.id}')">Seleccionar</button></div></div>`).join("") : `<div class="empty">No hay prendas disponibles para esta categoría.</div>`;
+}
+function selectGarmentForSlot(id){
+  const garment = findGarment(id); if (!garment || !currentSlot) return;
+  if (currentSlot === "accesorios") {
+    if (!Array.isArray(currentLook.accesorios)) currentLook.accesorios = [];
+    if (currentLook.accesorios.some(a => a.id === garment.id)) { alert("Ese accesorio ya está añadido."); return; }
+    if (currentLook.accesorios.length >= 10) { alert("Máximo 10 accesorios."); return; }
+    currentLook.accesorios.push(garment); renderCurrentLook(); document.getElementById("selectorCard").classList.add("hidden"); return;
+  }
+  if (currentSlot === "vestido") { currentLook.abrigo = null; currentLook.parte_superior = null; currentLook.parte_inferior = null; }
+  else if (["abrigo","parte_superior","parte_inferior"].includes(currentSlot) && currentLook.vestido && currentLook.vestido.ocasion !== "playa_piscina") { currentLook.vestido = null; }
+  currentLook[currentSlot] = garment; renderCurrentLook(); document.getElementById("selectorCard").classList.add("hidden");
+}
+function pickRandom(arr){ return arr.length ? arr[Math.floor(Math.random() * arr.length)] : null; }
+function pickRandomSome(arr, max){ if (!arr.length) return []; const shuffled = [...arr].sort(() => Math.random() - 0.5); const count = Math.min(max, Math.floor(Math.random() * Math.min(3, arr.length + 1))); return shuffled.slice(0, count); }
+function availablePool(){ return garments.filter(g => g.disponible && !g.vendida); }
+function buildLook(occasion, noCoat, boldMode = false){
+  const beach = occasion === "playa_piscina";
+  let pool = availablePool();
+  if (beach) pool = pool.filter(g => g.ocasion === "playa_piscina" || ["bikini","banador","salida_playa"].includes(g.categoria));
+  else pool = pool.filter(g => g.ocasion !== "playa_piscina" && !["bikini","banador","salida_playa"].includes(g.categoria));
+  const exactOccasion = pool.filter(g => g.ocasion === occasion);
+  if (exactOccasion.length) pool = exactOccasion;
+  if (boldMode) { const nonFav = pool.filter(g => !g.favorito); if (nonFav.length) pool = nonFav.concat(pool.filter(g => g.favorito)); }
+  else { const fav = pool.filter(g => g.favorito); if (fav.length) pool = fav.concat(pool.filter(g => !g.favorito)); }
+  const coats = pool.filter(g => inferSlotFromGarment(g) === "abrigo");
+  const tops = pool.filter(g => inferSlotFromGarment(g) === "parte_superior");
+  const bottoms = pool.filter(g => inferSlotFromGarment(g) === "parte_inferior");
+  const dresses = pool.filter(g => inferSlotFromGarment(g) === "vestido");
+  const shoes = pool.filter(g => inferSlotFromGarment(g) === "calzado");
+  const bags = pool.filter(g => inferSlotFromGarment(g) === "bolso");
+  const accessories = pool.filter(g => inferSlotFromGarment(g) === "accesorios");
+  const look = emptyLook();
+  if (beach) { look.vestido = pickRandom(dresses); look.calzado = pickRandom(shoes); look.bolso = pickRandom(bags); look.accesorios = pickRandomSome(accessories, 3); return look; }
+  const normalDresses = dresses.filter(g => !["bikini","banador","salida_playa"].includes(g.categoria));
+  if (normalDresses.length && Math.random() < 0.22) look.vestido = pickRandom(normalDresses);
+  else { look.parte_superior = pickRandom(tops); look.parte_inferior = pickRandom(bottoms); }
+  if (!noCoat) look.abrigo = pickRandom(coats);
+  look.calzado = pickRandom(shoes);
+  if (bags.length && Math.random() < 0.7) look.bolso = pickRandom(bags);
+  look.accesorios = pickRandomSome(accessories, 3);
+  return look;
+}
+function renderQuickLook(){
+  const acc = normalizeAccessories(quickLook.accesorios);
+  const items = [{label:"Abrigo", garment: quickLook.abrigo},{label:"Parte superior", garment: quickLook.parte_superior},{label:"Parte inferior", garment: quickLook.parte_inferior},{label:"Vestido", garment: quickLook.vestido && !["bikini","banador","salida_playa"].includes(quickLook.vestido.categoria) ? quickLook.vestido : null},{label:"Calzado", garment: quickLook.calzado},{label:"Bolso", garment: quickLook.bolso}].filter(x => x.garment);
+  if (acc.length) items.push({label:`Accesorios (${acc.length})`, garment: acc[0], extra: acc.slice(1)});
+  document.getElementById("quickLookGrid").innerHTML = items.length ? items.map(item => `<div class="mini-card"><img src="${item.garment.foto || placeholderImg}" alt="${escapeHtml(item.garment.nombre)}"><div class="mini-title">${escapeHtml(item.label)}</div><div class="meta">${escapeHtml(item.garment.nombre)}</div><div class="meta">${escapeHtml(formatCategory(item.garment.categoria))}</div>${item.extra && item.extra.length ? `<div class="meta">+ ${item.extra.length} más</div>` : ""}</div>`).join("") : `<div class="empty">No hay prendas suficientes para el look rápido.</div>`;
+}
+function generateQuickLook(){ quickLook = buildLook("casual", document.getElementById("quickNoCoat").checked, false); document.getElementById("quickLookTitle").textContent = "¿No tienes tiempo de pensar mucho?, arriesgate con esta propuesta✨"; renderQuickLook(); }
+function mapLookToIds(lookObj){ return { abrigo:lookObj.abrigo?.id||null, parte_superior:lookObj.parte_superior?.id||null, parte_inferior:lookObj.parte_inferior?.id||null, vestido:lookObj.vestido?.id||null, calzado:lookObj.calzado?.id||null, bolso:lookObj.bolso?.id||null, accesorios: normalizeAccessories(lookObj.accesorios).map(a => a.id) }; }
+function saveQuickLook(){
+  if (!Object.values({...quickLook, accesorios: normalizeAccessories(quickLook.accesorios).length ? quickLook.accesorios : null}).some(Boolean)) return alert("No hay look para guardar.");
+  sumarUsosLook(quickLook);
+  savedLooks.push({ id: uid(), nombre: `Look rápido ${savedLooks.length + 1}`, ocasion: "casual", favorito: false, fecha: new Date().toISOString(), ...mapLookToIds(quickLook) });
+  recentLooks.unshift({ id: uid(), nombre: `Usado ${new Date().toLocaleString()}`, ocasion: "casual", source: "rápido", fecha: new Date().toISOString(), ...mapLookToIds(quickLook) });
+  recentLooks = recentLooks.slice(0,10); persist(); refreshAll(); alert("Look guardado.");
+}
+function copyQuickToManual(){ currentLook = {...quickLook, accesorios: [...normalizeAccessories(quickLook.accesorios)]}; renderCurrentLook(); switchView("crearLook"); }
+function generateLook(occasion, bold = false){ lastOccasion = occasion; lastBold = bold; randomLook = buildLook(occasion, document.getElementById("randomNoCoat").checked, bold); renderRandomLook(); }
+function repeatLastLook(){ generateLook(lastOccasion || "casual", lastBold); }
+function saveRandomLook(){
+  if (!Object.values({...randomLook, accesorios: normalizeAccessories(randomLook.accesorios).length ? randomLook.accesorios : null}).some(Boolean)) return alert("Primero genera un look.");
+  sumarUsosLook(randomLook);
+  savedLooks.push({ id: uid(), nombre: `Look ${savedLooks.length + 1}`, ocasion: lastOccasion || "casual", favorito: false, fecha: new Date().toISOString(), ...mapLookToIds(randomLook) });
+  recentLooks.unshift({ id: uid(), nombre: `Usado ${new Date().toLocaleString()}`, ocasion: lastOccasion || "casual", source: "aleatorio", fecha: new Date().toISOString(), ...mapLookToIds(randomLook) });
+  recentLooks = recentLooks.slice(0,10); persist(); refreshAll(); alert("Look aleatorio guardado.");
+}
+function copyRandomToManual(){ currentLook = {...randomLook, accesorios: [...normalizeAccessories(randomLook.accesorios)]}; renderCurrentLook(); switchView("crearLook"); }
+function saveCurrentLook(){
+  if (!Object.values({...currentLook, accesorios: normalizeAccessories(currentLook.accesorios).length ? currentLook.accesorios : null}).some(Boolean)) return alert("Añade alguna prenda al look.");
+  const occasion = Object.values(currentLook).find(v => v && !Array.isArray(v))?.ocasion || "casual";
+  sumarUsosLook(currentLook);
+  savedLooks.push({ id: uid(), nombre: `Look ${savedLooks.length + 1}`, ocasion, favorito: false, fecha: new Date().toISOString(), ...mapLookToIds(currentLook) });
+  recentLooks.unshift({ id: uid(), nombre: `Usado ${new Date().toLocaleString()}`, ocasion, source: "manual", fecha: new Date().toISOString(), ...mapLookToIds(currentLook) });
+  recentLooks = recentLooks.slice(0,10); persist(); refreshAll(); alert("Look guardado.");
+}
+function savedLookCard(look){
+  const firstId = look.abrigo || look.parte_superior || look.parte_inferior || look.vestido || look.calzado || look.bolso || normalizeAccessories(look.accesorios)[0];
+  const first = findGarment(firstId);
+  const accCount = normalizeAccessories(look.accesorios).length;
+  const count = [look.abrigo, look.parte_superior, look.parte_inferior, look.vestido, look.calzado, look.bolso].filter(Boolean).length + accCount;
+  return `<div class="item-card"><img src="${first?.foto || placeholderImg}" alt="Look guardado"><div class="item-body"><p class="item-name">${escapeHtml(look.nombre)}</p><p class="meta">Ocasión: ${escapeHtml(formatOccasion(look.ocasion || "-"))}</p><p class="meta">Prendas: ${count}</p>${accCount ? `<p class="meta">Accesorios: ${accCount}</p>` : ""}${look.favorito ? '<span class="pill">Look favorito</span>' : ''}<div class="button-row" style="margin-top:10px"><button class="small-btn" type="button" onclick="loadSavedLook('${look.id}')">Abrir</button><button class="small-btn" type="button" onclick="toggleLookFavorite('${look.id}')">${look.favorito ? 'Quitar ♥' : 'Favorito ♥'}</button><button class="small-btn" type="button" onclick="deleteSavedLook('${look.id}')">Eliminar</button></div></div></div>`;
+}
+function recentLookCard(look){
+  const firstId = look.abrigo || look.parte_superior || look.parte_inferior || look.vestido || look.calzado || look.bolso || normalizeAccessories(look.accesorios)[0];
+  const first = findGarment(firstId);
+  const accCount = normalizeAccessories(look.accesorios).length;
+  const count = [look.abrigo, look.parte_superior, look.parte_inferior, look.vestido, look.calzado, look.bolso].filter(Boolean).length + accCount;
+  return `<div class="item-card"><img src="${first?.foto || placeholderImg}" alt="Look reciente"><div class="item-body"><p class="item-name">${escapeHtml(look.nombre)}</p><p class="meta">Ocasión: ${escapeHtml(formatOccasion(look.ocasion || "-"))}</p><p class="meta">Origen: ${escapeHtml(look.source || "-")}</p><p class="meta">Prendas: ${count}</p>${accCount ? `<p class="meta">Accesorios: ${accCount}</p>` : ""}</div></div>`;
+}
+function loadSavedLook(id){
+  const look = savedLooks.find(l => l.id === id); if (!look) return;
+  currentLook = { abrigo:findGarment(look.abrigo), parte_superior:findGarment(look.parte_superior), parte_inferior:findGarment(look.parte_inferior), vestido:findGarment(look.vestido), calzado:findGarment(look.calzado), bolso:findGarment(look.bolso), accesorios: normalizeAccessories(look.accesorios).map(id => findGarment(id)).filter(Boolean) };
+  renderCurrentLook(); switchView("crearLook");
+}
+function toggleLookFavorite(id){ const look = savedLooks.find(l => l.id === id); if (!look) return; look.favorito = !look.favorito; persist(); refreshAll(); }
+function deleteSavedLook(id){ savedLooks = savedLooks.filter(l => l.id !== id); persist(); refreshAll(); }
+function renderFavorites(){
+  document.getElementById("favoritesGrid").innerHTML = garments.filter(g => g.favorito).map(garmentCard).join("") || `<div class="empty">No tienes prendas favoritas todavía.</div>`;
+  document.getElementById("favoriteLooksGrid").innerHTML = savedLooks.filter(l => l.favorito).map(savedLookCard).join("") || `<div class="empty">No tienes looks favoritos todavía.</div>`;
+  document.getElementById("recentLooksGrid").innerHTML = recentLooks.map(recentLookCard).join("") || `<div class="empty">Todavía no has usado looks.</div>`;
+  document.getElementById("savedLooksGrid").innerHTML = savedLooks.map(savedLookCard).join("") || `<div class="empty">No has guardado looks todavía.</div>`;
+}
+function renderVinted(){ const items = garments.filter(g => g.en_vinted || g.vendida); document.getElementById("vintedGrid").innerHTML = items.length ? items.map(garmentCard).join("") : `<div class="empty">No tienes prendas en Vinted.</div>`; }
+function refreshAll(){ updateSummary(); fillFilterOptions(); renderWardrobe(); renderCurrentLook(); renderRandomLook(); renderFavorites(); renderVinted(); renderQuickLook(); renderUsageStats(); }
+function escapeHtml(text){ return String(text || "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;"); }
+window.switchView = switchView; window.populateCategoryOptions = populateCategoryOptions; window.saveGarment = saveGarment; window.resetForm = resetForm; window.renderWardrobe = renderWardrobe; window.exportData = exportData; window.importData = importData; window.editGarment = editGarment; window.toggleFavorite = toggleFavorite; window.toggleVinted = toggleVinted; window.deleteGarment = deleteGarment; window.openSelector = openSelector; window.selectGarmentForSlot = selectGarmentForSlot; window.removeFromLook = removeFromLook; window.removeAccessory = removeAccessory; window.clearLook = clearLook; window.saveCurrentLook = saveCurrentLook; window.generateQuickLook = generateQuickLook; window.saveQuickLook = saveQuickLook; window.copyQuickToManual = copyQuickToManual; window.generateLook = generateLook; window.repeatLastLook = repeatLastLook; window.saveRandomLook = saveRandomLook; window.copyRandomToManual = copyRandomToManual; window.loadSavedLook = loadSavedLook; window.toggleLookFavorite = toggleLookFavorite; window.deleteSavedLook = deleteSavedLook;
+try { loadData(); populateStaticSelects(); resetForm(); generateQuickLook(); refreshAll(); }
+catch (e) { alert("Había un error cargando la app. Error: " + e.message); console.error(e); }
+</script>
+</body>
+</html>
