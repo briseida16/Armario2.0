@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
-<button onclick="loginGoogle()">Iniciar sesión con Google</button>
-  <head>
+ <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>BriCloset</title>
@@ -120,8 +119,12 @@ main { padding:14px 10px 30px; } .card { padding:14px; border-radius:20px; } .ta
 </head>
 <body>
 <header>
+<header>
 <h1>BriCloset ✨</h1>
 <div class="subtitle">🌸 Toda tu ropa en un solo armario virtual, crea looks diferentes y utiliza todo lo que tienes para explotar tu potencial 🌸</div>
+<div style="margin-top:12px;">
+  <button class="ghost-btn" type="button" onclick="loginGoogle()">Iniciar sesión con Google</button>
+</div>
 <div class="tabs">
 <button class="tab-btn active" type="button" onclick="switchView('inicio', this)">Inicio</button>
 <button class="tab-btn" type="button" onclick="switchView('armario', this)">Mi armario</button>
@@ -668,7 +671,6 @@ function escapeHtml(text){ return String(text || "").replaceAll("&","&amp;").rep
 window.switchView = switchView; window.populateCategoryOptions = populateCategoryOptions; window.saveGarment = saveGarment; window.resetForm = resetForm; window.renderWardrobe = renderWardrobe; window.exportData = exportData; window.importData = importData; window.editGarment = editGarment; window.toggleFavorite = toggleFavorite; window.toggleVinted = toggleVinted; window.deleteGarment = deleteGarment; window.openSelector = openSelector; window.selectGarmentForSlot = selectGarmentForSlot; window.removeFromLook = removeFromLook; window.removeAccessory = removeAccessory; window.clearLook = clearLook; window.saveCurrentLook = saveCurrentLook; window.generateQuickLook = generateQuickLook; window.saveQuickLook = saveQuickLook; window.copyQuickToManual = copyQuickToManual; window.generateLook = generateLook; window.repeatLastLook = repeatLastLook; window.saveRandomLook = saveRandomLook; window.copyRandomToManual = copyRandomToManual; window.loadSavedLook = loadSavedLook; window.toggleLookFavorite = toggleLookFavorite; window.deleteSavedLook = deleteSavedLook;
 try { loadData(); populateStaticSelects(); resetForm(); generateQuickLook(); refreshAll(); }
 catch (e) { alert("Había un error cargando la app. Error: " + e.message); console.error(e); }
-</script>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
   import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
@@ -684,16 +686,20 @@ catch (e) { alert("Había un error cargando la app. Error: " + e.message); conso
   };
 
   const app = initializeApp(firebaseConfig);
-
-  // 🔐 AUTH
-  const auth = getAuth();
+  const db = getFirestore(app);
+  const auth = getAuth(app);
   const provider = new GoogleAuthProvider();
 
-  window.loginGoogle = () => {
-    signInWithPopup(auth, provider);
+  window.loginGoogle = async () => {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      alert("Sesión iniciada: " + result.user.email);
+    } catch (error) {
+      console.error("Error login:", error);
+      alert("Error al iniciar sesión con Google");
+    }
   };
 
-  // 👀 Detectar usuario
   onAuthStateChanged(auth, (user) => {
     if (user) {
       console.log("Usuario logueado:", user.email);
