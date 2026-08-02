@@ -32,8 +32,109 @@ main{max-width:1240px;margin:0 auto;padding:18px 14px 40px}.view{display:none}.v
 <section id="papelera" class="view"><div class="card"><h2 class="section-title">Papelera</h2><p class="muted">Las prendas eliminadas se guardan aquí 30 días antes de borrarse para siempre.</p></div><div id="trashGrid" class="grid"></div></section><div class="footer-space"></div></main><div id="toastBox"></div>
 <script>
 const APP_DATA_VERSION=3,placeholderImg="data:image/svg+xml;utf8,"+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500"><rect width="100%" height="100%" fill="#efe7eb"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#9b8691" font-size="24" font-family="Arial">Sin imagen</text></svg>`);const storage={memory:{},get(k){try{return localStorage.getItem(k)}catch(e){return this.memory[k]??null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){this.memory[k]=v}}};const STORAGE_GARMENTS="garments_bricloset_24",STORAGE_LOOKS="looks_bricloset_24",STORAGE_RECENT="recent_bricloset_24",STORAGE_WISHLIST="wishlist_bricloset_30";
-const categoryOptions={abrigos:[["abrigo","Abrigo"],["chaqueta","Chaqueta"]],jerseis_sudaderas:[["jersey","Jersey"],["sudadera","Sudadera"],["cardigan","Cárdigan"],["chaqueta_punto","Chaqueta de punto"]],parte_superior:[["camiseta","Camiseta"],["top","Top"],["body","Body"],["camisa","Camisa"],["blusa","Blusa"],["polo","Polo"],["camiseta_termica","Camiseta térmica"]],parte_inferior:[["vaquero","Vaquero"],["pantalon_vestir","Pantalón vestir"],["pantalon_casual","Pantalón casual"],["chandal","Chándal"],["falda","Falda"],["shorts","Shorts"],["leggings","Leggings"],["leggings_deportivos","Leggings deportivos"],["mallas_termicas","Mallas térmicas"]],vestidos_monos:[["vestido","Vestido"],["mono","Mono"]],playa:[["bikini","Bikini"],["banador","Bañador"],["salida_playa","Salida de playa"]],dormir_superior:[["dormir_camiseta_corta","Camiseta manga corta"],["dormir_camiseta_larga","Camiseta manga larga"],["dormir_camiseta_gordita","Camiseta gordita"]],dormir_inferior:[["dormir_pantalon_corto","Pantalón corto"],["dormir_pantalon_largo","Pantalón largo"],["dormir_pantalon_gordito","Pantalón gordito"]],dormir_otros:[["bata","Bata"],["camison","Camisón"],["dormir_otros","Otros"]],calzado:[["bota","Bota"],["tacones","Tacones"],["planos","Planos"],["deportivas","Deportivas"],["sandalias","Sandalias"],["zapatos","Zapatos"]],bolsos:[["bolso","Bolso"],["mochila","Mochila"],["clutch","Clutch"]],accesorios:[["pendiente","Pendiente"],["anillo","Anillo"],["collar","Collar"],["pulsera","Pulsera"],["bufanda","Bufanda"],["cinturon","Cinturón"],["panuelo","Pañuelo"],["gorro","Gorro"],["reloj","Reloj"]]};
-const groupLabels={abrigos:"Abrigos",jerseis_sudaderas:"Jerséis y sudaderas",parte_superior:"Parte superior",parte_inferior:"Parte inferior",vestidos_monos:"Vestidos y monos",playa:"Playa",dormir_superior:"Dormir · Parte superior",dormir_inferior:"Dormir · Parte inferior",dormir_otros:"Dormir · Otros",calzado:"Calzado",bolsos:"Bolsos",accesorios:"Accesorios"};
+const categoryOptions={
+abrigos:[
+["abrigo","Abrigo"],
+["chaqueta","Chaqueta"],["otros","Otros"]
+],
+
+jerseis_sudaderas:[
+["jersey","Jersey"],
+["sudadera","Sudadera"],
+["cardigan","Cárdigan"],
+["chaqueta_punto","Chaqueta de punto"],["otros","Otros"]
+],
+
+parte_superior:[
+["camiseta","Camiseta"],
+["top","Top"],
+["body","Body"],
+["camisa","Camisa"],
+["blusa","Blusa"],
+["polo","Polo"],
+["camiseta_termica","Camiseta térmica"],["otros","Otros"]
+],
+
+parte_inferior:[
+["vaquero","Vaquero"],
+["pantalon_vestir","Pantalón vestir"],["pantalon_ancho","Pantalón ancho"],
+["pantalon_casual","Pantalón casual"],["pantalon_cargo","Pantalón cargo"],["pantalon_pirata","Pantalón pirata"],
+["chandal","Chándal"],
+["falda_corta","Falda corta"],["falda_midi","Falda midi"],["falda_larga","Falda larga"],["falda_pantalon","Falda pantalón"],
+["shorts","Pantalón corto"],
+["leggings","Leggings"],
+["leggings_deportivos","Leggings deportivos"],
+["mallas_termicas","Mallas térmicas"],["otros","Otros"]
+],
+
+vestidos_monos:[
+["vestido_largo","Vestido largo"],["vestido_corto","Vestido corto"],["vestido_midi","Vestido_midi"],
+["mono","Mono"],["otros","Otros"]
+],
+
+playa:[
+["bikini","Bikini"],
+["banador","Bañador"],
+["pareo","Pareo"],["otros","Otros"]
+],
+
+dormir:[
+["camiseta_mc","Camiseta manga corta"],
+["camiseta_ml","Camiseta manga larga"],
+["camiseta_invierno","Camiseta invierno"],
+["pantalon_corto","Pantalón corto"],
+["pantalon_largo","Pantalón largo"],
+["pantalon_invierno","Pantalón invierno"],
+["camison","Camisón"],
+["bata","Bata"],
+["otros","Otros"]
+],
+
+calzado:[
+["bota","Botas"],
+["bota_cowboy","Botas cowboy"],
+["botin","Botines"],
+["tacones","Tacones"],
+["manoletinas","Manoletinas"],
+["sandalias","Sandalias"],
+["deportivas","Deportivas"],
+["running","Running"],
+["basket_interior","Zapatillas baloncesto interior"],
+["basket_exterior","Zapatillas baloncesto exterior"],
+["zapatos","Zapatos"],
+["chanclas","Chanclas"],
+["otros","Otros"]
+],
+
+bolsos:[
+["bolso grande","Bolso"],["mochila","Mochila"],["bolso_pequeño","Bolso pequeño"],["bolso_mano","bolso de mano"],["otros","Otros"]],
+accesorios:[
+["pendiente","Pendientes"],
+["anillo","Anillos"],
+["collar","Collares"],
+["pulsera","Pulseras"],
+["reloj","Relojes"],
+["gafas","Gafas de sol"],
+["cinturon","Cinturones"],
+["bufanda","Bufandas"],["gorra","Gorra"],
+["gorro","Gorros"],
+["perfume","Perfumes"],["sombreros","Sombreros"],["lacito","Lacitos"],
+["otros","Otros"]
+]
+};
+
+const groupLabels={
+abrigos:"Abrigos",
+jerseis_sudaderas:"Jerséis y sudaderas",
+parte_superior:"Parte superior",
+parte_inferior:"Parte inferior",
+vestidos_monos:"Vestidos y monos",
+playa:"Playa",
+dormir:"Dormir",
+calzado:"Calzado",
+bolsos:"Bolsos",
+accesorios:"Accesorios"
+};
 const seasons=[["todo_anio","Todo el año"],["invierno","Invierno"],["primavera","Primavera"],["verano","Verano"],["otono","Otoño"]],occasions=[["oficina","Oficina"],["gimnasio","Gimnasio"],["paseo","Paseo"],["amigas","Amigas"],["comida_familiar","Comida familiar"],["fiesta","Fiesta"],["boda","Boda"],["viaje","Viaje"],["casual","Casual"],["comodo","Cómodo"],["playa_piscina","Playa / piscina"],["pijama_estarporcasa","Pijama / estar por casa"]],slotTitles={abrigo:"Abrigo",exterior:"Jersey / sudadera",interior:"Parte superior",inferior:"Parte inferior",vestido:"Vestido o mono",calzado:"Calzado",bolso:"Bolso",accesorios:"Accesorios"},futureModules=["Dashboard","Estadísticas","Calendario","Coste por uso","Maleta inteligente","IA para reconocer prendas","Personal Shopper"];
 let garments=[],savedLooks=[],recentLooks=[],wishlist=[],editingGarmentId=null,editingWishId=null,currentLook=emptyLook(),randomLook=emptyLook(),quickLook=emptyLook(),currentSlot=null,lastOccasion=null,lastBold=false,relatedSelectedIds=[];
 function uid(){try{return crypto.randomUUID()}catch(e){return Date.now()+Math.random().toString(16).slice(2)}}function safeParse(s,f){try{return s?JSON.parse(s):f}catch(e){return f}}function esc(t){return String(t??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}function getChecks(id){return [...document.querySelectorAll(`#${id} input:checked`)].map(x=>x.value)}function setChecks(id,values){const arr=Array.isArray(values)?values:[];document.querySelectorAll(`#${id} input`).forEach(x=>x.checked=arr.includes(x.value))}function fmtOcc(v){return occasions.find(o=>o[0]===v)?.[1]||v}function fmtSeason(v){return seasons.find(s=>s[0]===v)?.[1]||"Todo el año"}function fmtCat(v){return Object.values(categoryOptions).flat().find(c=>c[0]===v)?.[1]||v}function fmtGroup(v){return groupLabels[v]||v}function emptyLook(){return{abrigo:null,exterior:null,interior:null,inferior:null,vestido:null,calzado:null,bolso:null,accesorios:[]}}function normalizeIds(v){return Array.isArray(v)?v.filter(Boolean):(v?[v]:[])}function normalizeOccasions(g){return Array.isArray(g.ocasiones)&&g.ocasiones.length?g.ocasiones:(g.ocasion?[g.ocasion]:["casual"])}function isSleepwear(g){return String(g.grupo||"").startsWith("dormir_")||(g.ocasiones||[]).includes("pijama_estarporcasa")}function currentSeason(){const m=new Date().getMonth()+1;return m<=2||m===12?"invierno":m<=5?"primavera":m<=8?"verano":"otono"}function inferSlot(g){if(!g)return"interior";if(g.grupo==="abrigos")return"abrigo";if(g.grupo==="jerseis_sudaderas")return"exterior";if(g.grupo==="parte_superior"||g.grupo==="dormir_superior")return"interior";if(g.grupo==="parte_inferior"||g.grupo==="dormir_inferior")return"inferior";if(["vestidos_monos","playa","dormir_otros"].includes(g.grupo))return"vestido";if(g.grupo==="calzado")return"calzado";if(g.grupo==="bolsos")return"bolso";if(g.grupo==="accesorios")return"accesorios";return"interior"}
