@@ -1,4 +1,4 @@
-const CACHE = 'bricloset-v1';
+const CACHE = 'bricloset-v3';
 const ARCHIVOS = ['/', '/index.html', '/manifest.json'];
 
 self.addEventListener('install', e => {
