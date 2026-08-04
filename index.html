@@ -11,32 +11,47 @@
 <meta name="theme-color" content="#d98fb3">
 <script>if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});</script>
 #loginModal{
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,.45);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-}
+    position:fixed;
+    top:0;
+    left:0;
+    width:100vw;
+    height:100vh;
+    background:rgba(0,0,0,.45);
 
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    z-index:99999;
+}
 #loginModal.hidden{
     display:none !important;
 }
-
 .login-modal-content{
-    width:min(420px,90%);
-    background:white;
+    background:#fff;
+    width:min(420px,90vw);
+    padding:30px;
     border-radius:24px;
-    padding:24px;
     box-shadow:0 20px 60px rgba(0,0,0,.25);
+
     display:flex;
     flex-direction:column;
-    gap:12px;
+    gap:15px;
 }
-
+.login-modal-content h2{
+    margin:0;
+    text-align:center;
+}
 .login-modal-content input{
     width:100%;
+    padding:12px;
+    border:1px solid #e3d4dc;
+    border-radius:14px;
+}
+.login-modal-content .button-row{
+    display:flex;
+    gap:10px;
+    justify-content:center;
 }<style>
 *{box-sizing:border-box}:root{--bg:#fff7fb;--card:rgba(255,255,255,.9);--text:#3f2e3a;--muted:#8a7080;--primary:#d98fb3;--primary-dark:#bf6f97;--line:#efd9e5;--shadow:0 10px 30px rgba(191,111,151,.12);--gradient:linear-gradient(135deg,#ffd9ea 0%,#ffeedd 100%)}
 body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--text);background:radial-gradient(circle at top left,#ffe3ef 0,transparent 28%),radial-gradient(circle at top right,#fff0df 0,transparent 22%),linear-gradient(180deg,#fff9fc 0%,#fff4f8 100%);min-height:100vh}
