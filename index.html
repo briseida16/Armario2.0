@@ -10,7 +10,34 @@
 <meta name="apple-mobile-web-app-title" content="BriCloset">
 <meta name="theme-color" content="#d98fb3">
 <script>if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});</script>
-<style>
+#loginModal{
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.45);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+#loginModal.hidden{
+    display:none !important;
+}
+
+.login-modal-content{
+    width:min(420px,90%);
+    background:white;
+    border-radius:24px;
+    padding:24px;
+    box-shadow:0 20px 60px rgba(0,0,0,.25);
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+}
+
+.login-modal-content input{
+    width:100%;
+}<style>
 *{box-sizing:border-box}:root{--bg:#fff7fb;--card:rgba(255,255,255,.9);--text:#3f2e3a;--muted:#8a7080;--primary:#d98fb3;--primary-dark:#bf6f97;--line:#efd9e5;--shadow:0 10px 30px rgba(191,111,151,.12);--gradient:linear-gradient(135deg,#ffd9ea 0%,#ffeedd 100%)}
 body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--text);background:radial-gradient(circle at top left,#ffe3ef 0,transparent 28%),radial-gradient(circle at top right,#fff0df 0,transparent 22%),linear-gradient(180deg,#fff9fc 0%,#fff4f8 100%);min-height:100vh}
 header{padding:24px 16px 14px;text-align:center;position:sticky;top:0;z-index:30;backdrop-filter:blur(14px);background:rgba(255,255,255,.68);border-bottom:1px solid rgba(255,255,255,.5)}h1{margin:0;font-size:clamp(1.8rem,4vw,2.5rem);letter-spacing:-.03em}.subtitle{margin-top:6px;color:var(--muted);font-size:1rem}.top-actions{position:absolute;top:16px;right:16px;display:flex;gap:8px;align-items:center;justify-content:flex-end;max-width:min(46vw,420px)}.auth-panel{display:flex;gap:8px;align-items:center}.auth-user{position:relative;display:flex;gap:8px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:999px;padding:5px 9px;box-shadow:var(--shadow);min-width:0;cursor:pointer;-webkit-tap-highlight-color:transparent}.auth-user:hover{border-color:#f1cad6}.auth-menu-arrow{font-size:.65rem;color:var(--primary-dark);transition:transform .2s ease}.auth-user.menu-open .auth-menu-arrow{transform:rotate(180deg)}.user-menu{position:absolute;top:calc(100% + 8px);left:5px;z-index:60;min-width:180px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:8px;box-shadow:var(--shadow);display:grid;gap:4px;opacity:1;transform:translateY(0);transition:opacity .18s ease,transform .18s ease}.user-menu.hidden{display:grid!important;opacity:0;pointer-events:none;transform:translateY(-6px)}.user-menu button{border:0;background:transparent;border-radius:12px;color:var(--text);cursor:pointer;font:inherit;font-weight:850;padding:10px 12px;text-align:left;transition:.2s}.user-menu button:hover{background:#fff2f4;color:#a74f69}.auth-photo,.auth-initials{width:30px;height:30px;border-radius:50%;flex:0 0 30px}.auth-photo{object-fit:cover;background:#f4edf2}.auth-initials{display:inline-flex;align-items:center;justify-content:center;background:var(--gradient);color:#7a4e64;font-weight:950;font-size:.78rem}.auth-name{font-size:.85rem;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px}.login-btn{position:relative;z-index:45;min-height:44px;min-width:190px;-webkit-tap-highlight-color:transparent;touch-action:manipulation}.mini-badge{background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 10px;font-size:.75rem;font-weight:800;color:var(--muted);box-shadow:var(--shadow)}
@@ -68,16 +95,13 @@ main{max-width:1240px;margin:0 auto;padding:18px 14px 40px}.view{display:none}.v
       id="loginPassword"
       placeholder="Contraseña"
     >
-
     <div class="button-row">
       <button class="primary-btn" onclick="login()">
         Entrar
       </button>
-
       <button class="ghost-btn" onclick="register()">
         Crear cuenta
       </button>
-
       <button class="ghost-btn" onclick="closeLoginModal()">
         Cancelar
       </button>
@@ -127,7 +151,6 @@ function userWardrobeRef(){return currentUser?doc(db,"users",currentUser.uid):nu
 function openLoginModal() {
     document.getElementById("loginModal").classList.remove("hidden");
 }
-
 function closeLoginModal() {
     document.getElementById("loginModal").classList.add("hidden");
 }async function register() {
