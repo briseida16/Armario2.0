@@ -133,11 +133,9 @@ function closeLoginModal() {
 }async function register() {
     const email = document.getElementById("loginEmail").value.trim();
     const password = document.getElementById("loginPassword").value;
-
     if (!email || !password) {
         return toast("Introduce correo y contraseña.", "warn");
     }
-
     try {
         await createUserWithEmailAndPassword(auth, email, password);
         closeLoginModal();
@@ -147,15 +145,12 @@ function closeLoginModal() {
         console.error(e);
     }
 }
-
 async function login() {
     const email = document.getElementById("loginEmail").value.trim();
     const password = document.getElementById("loginPassword").value;
-
     if (!email || !password) {
         return toast("Introduce correo y contraseña.", "warn");
     }
-
     try {
         await signInWithEmailAndPassword(auth, email, password);
         closeLoginModal();
@@ -177,19 +172,15 @@ function editGarment(id){const g=findGarment(id);if(!g)return;editingGarmentId=i
 function garmentCard(g){const rel=(g.relacionadas||[]).map(id=>findGarment(id)?.nombre).filter(Boolean).slice(0,3).join(", ");return`<div class="item-card"><img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}"><div class="item-body"><p class="item-name">${esc(g.nombre)}</p><p class="meta">Grupo: ${esc(fmtGroup(g.grupo))}</p><p class="meta">Categoría: ${esc(fmtCat(g.categoria))}</p><p class="meta">Color: ${esc(g.color||"-")}</p>${g.marca?`<p class="meta">Marca: ${esc(g.marca)}</p>`:""}${g.talla?`<p class="meta">Talla: ${esc(g.talla)}</p>`:""}<p class="meta">Temporada: ${esc(fmtSeason(g.temporada))}</p>${g.precio?`<p class="meta">Precio: ${esc(g.precio)} €</p></p>`:""}<p class="meta">Cantidad: ${g.cantidad||1}</p><p class="meta">Ocasiones: ${esc((g.ocasiones||[]).map(fmtOcc).join(", "))}</p><p class="meta">Usos: ${g.usos||0}${g.ultimo_uso?` · Último: ${new Date(g.ultimo_uso).toLocaleDateString()}`:""}</p>${g.comentarios?`<p class="meta">💬 ${esc(g.comentarios)}</p>`:""}${rel?`<p class="meta">🔗 ${esc(rel)}</p>`:""}${g.basico?'<span class="pill">Básico</span>':''}${g.favorito?'<span class="pill">Favorita</span>':''}${g.en_vinted?'<span class="pill">Vinted</span>':''}<div class="button-row" style="margin-top:10px"><button class="small-btn" onclick="editGarment('${g.id}')">Editar</button><button class="small-btn" title="Editar" onclick="editGarment('${g.id}')">
 ✏️
 </button>
-
 <button class="small-btn" title="Añadir uso" onclick="markUsed('${g.id}')">
 🔄
 </button>
-
 <button class="small-btn" title="Favorito" onclick="toggleFavorite('${g.id}')">
 ${g.favorito?"❤️":"🤍"}
 </button>
-
 <button class="small-btn" title="Vinted" onclick="toggleVinted('${g.id}')">
 🛍️
 </button>
-
 <button class="small-btn danger-btn" title="Eliminar" onclick="deleteGarment('${g.id}')">
 🗑️
 </button></div></div></div>`}
