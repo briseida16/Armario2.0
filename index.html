@@ -318,7 +318,22 @@ function userWardrobeRef(){return currentUser?doc(db,"users",currentUser.uid):nu
             name.textContent="";
         }
     }
-}async function logout(){try{await signOut(auth)}catch(e){toast("No he podido cerrar sesión.","warn");console.error(e)}}async function saveWardrobeToFirestore(){const ref=userWardrobeRef();if(!ref||!wardrobeLoaded){pendingWardrobeSave=true;setSyncStatus(currentUser?"Cargando armario":"Esperando sesión");return}try{setSyncStatus("Sincronizando...");await setDoc(ref,{garments}, {merge:true});pendingWardrobeSave=false;setSyncStatus("Firestore conectado")}catch(e){pendingWardrobeSave=true;setSyncStatus("Error de sincronización");toast("No he podido guardar el armario en Firestore.","warn");console.error(e)}}async function loadWardrobeFromFirestore(user){currentUser=user;wardrobeLoaded=false;setSyncStatus("Cargando armario");try{const snap=await getDoc(userWardrobeRef());garments=(snap.exists()&&Array.isArray(snap.data().garments)?snap.data().garments:[]).map(migrateGarment);purgeOldTrash();wardrobeLoaded=true;refreshAll();setSyncStatus("Firestore conectado");if(!snap.exists())await setDoc(userWardrobeRef(),{garments:[]},{merge:true});if(pendingWardrobeSave)saveWardrobeToFirestore();else saveWardrobeToFirestore()}catch(e){garments=[];wardrobeLoaded=false;refreshAll();setSyncStatus("Error de conexión");toast("No he podido leer tus prendas de Firestore.","warn");console.error(e)}}function persist(){storage.set(STORAGE_LOOKS,JSON.stringify(savedLooks));storage.set(STORAGE_RECENT,JSON.stringify(recentLooks));storage.set(STORAGE_WISHLIST,JSON.stringify(wishlist));saveWardrobeToFirestore();mirrorToIndexedDB()}function loadData(){garments=[];savedLooks=safeParse(storage.get(STORAGE_LOOKS),[]);recentLooks=safeParse(storage.get(STORAGE_RECENT),[]);wishlist=safeParse(storage.get(STORAGE_WISHLIST),[]).map(migrateWish)}
+}async function logout(){try{await signOut(auth)}catch(e){toast("No he podido cerrar sesión.","warn");console.error(e)}}async function saveWardrobeToFirestore(){const ref=userWardrobeRef();if(!ref||!wardrobeLoaded){pendingWardrobeSave=true;setSyncStatus(currentUser?"Cargando armario":"Esperando sesión");return}try{setSyncStatus("Sincronizando...");await setDoc(ref,{garments}, {merge:true});pendingWardrobeSave=false;setSyncStatus("Firestore conectado")}catch(e){
+    pendingWardrobeSave = true;
+
+    setSyncStatus("Error de sincronización");
+
+    const msg = `${e.code || "Error"}\n${e.message || ""}`;
+
+    toast(msg, "warn");
+
+    alert(
+        "Error al guardar en Firebase\n\n" +
+        msg
+    );
+
+    console.error(e);
+}}async function loadWardrobeFromFirestore(user){currentUser=user;wardrobeLoaded=false;setSyncStatus("Cargando armario");try{const snap=await getDoc(userWardrobeRef());garments=(snap.exists()&&Array.isArray(snap.data().garments)?snap.data().garments:[]).map(migrateGarment);purgeOldTrash();wardrobeLoaded=true;refreshAll();setSyncStatus("Firestore conectado");if(!snap.exists())await setDoc(userWardrobeRef(),{garments:[]},{merge:true});if(pendingWardrobeSave)saveWardrobeToFirestore();else saveWardrobeToFirestore()}catch(e){garments=[];wardrobeLoaded=false;refreshAll();setSyncStatus("Error de conexión");toast("No he podido leer tus prendas de Firestore.","warn");console.error(e)}}function persist(){storage.set(STORAGE_LOOKS,JSON.stringify(savedLooks));storage.set(STORAGE_RECENT,JSON.stringify(recentLooks));storage.set(STORAGE_WISHLIST,JSON.stringify(wishlist));saveWardrobeToFirestore();mirrorToIndexedDB()}function loadData(){garments=[];savedLooks=safeParse(storage.get(STORAGE_LOOKS),[]);recentLooks=safeParse(storage.get(STORAGE_RECENT),[]);wishlist=safeParse(storage.get(STORAGE_WISHLIST),[]).map(migrateWish)}
 function openLoginModal() {
     document.getElementById("loginModal").classList.remove("hidden");
 }
