@@ -386,12 +386,17 @@ async function saveWardrobeToFirestore(){
         setSyncStatus("Firestore conectado");
         return{ok:true};
     }catch(e){
-        toWrite.forEach(g=>pendingGarmentIds.add(g.id));
-        persistPendingGarmentIds();
-        setSyncStatus("Error de sincronización");
-        console.error(e);
-        return{ok:false,error:e};
-    }
+    toWrite.forEach(g=>pendingGarmentIds.add(g.id));
+    persistPendingGarmentIds();
+    setSyncStatus("Error de sincronización");
+    alert(
+      (e.code || "Sin código") +
+      "\n\n" +
+      (e.message || "Sin mensaje")
+    );
+    console.error(e);
+    return { ok:false, error:e };
+}
 }
 
 // Carga el armario: primero muestra la copia local (la app funciona al instante, incluso sin red), y luego
