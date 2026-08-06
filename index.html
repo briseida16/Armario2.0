@@ -218,13 +218,32 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword
 }from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+import { getFirestore, initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, doc, getDoc, getDocs, setDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 import { firebaseConfig } from "./firebase-config.js";
 const firebaseApp = initializeApp(firebaseConfig);
 const auth = getAuth(firebaseApp);
-const db = getFirestore(firebaseApp);
+// Se activa el caché local persistente de Firestore (IndexedDB propio del SDK): las escrituras hechas sin
+// conexión quedan encoladas por el propio Firestore y se reintentan solas al volver la red, incluso tras
+// recargar la app. Si el navegador no lo soporta (privacidad estricta, Safari en algunos modos, etc.) se
+// cae a Firestore en memoria sin romper la app.
+let db;
+try{
+  db = initializeFirestore(firebaseApp,{localCache:persistentLocalCache({tabManager:persistentMultipleTabManager()})});
+}catch(e){
+  console.warn("No se pudo activar la persistencia offline de Firestore, se usará solo memoria.",e);
+  db = getFirestore(firebaseApp);
+}
 let currentUser=null,wardrobeLoaded=false,pendingWardrobeSave=false;
-const APP_DATA_VERSION=3,placeholderImg="data:image/svg+xml;utf8,"+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500"><rect width="100%" height="100%" fill="#efe7eb"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#9b8691" font-size="24" font-family="Arial">Sin imagen</text></svg>`);const storage={memory:{},get(k){try{return localStorage.getItem(k)}catch(e){return this.memory[k]??null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){this.memory[k]=v}}};const STORAGE_LOOKS="looks_bricloset_24",STORAGE_RECENT="recent_bricloset_24",STORAGE_WISHLIST="wishlist_bricloset_30";
+const APP_DATA_VERSION=3,placeholderImg="data:image/svg+xml;utf8,"+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500"><rect width="100%" height="100%" fill="#efe7eb"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#9b8691" font-size="24" font-family="Arial">Sin imagen</text></svg>`);const storage={memory:{},get(k){try{return localStorage.getItem(k)}catch(e){return this.memory[k]??null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){this.memory[k]=v}}};const STORAGE_LOOKS="looks_bricloset_24",STORAGE_RECENT="recent_bricloset_24",STORAGE_WISHLIST="wishlist_bricloset_30",STORAGE_GARMENTS="garments_bricloset_1",STORAGE_PENDING_GARMENTS="garments_pending_bricloset_1";
+// --- Estado de sincronización de prendas con Firestore ---
+// pendingGarmentIds: ids de prendas con cambios que todavía no se han confirmado en Firestore.
+// Se persiste en localStorage para poder reintentar el envío aunque se cierre o recargue la app.
+let pendingGarmentIds=new Set(safeParseGlobal());
+function safeParseGlobal(){try{const s=localStorage.getItem(STORAGE_PENDING_GARMENTS);return s?JSON.parse(s):[]}catch(e){return[]}}
+// lastSyncedGarmentSnapshot: última versión de cada prenda que sabemos confirmada en Firestore (id -> JSON).
+// Se usa para calcular por diferencias qué documentos hay que escribir o borrar, en vez de reescribir el array entero.
+let lastSyncedGarmentSnapshot={};
+let garmentsSyncChain=Promise.resolve();
 const categoryOptions={abrigos:[["abrigo","Abrigo"],["chaqueta","Chaqueta"],["otros","Otros"]],jerseis_sudaderas:[["jersey","Jersey"],["sudadera","Sudadera"],["cardigan","Cárdigan"],["chaqueta_punto","Chaqueta de punto"],["otros","Otros"]],parte_superior:[["camiseta","Camiseta"],["top","Top"],["body","Body"],["camisa","Camisa"],["blusa","Blusa"],["polo","Polo"],["camiseta_termica","Camiseta térmica"],["camiseta_de_equipos","Camiseta de equipos"],["camiseta_deportiva","Camiseta deportiva"],["otros","Otros"]],parte_inferior:[["vaquero","Vaquero"],["pantalon_vestir","Pantalón vestir"],["pantalon_ancho","Pantalón ancho"],
 ["pantalon_casual","Pantalón casual"],["pantalon_cargo","Pantalón cargo"],["pantalon_pirata","Pantalón pirata"],["chandal","Chándal"],["falda_corta","Falda corta"],["falda_midi","Falda midi"],["falda_larga","Falda larga"],["falda_pantalon","Falda pantalón"],["shorts","Pantalón corto"],["leggings","Leggings"],["leggings_deportivos","Leggings deportivos"],["mallas_termicas","Mallas térmicas"],["otros","Otros"]],vestidos_monos:[["vestido_largo","Vestido largo"],["vestido_corto","Vestido corto"],["vestido_midi","Vestido_midi"],["mono","Mono"],["otros","Otros"]],playa:[["bikini","Bikini"],["banador","Bañador"],["pareo","Pareo"],["otros","Otros"]],
 dormir:[["camiseta_mc","Camiseta manga corta"],["camiseta_ml","Camiseta manga larga"],["camiseta_invierno","Camiseta invierno"],["pantalon_corto","Pantalón corto"],["pantalon_largo","Pantalón largo"],["pantalon_invierno","Pantalón invierno"],["camison","Camisón"],["bata","Bata"],["otros","Otros"]],
@@ -318,22 +337,133 @@ function userWardrobeRef(){return currentUser?doc(db,"users",currentUser.uid):nu
             name.textContent="";
         }
     }
-}async function logout(){try{await signOut(auth)}catch(e){toast("No he podido cerrar sesión.","warn");console.error(e)}}async function saveWardrobeToFirestore(){const ref=userWardrobeRef();if(!ref||!wardrobeLoaded){pendingWardrobeSave=true;setSyncStatus(currentUser?"Cargando armario":"Esperando sesión");return}try{setSyncStatus("Sincronizando...");await setDoc(ref,{garments}, {merge:true});pendingWardrobeSave=false;setSyncStatus("Firestore conectado")}catch(e){
-    pendingWardrobeSave = true;
+}async function logout(){try{await signOut(auth)}catch(e){toast("No he podido cerrar sesión.","warn");console.error(e)}}
+function userGarmentsCol(){return currentUser?collection(db,"users",currentUser.uid,"garments"):null}
+function userMetaRef(){return currentUser?doc(db,"users",currentUser.uid):null}
+function garmentsLocalKey(){return currentUser?`${STORAGE_GARMENTS}_${currentUser.uid}`:STORAGE_GARMENTS}
+function persistPendingGarmentIds(){storage.set(STORAGE_PENDING_GARMENTS,JSON.stringify([...pendingGarmentIds]))}
+// Copia local inmediata del armario. Se hace SIEMPRE, haya o no conexión: es la garantía de que una prenda
+// nunca se pierde aunque Firestore falle, tarde o no exista sesión todavía.
+function persistGarmentsLocally(){try{storage.set(garmentsLocalKey(),JSON.stringify(garments))}catch(e){console.warn("No se pudo guardar el armario localmente",e)}}
+function loadGarmentsLocally(){const scoped=safeParse(storage.get(garmentsLocalKey()),null);if(scoped)return scoped;return safeParse(storage.get(STORAGE_GARMENTS),[])}
 
-    setSyncStatus("Error de sincronización");
+// Sincroniza el armario con Firestore escribiendo SOLO las prendas que cambiaron desde la última confirmación
+// (comparando contra lastSyncedGarmentSnapshot) y borrando solo las que ya no existen localmente. Esto evita
+// reescribir todo el array en cada guardado (menos riesgo de choque entre dispositivos y de superar el límite
+// de tamaño de un documento de Firestore).
+async function saveWardrobeToFirestore(){
+    persistGarmentsLocally();
+    mirrorToIndexedDB();
+    const col=userGarmentsCol();
+    if(!col||!wardrobeLoaded){
+        garments.forEach(g=>pendingGarmentIds.add(g.id));
+        persistPendingGarmentIds();
+        setSyncStatus(currentUser?"Cargando armario":"Esperando sesión");
+        return{ok:false,reason:"not-ready"};
+    }
+    // Salvaguarda: si en memoria no hay prendas pero ya teníamos prendas confirmadas en Firestore, lo más
+    // probable es que sea un fallo de carga (no un armario realmente vaciado), así que no se borra nada remoto.
+    if(garments.length===0&&Object.keys(lastSyncedGarmentSnapshot).length>0){
+        console.warn("Sincronización de prendas pausada: el armario está vacío en memoria pero había prendas sincronizadas.");
+        setSyncStatus("Sincronización pausada");
+        return{ok:false,reason:"empty-guard"};
+    }
+    const currentIds=new Set(garments.map(g=>g.id));
+    const toWrite=garments.filter(g=>lastSyncedGarmentSnapshot[g.id]!==JSON.stringify(g));
+    const toDelete=Object.keys(lastSyncedGarmentSnapshot).filter(id=>!currentIds.has(id));
+    if(!toWrite.length&&!toDelete.length){setSyncStatus("Firestore conectado");return{ok:true}}
+    try{
+        setSyncStatus("Sincronizando...");
+        const ops=[...toWrite.map(g=>({type:"set",g})),...toDelete.map(id=>({type:"del",id}))];
+        for(let i=0;i<ops.length;i+=450){ // los batch de Firestore admiten máx. 500 operaciones
+            const batch=writeBatch(db);
+            ops.slice(i,i+450).forEach(op=>op.type==="set"?batch.set(doc(col,op.g.id),op.g):batch.delete(doc(col,op.id)));
+            await batch.commit();
+        }
+        toWrite.forEach(g=>{lastSyncedGarmentSnapshot[g.id]=JSON.stringify(g);pendingGarmentIds.delete(g.id)});
+        toDelete.forEach(id=>{delete lastSyncedGarmentSnapshot[id];pendingGarmentIds.delete(id)});
+        persistPendingGarmentIds();
+        setSyncStatus("Firestore conectado");
+        return{ok:true};
+    }catch(e){
+        toWrite.forEach(g=>pendingGarmentIds.add(g.id));
+        persistPendingGarmentIds();
+        setSyncStatus("Error de sincronización");
+        console.error(e);
+        return{ok:false,error:e};
+    }
+}
 
-    const msg = `${e.code || "Error"}\n${e.message || ""}`;
+// Carga el armario: primero muestra la copia local (la app funciona al instante, incluso sin red), y luego
+// intenta traer la versión de Firestore. Si el usuario aún tenía prendas locales sin confirmar (pendingGarmentIds)
+// cuando termina la carga remota, esas versiones locales ganan en la fusión para no perder ediciones hechas
+// mientras se cargaba o mientras no había conexión.
+async function loadWardrobeFromFirestore(user){
+    currentUser=user;wardrobeLoaded=false;setSyncStatus("Cargando armario");
+    garments=loadGarmentsLocally().map(migrateGarment);
+    refreshAll();
+    try{
+        const metaRef=userMetaRef();
+        const [metaSnap,colSnap]=await Promise.all([getDoc(metaRef),getDocs(userGarmentsCol())]);
+        let remoteGarments;
+        if(!colSnap.empty){
+            remoteGarments=colSnap.docs.map(d=>({id:d.id,...d.data()}));
+        }else if(metaSnap.exists()&&Array.isArray(metaSnap.data().garments)&&metaSnap.data().garments.length){
+            // Migración automática y transparente del formato antiguo (un solo documento con el array
+            // "garments") al nuevo: una prenda = un documento en users/{uid}/garments/{id}. Se hace una única
+            // vez, sin perder ninguna prenda y sin que la usuaria tenga que hacer nada.
+            remoteGarments=metaSnap.data().garments.map(migrateGarment);
+            const col=userGarmentsCol();
+            for(let i=0;i<remoteGarments.length;i+=450){
+                const batch=writeBatch(db);
+                remoteGarments.slice(i,i+450).forEach(g=>batch.set(doc(col,g.id),g));
+                await batch.commit();
+            }
+            await setDoc(metaRef,{migrado_a_subcoleccion:true,migrado_en:new Date().toISOString()},{merge:true});
+        }else{
+            remoteGarments=[];
+        }
+        remoteGarments=remoteGarments.map(migrateGarment);
+        lastSyncedGarmentSnapshot={};
+        remoteGarments.forEach(g=>lastSyncedGarmentSnapshot[g.id]=JSON.stringify(g));
+        const localById=new Map(garments.map(g=>[g.id,g]));
+        const merged=remoteGarments.map(rg=>pendingGarmentIds.has(rg.id)&&localById.has(rg.id)?localById.get(rg.id):rg);
+        const remoteIds=new Set(remoteGarments.map(g=>g.id));
+        localById.forEach((g,id)=>{if(pendingGarmentIds.has(id)&&!remoteIds.has(id))merged.push(g)});
+        garments=merged;
+        purgeOldTrash();
+        wardrobeLoaded=true;
+        persistGarmentsLocally();
+        refreshAll();
+        setSyncStatus("Firestore conectado");
+        saveWardrobeToFirestore(); // envía cualquier cambio pendiente o el resultado de purgar la papelera antigua
+    }catch(e){
+        // No se vacía el armario ante un fallo: se sigue trabajando con la copia local ya cargada, y se
+        // marcan todas las prendas como pendientes para reintentar la sincronización más adelante.
+        wardrobeLoaded=true;
+        garments.forEach(g=>pendingGarmentIds.add(g.id));
+        persistPendingGarmentIds();
+        refreshAll();
+        setSyncStatus("Sin conexión (usando datos locales)");
+        toast("No he podido conectar con Firestore. Sigo trabajando con la copia guardada en este dispositivo.","warn");
+        console.error(e);
+    }
+}
+// Reintento automático: en cuanto vuelve la conexión, o cada 45s mientras haya cambios sin confirmar, se
+// reintenta la sincronización sin necesidad de que la usuaria haga nada más.
+window.addEventListener("online",()=>{if(currentUser&&pendingGarmentIds.size)saveWardrobeToFirestore()});
+setInterval(()=>{if(currentUser&&wardrobeLoaded&&pendingGarmentIds.size)saveWardrobeToFirestore()},45000);
 
-    toast(msg, "warn");
-
-    alert(
-        "Error al guardar en Firebase\n\n" +
-        msg
-    );
-
-    console.error(e);
-}}async function loadWardrobeFromFirestore(user){currentUser=user;wardrobeLoaded=false;setSyncStatus("Cargando armario");try{const snap=await getDoc(userWardrobeRef());garments=(snap.exists()&&Array.isArray(snap.data().garments)?snap.data().garments:[]).map(migrateGarment);purgeOldTrash();wardrobeLoaded=true;refreshAll();setSyncStatus("Firestore conectado");if(!snap.exists())await setDoc(userWardrobeRef(),{garments:[]},{merge:true});if(pendingWardrobeSave)saveWardrobeToFirestore();else saveWardrobeToFirestore()}catch(e){garments=[];wardrobeLoaded=false;refreshAll();setSyncStatus("Error de conexión");toast("No he podido leer tus prendas de Firestore.","warn");console.error(e)}}function persist(){storage.set(STORAGE_LOOKS,JSON.stringify(savedLooks));storage.set(STORAGE_RECENT,JSON.stringify(recentLooks));storage.set(STORAGE_WISHLIST,JSON.stringify(wishlist));saveWardrobeToFirestore();mirrorToIndexedDB()}function loadData(){garments=[];savedLooks=safeParse(storage.get(STORAGE_LOOKS),[]);recentLooks=safeParse(storage.get(STORAGE_RECENT),[]);wishlist=safeParse(storage.get(STORAGE_WISHLIST),[]).map(migrateWish)}
+function persist(){
+    storage.set(STORAGE_LOOKS,JSON.stringify(savedLooks));
+    storage.set(STORAGE_RECENT,JSON.stringify(recentLooks));
+    storage.set(STORAGE_WISHLIST,JSON.stringify(wishlist));
+    // Se encadenan las sincronizaciones (en vez de lanzarlas en paralelo) para que dos guardados seguidos no
+    // se pisen entre sí; cada llamada devuelve la promesa de SU turno para que quien la necesite pueda esperarla.
+    garmentsSyncChain=garmentsSyncChain.then(()=>saveWardrobeToFirestore());
+    return garmentsSyncChain;
+}
+function loadData(){garments=[];savedLooks=safeParse(storage.get(STORAGE_LOOKS),[]);recentLooks=safeParse(storage.get(STORAGE_RECENT),[]);wishlist=safeParse(storage.get(STORAGE_WISHLIST),[]).map(migrateWish)}
 function openLoginModal() {
     document.getElementById("loginModal").classList.remove("hidden");
 }
