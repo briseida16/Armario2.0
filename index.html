@@ -452,7 +452,11 @@ async function loadWardrobeFromFirestore(user){
         setSyncStatus("Sin conexión (usando datos locales)");
         toast("No he podido conectar con Firestore. Sigo trabajando con la copia guardada en este dispositivo.","warn");
         console.error(e);
-    }
+    }alert(
+    (e.code || "Sin código") +
+    "\n\n" +
+    (e.message || "Sin mensaje")
+);
 }
 // Reintento automático: en cuanto vuelve la conexión, o cada 45s mientras haya cambios sin confirmar, se
 // reintenta la sincronización sin necesidad de que la usuaria haga nada más.
