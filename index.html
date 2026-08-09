@@ -104,7 +104,53 @@ input{
 }.summary-box{
     cursor:pointer;
     transition:.2s ease;
-}.summary-number{font-size:1.35rem;font-weight:950;margin-bottom:4px}.hidden{display:none!important}.mini-outfit{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:14px}.mini-card{background:rgba(255,255,255,.85);border-radius:20px;padding:10px;box-shadow:var(--shadow)}.mini-card img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:14px;background:#f2edf0;margin-bottom:8px}.mini-title{font-weight:900;margin-bottom:3px;font-size:.92rem}.related-picker{border:1px solid var(--line);border-radius:16px;background:#fff;padding:10px;display:grid;gap:10px}.related-options{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;max-height:260px;overflow:auto}.related-option,.related-selected-card{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:14px;background:#fff;padding:8px}.related-option{cursor:pointer}.related-option.selected{background:#f9e8f0;border-color:#d98fb3}.related-option img,.related-selected-card img{width:54px;height:54px;object-fit:cover;border-radius:12px;background:#f2edf0}.related-name{font-weight:800;font-size:.9rem}.related-meta{color:var(--muted);font-size:.82rem}.related-selected{display:flex;flex-wrap:wrap;gap:10px}.related-remove{margin-left:auto;border:none;background:#fff2f4;color:#a74f69;border-radius:999px;width:26px;height:26px;cursor:pointer;font-weight:900}.future-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}.future-card{background:#fff;border:1px dashed #e6c6d7;border-radius:18px;padding:14px;font-weight:850;color:#7a5a6a}
+}.summary-number{font-size:1.35rem;font-weight:950;margin-bottom:4px}.hidden{display:none!important}.mini-outfit{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:14px}.mini-card{background:rgba(255,255,255,.85);border-radius:20px;padding:10px;box-shadow:var(--shadow)}.mini-card img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:14px;background:#f2edf0;margin-bottom:8px}.mini-title{font-weight:900;margin-bottom:3px;font-size:.92rem}.related-picker{border:1px solid var(--line);border-radius:16px;background:#fff;padding:10px;display:grid;gap:10px}.multi-select{
+    position:relative;
+    width:100%;
+}
+.multi-select summary{
+    list-style:none;
+    cursor:pointer;
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:10px 14px;
+    background:#fff;
+    box-shadow:var(--shadow);
+    font:inherit;
+    color:var(--text);
+}
+.multi-select summary::-webkit-details-marker{
+    display:none;
+}
+.multi-select summary::after{
+    content:"▾";
+    float:right;
+}
+.multi-select-options{
+    position:absolute;
+    left:0;
+    right:0;
+    top:calc(100% + 6px);
+    z-index:50;
+    display:grid;
+    gap:4px;
+    padding:8px;
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:14px;
+    box-shadow:var(--shadow);
+}
+.multi-select-options label{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:8px;
+    border-radius:10px;
+    cursor:pointer;
+}
+.multi-select-options label:hover{
+    background:#fff2f4;
+}.related-options{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;max-height:260px;overflow:auto}.related-option,.related-selected-card{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:14px;background:#fff;padding:8px}.related-option{cursor:pointer}.related-option.selected{background:#f9e8f0;border-color:#d98fb3}.related-option img,.related-selected-card img{width:54px;height:54px;object-fit:cover;border-radius:12px;background:#f2edf0}.related-name{font-weight:800;font-size:.9rem}.related-meta{color:var(--muted);font-size:.82rem}.related-selected{display:flex;flex-wrap:wrap;gap:10px}.related-remove{margin-left:auto;border:none;background:#fff2f4;color:#a74f69;border-radius:999px;width:26px;height:26px;cursor:pointer;font-weight:900}.future-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}.future-card{background:#fff;border:1px dashed #e6c6d7;border-radius:18px;padding:14px;font-weight:850;color:#7a5a6a}
 #toastBox{position:fixed;left:0;right:0;bottom:14px;display:flex;flex-direction:column;align-items:center;gap:8px;z-index:1000000;pointer-events:none}.toast{background:#3f2e3a;color:#fff;padding:11px 18px;border-radius:999px;font-weight:800;font-size:.9rem;opacity:0;transform:translateY(10px);transition:.25s;box-shadow:var(--shadow);max-width:88vw;text-align:center}.toast.show{opacity:1;transform:translateY(0)}.toast-warn{background:#a74f69}@media(max-width:680px){main{padding:14px 10px 30px}.card{padding:14px;border-radius:20px}.tabs{justify-content:flex-start}.top-actions{position:static;justify-content:center;margin-top:12px;max-width:none;flex-wrap:wrap}.auth-panel{width:100%;justify-content:center;flex-wrap:wrap}.auth-name{max-width:42vw}.user-menu{left:50%;right:auto;transform:translate(-50%,0);min-width:170px}.user-menu.hidden{transform:translate(-50%,-6px)}.login-btn{width:100%;max-width:320px}}
 </style></head><body><header><h1>BriCloset ✨</h1><div class="subtitle">🌸 Toda tu ropa en un solo armario virtual, crea looks diferentes y utiliza todo lo que tienes para explotar tu potencial 🌸</div><div class="top-actions"><div class="auth-panel"><button type="button" class="primary-btn" id="loginBtn" onclick="openLoginModal()">
     Iniciar sesión
@@ -243,14 +289,37 @@ input{
     <input id="marca" placeholder="Ej. Zara">
 </div>
 <div class="field">
-    <label>Temporada</label>
-    <select id="temporada">
-        <option value="todo_anio">Todo el año</option>
-        <option value="primavera">🌺 Primavera</option>
-        <option value="verano">☀️ Verano</option>
-        <option value="otono">🍂 Otoño</option>
-        <option value="invierno">❄️ Invierno</option>
-    </select>
+    <label>Temporadas</label>
+    <details class="multi-select">
+        <summary id="temporadaSummary">Seleccionar temporadas</summary>
+
+        <div id="temporadaChecks" class="multi-select-options">
+            <label>
+                <input type="checkbox" value="todo_anio">
+                Todo el año
+            </label>
+
+            <label>
+                <input type="checkbox" value="primavera">
+                🌺 Primavera
+            </label>
+
+            <label>
+                <input type="checkbox" value="verano">
+                ☀️ Verano
+            </label>
+
+            <label>
+                <input type="checkbox" value="otono">
+                🍂 Otoño
+            </label>
+
+            <label>
+                <input type="checkbox" value="invierno">
+                ❄️ Invierno
+            </label>
+        </div>
+    </details>
 </div><div class="field">
     <label>Precio (€)</label>
     <input id="precio" type="number" step="0.01" min="0" placeholder="29,99">
