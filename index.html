@@ -243,29 +243,14 @@ input{
     <input id="marca" placeholder="Ej. Zara">
 </div>
 <div class="field">
-    <label>Temporadas</label>
-    <div id="temporadaChecks" class="check-grid">
-        <label>
-            <input type="checkbox" value="todo_anio">
-            Todo el año
-        </label>
-        <label>
-            <input type="checkbox" value="primavera">
-            🌺 Primavera
-        </label>
-        <label>
-            <input type="checkbox" value="verano">
-            ☀️ Verano
-        </label>
-        <label>
-            <input type="checkbox" value="otono">
-            🍂 Otoño
-        </label>
-        <label>
-            <input type="checkbox" value="invierno">
-            ❄️ Invierno
-        </label>
-    </div>
+    <label>Temporada</label>
+    <select id="temporada">
+        <option value="todo_anio">Todo el año</option>
+        <option value="primavera">🌺 Primavera</option>
+        <option value="verano">☀️ Verano</option>
+        <option value="otono">🍂 Otoño</option>
+        <option value="invierno">❄️ Invierno</option>
+    </select>
 </div><div class="field">
     <label>Precio (€)</label>
     <input id="precio" type="number" step="0.01" min="0" placeholder="29,99">
