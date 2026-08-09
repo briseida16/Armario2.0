@@ -1016,8 +1016,311 @@ function renderWardrobeStats(){
 window.clearWardrobeFilters = clearWardrobeFilters;
 function renderTrash(){const box=document.getElementById("trashGrid"),items=garments.filter(g=>g.eliminado_en);box.innerHTML=items.length?items.map(g=>`<div class="item-card"><img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}"><div class="item-body"><p class="item-name">${esc(g.nombre)}</p><p class="meta">Se borrará definitivamente en ${Math.max(0,30-Math.floor((Date.now()-new Date(g.eliminado_en).getTime())/86400000))} día(s)</p><div class="button-row" style="margin-top:10px"><button class="small-btn" onclick="restoreGarment('${g.id}')">Restaurar</button><button class="small-btn danger-btn" onclick="deleteGarmentForever('${g.id}')">Borrar ya</button></div></div></div>`).join(""):'<div class="empty">La papelera está vacía.</div>'}
 function markUsed(id){const g=findGarment(id);if(g){g.usos=(g.usos||0)+1;g.ultimo_uso=new Date().toISOString();persist();refreshAll()}}function toggleFavorite(id){const g=findGarment(id);if(g){g.favorito=!g.favorito;persist();refreshAll()}}function toggleVinted(id){const g=findGarment(id);if(g){g.en_vinted=!g.en_vinted;persist();refreshAll()}}function deleteGarment(id){const g=findGarment(id);if(!g||!confirm(`¿Mover "${g.nombre}" a la papelera? Podrás recuperarla durante 30 días.`))return;g.eliminado_en=new Date().toISOString();persist();refreshAll();toast("Prenda movida a la papelera 🗑️")}function restoreGarment(id){const g=findGarment(id);if(g){g.eliminado_en=null;persist();refreshAll();toast("Prenda restaurada ✅")}}function deleteGarmentForever(id){const g=findGarment(id);if(!g||!confirm(`Esto borrará "${g.nombre}" para siempre. ¿Seguro?`))return;garments=garments.filter(x=>x.id!==id);savedLooks=savedLooks.map(l=>cleanLookIds(l,id));recentLooks=recentLooks.map(l=>cleanLookIds(l,id));persist();refreshAll()}function purgeOldTrash(){const limit=Date.now()-30*24*60*60*1000;garments=garments.filter(g=>!g.eliminado_en||new Date(g.eliminado_en).getTime()>=limit)}function cleanLookIds(l,id){const x={...l};["abrigo","exterior","interior","inferior","vestido","calzado","bolso"].forEach(k=>{if(x[k]===id)x[k]=null});x.accesorios=normalizeIds(x.accesorios).filter(a=>a!==id);return x}
-function outfitSlotsHtml(prefix){return Object.keys(emptyLook()).map(k=>`<div class="slot" id="${prefix}_${k}"></div>`).join("")}function renderOutfitShell(){document.getElementById("manualOutfit").innerHTML=outfitSlotsHtml("slot");document.getElementById("randomOutfit").innerHTML=outfitSlotsHtml("random")}function availablePool(occasion){let pool=garments.filter(g=>g.disponible&&!g.eliminado_en&&(g.ocasiones||[]).includes(occasion));if(!pool.length)pool=garments.filter(g=>g.disponible&&!g.eliminado_en);if(document.getElementById("randomExcludeSleep")?.checked)pool=pool.filter(g=>!isSleepwear(g));if(document.getElementById("randomOnlyFavorites")?.checked)pool=pool.filter(g=>g.favorito);if(document.getElementById("randomOnlyBasics")?.checked)pool=pool.filter(g=>g.basico);if(document.getElementById("randomOnlySeason")?.checked)pool=pool.filter(g=>["todo_anio",currentSeason()].includes(g.temporada||"todo_anio"));return pool}function scoreItem(g,occasion,bold=false,seed=[]){let score=0;if(g.favorito)score+=bold?0:4;if(g.basico)score+=1;if((g.ocasiones||[]).includes(occasion))score+=5;if((g.usos||0)===0)score+=bold?4:1;score-=Math.min(g.usos||0,8)*.25;seed.forEach(s=>{if(s&&(s.relacionadas||[]).includes(g.id))score+=5;if(g.relacionadas?.includes(s.id))score+=5;if(s?.color&&g.color&&s.color.toLowerCase()===g.color.toLowerCase())score+=1});return score+Math.random()*2}function best(arr,occasion,bold=false,seed=[]){return arr.length?[...arr].sort((a,b)=>scoreItem(b,occasion,bold,seed)-scoreItem(a,occasion,bold,seed))[0]:null}function bestSome(arr,occasion,bold=false,seed=[],max=3){return[...arr].sort((a,b)=>scoreItem(b,occasion,bold,seed)-scoreItem(a,occasion,bold,seed)).slice(0,Math.min(max,arr.length))}function buildLook(occasion,noCoat,bold=false){const pool=availablePool(occasion),bagsAllowed=document.getElementById("randomIncludeBags")?.checked??true,accAllowed=document.getElementById("randomIncludeAccessories")?.checked??true;const by=s=>pool.filter(g=>inferSlot(g)===s);let look=emptyLook();const useDress=by("vestido").length&&(!by("inferior").length||!by("interior").length||Math.random()<.35);if(!noCoat)look.abrigo=best(by("abrigo"),occasion,bold,[]);if(useDress){look.exterior=best(by("exterior"),occasion,bold,[look.abrigo].filter(Boolean));look.vestido=best(by("vestido"),occasion,bold,[look.abrigo,look.exterior].filter(Boolean))}else{look.exterior=best(by("exterior"),occasion,bold,[look.abrigo].filter(Boolean));look.interior=best(by("interior"),occasion,bold,[look.abrigo,look.exterior].filter(Boolean));look.inferior=best(by("inferior"),occasion,bold,[look.abrigo,look.exterior,look.interior].filter(Boolean))}look.calzado=best(by("calzado"),occasion,bold,Object.values(look).filter(x=>x&&!Array.isArray(x)));if(bagsAllowed)look.bolso=best(by("bolso"),occasion,bold,Object.values(look).filter(x=>x&&!Array.isArray(x)));if(accAllowed)look.accesorios=bestSome(by("accesorios"),occasion,bold,Object.values(look).filter(x=>x&&!Array.isArray(x)),3);return look}
-function renderSlot(slot,value,prefix){const el=document.getElementById(`${prefix}_${slot}`);if(!el)return;if(slot==="accesorios"){const items=Array.isArray(value)?value:[];el.innerHTML=`<div class="slot-title">Accesorios ${items.length?`(${items.length})`:""}</div>`+(items.length?items.map((g,i)=>`<div class="related-selected-card"><img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}"><div><strong>${esc(g.nombre)}</strong><div class="muted">${esc(fmtCat(g.categoria))}</div></div>${prefix==="slot"?`<button class="small-btn danger-btn" onclick="removeAccessory(${i})">Quitar</button>`:""}</div>`).join(""):'<div class="muted">Vacío</div>')+(prefix==="slot"?`<button class="small-btn" onclick="openSelector('accesorios')">+ Añadir</button>`:"");return}el.innerHTML=value?`<div class="slot-title">${slotTitles[slot]}</div><img src="${value.foto||placeholderImg}" alt="${esc(value.nombre)}"><strong>${esc(value.nombre)}</strong><div class="muted">${esc(fmtCat(value.categoria))} · ${esc(value.color||"-")}</div>${prefix==="slot"?`<button class="small-btn" onclick="removeFromLook('${slot}')">Quitar</button>`:""}`:`<div class="slot-title">${slotTitles[slot]}</div><div class="muted">Vacío</div>`}function renderCurrentLook(){Object.keys(currentLook).forEach(s=>renderSlot(s,currentLook[s],"slot"))}function renderRandomLook(){document.getElementById("randomLookTitle").textContent=lastOccasion?`Look generado para: ${fmtOcc(lastOccasion)}${lastBold?" · modo Atrévete":""}`:"Todavía no has generado ningún look.";Object.keys(randomLook).forEach(s=>renderSlot(s,randomLook[s],"random"))}function renderQuickLook(){const box=document.getElementById("quickLookGrid"),entries=Object.entries(quickLook).flatMap(([k,v])=>k==="accesorios"?(v||[]).map(a=>["Accesorio",a]):v?[[slotTitles[k],v]]:[]);box.innerHTML=entries.length?entries.map(([label,g])=>`<div class="mini-card"><img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}"><div class="mini-title">${esc(label)}</div><div class="meta">${esc(g.nombre)}</div><div class="meta">${esc(fmtCat(g.categoria))}</div></div>`).join(""):'<div class="empty">No hay prendas suficientes para generar look.</div>'}function generateQuickLook(){quickLook=buildLook("casual",document.getElementById("quickNoCoat").checked,false);document.getElementById("quickLookTitle").textContent="Propuesta rápida con lógica de personal shopper ✨";renderQuickLook()}function generateLook(occasion,bold=false){lastOccasion=occasion;lastBold=bold;randomLook=buildLook(occasion,document.getElementById("randomNoCoat").checked,bold);renderRandomLook()}function repeatLastLook(){generateLook(lastOccasion||"casual",lastBold)}function openSelector(slot){currentSlot=slot;document.getElementById("selectorCard").classList.remove("hidden");const list=garments.filter(g=>g.disponible&&!g.vendida&&!g.eliminado_en&&inferSlot(g)===slot);document.getElementById("selectorGrid").innerHTML=list.length?list.map(g=>`<div class="item-card"><img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}"><div class="item-body"><p class="item-name">${esc(g.nombre)}</p><p class="meta">${esc(fmtCat(g.categoria))}</p><button class="small-btn" onclick="selectGarmentForSlot('${g.id}')">Seleccionar</button></div></div>`).join(""):'<div class="empty">No hay prendas disponibles.</div>'}function selectGarmentForSlot(id){const g=findGarment(id);if(!g||!currentSlot)return;if(currentSlot==="accesorios"){if(!currentLook.accesorios.some(a=>a.id===id))currentLook.accesorios.push(g)}else{if(currentSlot==="vestido"){currentLook.interior=null;currentLook.inferior=null}else if(["interior","inferior"].includes(currentSlot))currentLook.vestido=null;currentLook[currentSlot]=g}renderCurrentLook();document.getElementById("selectorCard").classList.add("hidden")}function removeFromLook(slot){currentLook[slot]=null;renderCurrentLook()}function removeAccessory(i){currentLook.accesorios.splice(i,1);renderCurrentLook()}function clearLook(){currentLook=emptyLook();renderCurrentLook();document.getElementById("selectorCard").classList.add("hidden")}function mapLookToIds(look){return{abrigo:look.abrigo?.id||null,exterior:look.exterior?.id||null,interior:look.interior?.id||null,inferior:look.inferior?.id||null,vestido:look.vestido?.id||null,calzado:look.calzado?.id||null,bolso:look.bolso?.id||null,accesorios:(look.accesorios||[]).map(a=>a.id)}}function idsToLook(l){return{abrigo:findGarment(l.abrigo),exterior:findGarment(l.exterior),interior:findGarment(l.interior),inferior:findGarment(l.inferior),vestido:findGarment(l.vestido),calzado:findGarment(l.calzado),bolso:findGarment(l.bolso),accesorios:normalizeIds(l.accesorios).map(findGarment).filter(Boolean)}}function hasLook(look){return Object.entries(look).some(([k,v])=>k==="accesorios"?(v||[]).length:!!v)}function addUsageFromLook(look){["abrigo","exterior","interior","inferior","vestido","calzado","bolso"].forEach(k=>look[k]?.id&&markUsedSilent(look[k].id));(look.accesorios||[]).forEach(a=>a?.id&&markUsedSilent(a.id))}function markUsedSilent(id){const g=findGarment(id);if(g){g.usos=(g.usos||0)+1;g.ultimo_uso=new Date().toISOString()}}function saveLookObject(look,name,occasion,source){if(!hasLook(look))return toast("No hay look para guardar.","warn");addUsageFromLook(look);const item={id:uid(),nombre:name,ocasion,source,fecha:new Date().toISOString(),favorito:false,...mapLookToIds(look)};savedLooks.push(item);recentLooks.unshift({...item,id:uid(),nombre:`Usado ${new Date().toLocaleString()}`});recentLooks=recentLooks.slice(0,10);persist();refreshAll();toast("Look guardado ✅")}function saveQuickLook(){saveLookObject(quickLook,`Look rápido ${savedLooks.length+1}`,"casual","rápido")}function saveRandomLook(){saveLookObject(randomLook,`Look ${savedLooks.length+1}`,lastOccasion||"casual","aleatorio")}function saveCurrentLook(){const occ=Object.values(currentLook).find(v=>v&&!Array.isArray(v))?.ocasiones?.[0]||"casual";saveLookObject(currentLook,`Look ${savedLooks.length+1}`,occ,"manual")}function copyQuickToManual(){currentLook={...quickLook,accesorios:[...(quickLook.accesorios||[])]};renderCurrentLook();switchView("crearLook")}function copyRandomToManual(){currentLook={...randomLook,accesorios:[...(randomLook.accesorios||[])]};renderCurrentLook();switchView("crearLook")}
+function outfitSlotsHtml(prefix){return Object.keys(emptyLook()).map(k=>`<div class="slot" id="${prefix}_${k}"></div>`).join("")}function renderOutfitShell(){document.getElementById("manualOutfit").innerHTML=outfitSlotsHtml("slot");document.getElementById("randomOutfit").innerHTML=outfitSlotsHtml("random")}function availablePool(occasion){
+    let pool=garments.filter(g=>
+        g.disponible &&
+        !g.eliminado_en &&
+        (g.ocasiones||[]).includes(occasion)
+    );
+
+    if(!pool.length){
+        pool=garments.filter(g=>g.disponible&&!g.eliminado_en);
+    }
+
+    if(document.getElementById("randomExcludeSleep")?.checked){
+        pool=pool.filter(g=>!isSleepwear(g));
+    }
+
+    if(document.getElementById("randomOnlyFavorites")?.checked){
+        pool=pool.filter(g=>g.favorito);
+    }
+
+    if(document.getElementById("randomOnlyBasics")?.checked){
+        pool=pool.filter(g=>g.basico);
+    }
+
+    if(document.getElementById("randomOnlySeason")?.checked){
+        const season=currentSeason();
+        pool=pool.filter(g=>{
+            const seasons=Array.isArray(g.temporada)
+                ? g.temporada
+                : [g.temporada||"todo_anio"];
+
+            return seasons.includes("todo_anio") || seasons.includes(season);
+        });
+    }
+
+    return pool;
+}
+
+function scoreItem(g,occasion,bold=false,seed=[]){
+    let score=0;
+
+    if(g.favorito) score+=bold?0:3;
+
+    if(g.basico) score+=1;
+
+    if((g.ocasiones||[]).includes(occasion)){
+        score+=6;
+    }
+
+    const uses=g.usos||0;
+
+    if(uses===0){
+        score+=bold?5:3;
+    }else if(uses<=2){
+        score+=2;
+    }
+
+    score-=Math.min(uses,12)*0.18;
+
+    const seasons=Array.isArray(g.temporada)
+        ? g.temporada
+        : [g.temporada||"todo_anio"];
+
+    if(seasons.includes("todo_anio")||seasons.includes(currentSeason())){
+        score+=2;
+    }
+
+    seed.forEach(s=>{
+        if(!s)return;
+
+        if((s.relacionadas||[]).includes(g.id)){
+            score+=5;
+        }
+
+        if(g.relacionadas?.includes(s.id)){
+            score+=5;
+        }
+
+        if(
+            s.color &&
+            g.color &&
+            s.color.toLowerCase()===g.color.toLowerCase()
+        ){
+            score+=1.5;
+        }
+    });
+
+    return score;
+}
+
+function rankedCandidates(arr,occasion,bold=false,seed=[]){
+    return [...arr]
+        .map(g=>({
+            garment:g,
+            score:scoreItem(g,occasion,bold,seed)
+        }))
+        .sort((a,b)=>b.score-a.score);
+}
+
+function pickRandomWeighted(arr,occasion,bold=false,seed=[],maxCandidates=4){
+    if(!arr.length)return null;
+
+    const ranked=rankedCandidates(arr,occasion,bold,seed)
+        .slice(0,Math.min(maxCandidates,arr.length));
+
+    const weights=ranked.map((item,index)=>{
+        return Math.max(1, ranked.length-index);
+    });
+
+    const total=weights.reduce((sum,w)=>sum+w,0);
+    let random=Math.random()*total;
+
+    for(let i=0;i<ranked.length;i++){
+        random-=weights[i];
+
+        if(random<=0){
+            return ranked[i].garment;
+        }
+    }
+
+    return ranked[0].garment;
+}
+
+function best(arr,occasion,bold=false,seed=[]){
+    return pickRandomWeighted(arr,occasion,bold,seed,4);
+}
+
+function bestSome(arr,occasion,bold=false,seed=[],max=3){
+    if(!arr.length)return [];
+
+    const ranked=rankedCandidates(arr,occasion,bold,seed);
+    const result=[];
+
+    const pool=ranked.slice(0,Math.min(6,ranked.length));
+
+    while(result.length<Math.min(max,pool.length)){
+        const total=pool.reduce(
+            (sum,item,index)=>sum+Math.max(1,pool.length-index),
+            0
+        );
+
+        let random=Math.random()*total;
+        let selectedIndex=0;
+
+        for(let i=0;i<pool.length;i++){
+            random-=Math.max(1,pool.length-i);
+
+            if(random<=0){
+                selectedIndex=i;
+                break;
+            }
+        }
+
+        result.push(pool[selectedIndex].garment);
+        pool.splice(selectedIndex,1);
+    }
+
+    return result;
+}
+
+function buildLook(occasion,noCoat,bold=false){
+    const pool=availablePool(occasion);
+
+    const bagsAllowed=
+        document.getElementById("randomIncludeBags")?.checked??true;
+
+    const accAllowed=
+        document.getElementById("randomIncludeAccessories")?.checked??true;
+
+    const by=s=>pool.filter(g=>inferSlot(g)===s);
+
+    let look=emptyLook();
+
+    const useDress=
+        by("vestido").length &&
+        (
+            !by("inferior").length ||
+            !by("interior").length ||
+            Math.random()<0.35
+        );
+
+    if(!noCoat){
+        look.abrigo=best(
+            by("abrigo"),
+            occasion,
+            bold,
+            []
+        );
+    }
+
+    if(useDress){
+        look.exterior=best(
+            by("exterior"),
+            occasion,
+            bold,
+            [look.abrigo].filter(Boolean)
+        );
+
+        look.vestido=best(
+            by("vestido"),
+            occasion,
+            bold,
+            [look.abrigo,look.exterior].filter(Boolean)
+        );
+    }else{
+        look.exterior=best(
+            by("exterior"),
+            occasion,
+            bold,
+            [look.abrigo].filter(Boolean)
+        );
+
+        look.interior=best(
+            by("interior"),
+            occasion,
+            bold,
+            [look.abrigo,look.exterior].filter(Boolean)
+        );
+
+        look.inferior=best(
+            by("inferior"),
+            occasion,
+            bold,
+            [look.abrigo,look.exterior,look.interior].filter(Boolean)
+        );
+    }
+
+    const clothingSeed=
+        Object.values(look).filter(
+            x=>x&&!Array.isArray(x)
+        );
+
+    look.calzado=best(
+        by("calzado"),
+        occasion,
+        bold,
+        clothingSeed
+    );
+
+    if(bagsAllowed){
+        look.bolso=best(
+            by("bolso"),
+            occasion,
+            bold,
+            Object.values(look).filter(
+                x=>x&&!Array.isArray(x)
+            )
+        );
+    }
+
+    if(accAllowed){
+        look.accesorios=bestSome(
+            by("accesorios"),
+            occasion,
+            bold,
+            Object.values(look).filter(
+                x=>x&&!Array.isArray(x)
+            ),
+            3
+        );
+    }
+
+    return look;
+}{const pool=availablePool(occasion),bagsAllowed=document.getElementById("randomIncludeBags")?.checked??true,accAllowed=document.getElementById("randomIncludeAccessories")?.checked??true;const by=s=>pool.filter(g=>inferSlot(g)===s);let look=emptyLook();const useDress=by("vestido").length&&(!by("inferior").length||!by("interior").length||Math.random()<.35);if(!noCoat)look.abrigo=best(by("abrigo"),occasion,bold,[]);if(useDress){look.exterior=best(by("exterior"),occasion,bold,[look.abrigo].filter(Boolean));look.vestido=best(by("vestido"),occasion,bold,[look.abrigo,look.exterior].filter(Boolean))}else{look.exterior=best(by("exterior"),occasion,bold,[look.abrigo].filter(Boolean));look.interior=best(by("interior"),occasion,bold,[look.abrigo,look.exterior].filter(Boolean));look.inferior=best(by("inferior"),occasion,bold,[look.abrigo,look.exterior,look.interior].filter(Boolean))}look.calzado=best(by("calzado"),occasion,bold,Object.values(look).filter(x=>x&&!Array.isArray(x)));if(bagsAllowed)look.bolso=best(by("bolso"),occasion,bold,Object.values(look).filter(x=>x&&!Array.isArray(x)));if(accAllowed)look.accesorios=bestSome(by("accesorios"),occasion,bold,Object.values(look).filter(x=>x&&!Array.isArray(x)),3);return look}
+function renderSlot(slot,value,prefix){const el=document.getElementById(`${prefix}_${slot}`);if(!el)return;if(slot==="accesorios"){const items=Array.isArray(value)?value:[];el.innerHTML=`<div class="slot-title">Accesorios ${items.length?`(${items.length})`:""}</div>`+(items.length?items.map((g,i)=>`<div class="related-selected-card"><img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}"><div><strong>${esc(g.nombre)}</strong><div class="muted">${esc(fmtCat(g.categoria))}</div></div>${prefix==="slot"?`<button class="small-btn danger-btn" onclick="removeAccessory(${i})">Quitar</button>`:""}</div>`).join(""):'<div class="muted">Vacío</div>')+(prefix==="slot"?`<button class="small-btn" onclick="openSelector('accesorios')">+ Añadir</button>`:"");return}el.innerHTML=value?`<div class="slot-title">${slotTitles[slot]}</div><img src="${value.foto||placeholderImg}" alt="${esc(value.nombre)}"><strong>${esc(value.nombre)}</strong><div class="muted">${esc(fmtCat(value.categoria))} · ${esc(value.color||"-")}</div>${prefix==="slot"?`<button class="small-btn" onclick="removeFromLook('${slot}')">Quitar</button>`:""}`:`<div class="slot-title">${slotTitles[slot]}</div><div class="muted">Vacío</div>`}function renderCurrentLook(){Object.keys(currentLook).forEach(s=>renderSlot(s,currentLook[s],"slot"))}function renderRandomLook(){document.getElementById("randomLookTitle").textContent=lastOccasion?`Look generado para: ${fmtOcc(lastOccasion)}${lastBold?" · modo Atrévete":""}`:"Todavía no has generado ningún look.";Object.keys(randomLook).forEach(s=>renderSlot(s,randomLook[s],"random"))}function renderQuickLook(){const box=document.getElementById("quickLookGrid"),entries=Object.entries(quickLook).flatMap(([k,v])=>k==="accesorios"?(v||[]).map(a=>["Accesorio",a]):v?[[slotTitles[k],v]]:[]);box.innerHTML=entries.length?entries.map(([label,g])=>`<div class="mini-card"><img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}"><div class="mini-title">${esc(label)}</div><div class="meta">${esc(g.nombre)}</div><div class="meta">${esc(fmtCat(g.categoria))}</div></div>`).join(""):'<div class="empty">No hay prendas suficientes para generar look.</div>'}function generateQuickLook(){
+    quickLook=buildLook(
+        "casual",
+        document.getElementById("quickNoCoat").checked,
+        false
+    );
+
+    const today=new Date().toISOString().slice(0,10);
+
+    localStorage.setItem(
+        "bricloset_quick_look_day",
+        JSON.stringify({
+            fecha:today,
+            look:mapLookToIds(quickLook)
+        })
+    );
+
+    document.getElementById("quickLookTitle").textContent=
+        "Propuesta rápida con lógica de personal shopper ✨";
+
+    renderQuickLook();
+}
+
+function ensureDailyQuickLook(){
+    if(!garments.length)return;
+
+    const today=new Date().toISOString().slice(0,10);
+
+    const saved=safeParse(
+        localStorage.getItem("bricloset_quick_look_day"),
+        null
+    );
+    if(saved?.fecha===today && saved.look){
+        const restored=idsToLook(saved.look);
+
+        if(hasLook(restored)){
+            quickLook=restored;
+            return;
+        }
+    }
+    generateQuickLook();
+}function generateLook(occasion,bold=false){lastOccasion=occasion;lastBold=bold;randomLook=buildLook(occasion,document.getElementById("randomNoCoat").checked,bold);renderRandomLook()}function repeatLastLook(){generateLook(lastOccasion||"casual",lastBold)}function openSelector(slot){currentSlot=slot;document.getElementById("selectorCard").classList.remove("hidden");const list=garments.filter(g=>g.disponible&&!g.vendida&&!g.eliminado_en&&inferSlot(g)===slot);document.getElementById("selectorGrid").innerHTML=list.length?list.map(g=>`<div class="item-card"><img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}"><div class="item-body"><p class="item-name">${esc(g.nombre)}</p><p class="meta">${esc(fmtCat(g.categoria))}</p><button class="small-btn" onclick="selectGarmentForSlot('${g.id}')">Seleccionar</button></div></div>`).join(""):'<div class="empty">No hay prendas disponibles.</div>'}function selectGarmentForSlot(id){const g=findGarment(id);if(!g||!currentSlot)return;if(currentSlot==="accesorios"){if(!currentLook.accesorios.some(a=>a.id===id))currentLook.accesorios.push(g)}else{if(currentSlot==="vestido"){currentLook.interior=null;currentLook.inferior=null}else if(["interior","inferior"].includes(currentSlot))currentLook.vestido=null;currentLook[currentSlot]=g}renderCurrentLook();document.getElementById("selectorCard").classList.add("hidden")}function removeFromLook(slot){currentLook[slot]=null;renderCurrentLook()}function removeAccessory(i){currentLook.accesorios.splice(i,1);renderCurrentLook()}function clearLook(){currentLook=emptyLook();renderCurrentLook();document.getElementById("selectorCard").classList.add("hidden")}function mapLookToIds(look){return{abrigo:look.abrigo?.id||null,exterior:look.exterior?.id||null,interior:look.interior?.id||null,inferior:look.inferior?.id||null,vestido:look.vestido?.id||null,calzado:look.calzado?.id||null,bolso:look.bolso?.id||null,accesorios:(look.accesorios||[]).map(a=>a.id)}}function idsToLook(l){return{abrigo:findGarment(l.abrigo),exterior:findGarment(l.exterior),interior:findGarment(l.interior),inferior:findGarment(l.inferior),vestido:findGarment(l.vestido),calzado:findGarment(l.calzado),bolso:findGarment(l.bolso),accesorios:normalizeIds(l.accesorios).map(findGarment).filter(Boolean)}}function hasLook(look){return Object.entries(look).some(([k,v])=>k==="accesorios"?(v||[]).length:!!v)}function addUsageFromLook(look){["abrigo","exterior","interior","inferior","vestido","calzado","bolso"].forEach(k=>look[k]?.id&&markUsedSilent(look[k].id));(look.accesorios||[]).forEach(a=>a?.id&&markUsedSilent(a.id))}function markUsedSilent(id){const g=findGarment(id);if(g){g.usos=(g.usos||0)+1;g.ultimo_uso=new Date().toISOString()}}function saveLookObject(look,name,occasion,source){if(!hasLook(look))return toast("No hay look para guardar.","warn");addUsageFromLook(look);const item={id:uid(),nombre:name,ocasion,source,fecha:new Date().toISOString(),favorito:false,...mapLookToIds(look)};savedLooks.push(item);recentLooks.unshift({...item,id:uid(),nombre:`Usado ${new Date().toLocaleString()}`});recentLooks=recentLooks.slice(0,10);persist();refreshAll();toast("Look guardado ✅")}function saveQuickLook(){saveLookObject(quickLook,`Look rápido ${savedLooks.length+1}`,"casual","rápido")}function saveRandomLook(){saveLookObject(randomLook,`Look ${savedLooks.length+1}`,lastOccasion||"casual","aleatorio")}function saveCurrentLook(){const occ=Object.values(currentLook).find(v=>v&&!Array.isArray(v))?.ocasiones?.[0]||"casual";saveLookObject(currentLook,`Look ${savedLooks.length+1}`,occ,"manual")}function copyQuickToManual(){currentLook={...quickLook,accesorios:[...(quickLook.accesorios||[])]};renderCurrentLook();switchView("crearLook")}function copyRandomToManual(){currentLook={...randomLook,accesorios:[...(randomLook.accesorios||[])]};renderCurrentLook();switchView("crearLook")}
 function savedLookCard(l,editable=true){const look=idsToLook(l),first=look.abrigo||look.exterior||look.interior||look.inferior||look.vestido||look.calzado||look.bolso||look.accesorios[0],count=[look.abrigo,look.exterior,look.interior,look.inferior,look.vestido,look.calzado,look.bolso].filter(Boolean).length+look.accesorios.length;return`<div class="item-card"><img src="${first?.foto||placeholderImg}" alt="Look"><div class="item-body"><p class="item-name">${esc(l.nombre)}</p><p class="meta">Ocasión: ${esc(fmtOcc(l.ocasion||"-"))}</p><p class="meta">Prendas: ${count}</p>${l.favorito?'<span class="pill">Look favorito</span>':''}${editable?`<div class="button-row" style="margin-top:10px"><button class="small-btn" onclick="loadSavedLook('${l.id}')">Abrir</button><button class="small-btn" onclick="toggleLookFavorite('${l.id}')">${l.favorito?'Quitar ♥':'Favorito ♥'}</button><button class="small-btn danger-btn" onclick="deleteSavedLook('${l.id}')">Eliminar</button></div>`:""}</div></div>`}function loadSavedLook(id){const l=savedLooks.find(x=>x.id===id);if(l){currentLook=idsToLook(l);renderCurrentLook();switchView("crearLook")}}function toggleLookFavorite(id){const l=savedLooks.find(x=>x.id===id);if(l){l.favorito=!l.favorito;persist();refreshAll()}}function deleteSavedLook(id){savedLooks=savedLooks.filter(l=>l.id!==id);persist();refreshAll()}
 function resetWishForm(){editingWishId=null;["wishNombre","wishMarca","wishPrecio","wishEnlace","wishComentarios"].forEach(id=>document.getElementById(id).value="");document.getElementById("wishPrioridad").value="Alta";document.getElementById("wishFoto").value=""}function saveWish(){const file=document.getElementById("wishFoto").files[0],old=wishlist.find(w=>w.id===editingWishId)||{},data=migrateWish({id:editingWishId||uid(),foto:old.foto,nombre:document.getElementById("wishNombre").value.trim(),marca:document.getElementById("wishMarca").value.trim(),precio:document.getElementById("wishPrecio").value,enlace:document.getElementById("wishEnlace").value.trim(),prioridad:document.getElementById("wishPrioridad").value,comentarios:document.getElementById("wishComentarios").value.trim()});if(!data.nombre)return toast("Pon al menos un nombre en la wishlist.","warn");const finish=w=>{if(editingWishId){const i=wishlist.findIndex(x=>x.id===editingWishId);if(i!==-1)wishlist[i]=w}else wishlist.unshift(w);persist();resetWishForm();refreshAll();toast("Wishlist guardada ✅")};file?compressImage(file).then(url=>{data.foto=url;finish(data)}).catch(()=>finish(data)):finish(data)}function wishToWardrobe(id){const w=wishlist.find(x=>x.id===id);if(!w)return;garments.unshift(migrateGarment({nombre:w.nombre,marca:w.marca,precio:w.precio,comentarios:w.comentarios,foto:w.foto,grupo:"parte_superior",categoria:"camiseta",temporada:"todo_anio",ocasiones:["casual"],cantidad:1,disponible:true}));wishlist=wishlist.filter(x=>x.id!==id);persist();refreshAll();switchView("armario");toast("Añadido al armario ✅")}function deleteWish(id){wishlist=wishlist.filter(w=>w.id!==id);persist();refreshAll()}function renderWishlist(){document.getElementById("wishlistGrid").innerHTML=wishlist.length?wishlist.map(w=>`<div class="item-card"><img src="${w.foto||placeholderImg}" alt="${esc(w.nombre)}"><div class="item-body"><p class="item-name">${esc(w.nombre)}</p>${w.marca?`<p class="meta">Marca: ${esc(w.marca)}</p>`:""}${w.precio?`<p class="meta">Precio: ${esc(w.precio)} €</p>`:""}<p class="meta">Prioridad: ${esc(w.prioridad)}</p>${w.enlace?`<p class="meta"><a href="${esc(w.enlace)}" target="_blank" rel="noopener noreferrer">Enlace de compra</a></p>`:""}${w.comentarios?`<p class="meta">💬 ${esc(w.comentarios)}</p>`:""}<div class="button-row" style="margin-top:10px"><button class="small-btn" onclick="wishToWardrobe('${w.id}')">Añadir al armario</button><button class="small-btn danger-btn" onclick="deleteWish('${w.id}')">Eliminar</button></div></div></div>`).join(""):'<div class="empty">Tu wishlist está vacía.</div>'}
 function renderFavorites(){document.getElementById("favoritesGrid").innerHTML=garments.filter(g=>g.favorito&&!g.eliminado_en).map(garmentCard).join("")||'<div class="empty">No tienes prendas favoritas todavía.</div>';document.getElementById("favoriteLooksGrid").innerHTML=savedLooks.filter(l=>l.favorito).map(savedLookCard).join("")||'<div class="empty">No tienes looks favoritos todavía.</div>';document.getElementById("recentLooksGrid").innerHTML=recentLooks.map(l=>savedLookCard(l,false)).join("")||'<div class="empty">Todavía no has usado looks.</div>';document.getElementById("savedLooksGrid").innerHTML=savedLooks.map(l=>savedLookCard(l,true)).join("")||'<div class="empty">No has guardado looks todavía.</div>'}function renderVinted(){const items=garments.filter(g=>(g.en_vinted||g.vendida)&&!g.eliminado_en);document.getElementById("vintedGrid").innerHTML=items.length?items.map(garmentCard).join(""):'<div class="empty">No tienes prendas en Vinted.</div>'}function updateSummary(){
@@ -1055,10 +1358,10 @@ function renderFavorites(){document.getElementById("favoritesGrid").innerHTML=ga
     }
 };
 function exportData(){const backup={version:APP_DATA_VERSION,exportado_en:new Date().toISOString(),garments,savedLooks,recentLooks,wishlist};const blob=new Blob([JSON.stringify(backup,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`bricloset-backup-${new Date().toISOString().slice(0,10)}.json`;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url)}function importData(e){const file=e.target.files?.[0];if(!file)return;const r=new FileReader();r.onload=x=>{try{const migrated=migrateBackup(JSON.parse(x.target.result));garments=migrated.garments;savedLooks=migrated.savedLooks;recentLooks=migrated.recentLooks;wishlist=migrated.wishlist;persist();refreshAll();toast("Armario importado correctamente ✅")}catch(err){toast("No he podido importar el archivo.","warn");console.error(err)}finally{e.target.value=""}};r.readAsText(file)}
-function refreshAll(){updateSummary();fillFilterOptions();renderRelatedSelect();renderWardrobe();renderTrash();renderCurrentLook();renderRandomLook();renderQuickLook();renderWishlist();renderFavorites();renderVinted()}function toast(msg,type="ok"){const box=document.getElementById("toastBox");if(!box)return alert(msg);const t=document.createElement("div");t.className=`toast toast-${type}`;t.textContent=msg;box.appendChild(t);requestAnimationFrame(()=>t.classList.add("show"));setTimeout(()=>{t.classList.remove("show");setTimeout(()=>t.remove(),300)},3200)}
+function refreshAll(){updateSummary();ensureDailyQuickLook();fillFilterOptions();renderRelatedSelect();renderWardrobe();renderTrash();renderCurrentLook();renderRandomLook();renderQuickLook();renderWishlist();renderFavorites();renderVinted()}function toast(msg,type="ok"){const box=document.getElementById("toastBox");if(!box)return alert(msg);const t=document.createElement("div");t.className=`toast toast-${type}`;t.textContent=msg;box.appendChild(t);requestAnimationFrame(()=>t.classList.add("show"));setTimeout(()=>{t.classList.remove("show");setTimeout(()=>t.remove(),300)},3200)}
 const IDB_NAME="bricloset_mirror_db",IDB_STORE="backups";function idbOpen(){return new Promise((resolve,reject)=>{const req=indexedDB.open(IDB_NAME,1);req.onupgradeneeded=()=>req.result.createObjectStore(IDB_STORE);req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}async function mirrorToIndexedDB(){try{const db=await idbOpen(),tx=db.transaction(IDB_STORE,"readwrite");tx.objectStore(IDB_STORE).put({version:APP_DATA_VERSION,savedLooks,recentLooks,wishlist,guardado_en:new Date().toISOString()},"latest")}catch(e){console.warn("No se pudo espejar en IndexedDB",e)}}async function recoverFromIndexedDB(){try{const db=await idbOpen(),tx=db.transaction(IDB_STORE,"readonly"),req=tx.objectStore(IDB_STORE).get("latest");return new Promise(res=>{req.onsuccess=()=>res(req.result||null);req.onerror=()=>res(null)})}catch(e){return null}}
 Object.assign(window,{login,register,openLoginModal,closeLoginModal,logout,toggleRelated,switchView,populateCategoryOptions,saveGarment,resetForm,renderWardrobe,applySummaryFilter,clearWardrobeFilters,clearWardrobeSpecialFilters,applyWardrobeSpecialFilter,exportData,importData,editGarment,toggleFavorite,toggleVinted,deleteGarment,restoreGarment,deleteGarmentForever,markUsed,openSelector,selectGarmentForSlot,removeFromLook,removeAccessory,clearLook,saveCurrentLook,generateQuickLook,saveQuickLook,copyQuickToManual,generateLook,repeatLastLook,saveRandomLook,copyRandomToManual,loadSavedLook,toggleLookFavorite,deleteSavedLook,saveWish,resetWishForm,wishToWardrobe,deleteWish});
-try{loadData();populateStaticSelects();resetForm();resetWishForm();generateQuickLook();refreshAll();document.getElementById("authUserBox")?.addEventListener("click",e=>{if(e.target.closest(".user-menu"))return;toggleUserMenu()});document.getElementById("authUserBox")?.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();toggleUserMenu()}else if(e.key==="Escape")closeUserMenu()});document.addEventListener("click",e=>{const box=document.getElementById("authUserBox");if(box&&!box.contains(e.target))closeUserMenu()});document.getElementById("logoutBtn")?.addEventListener("click",e=>{e.stopPropagation();closeUserMenu();logout()});onAuthStateChanged(auth,user=>{updateAuthUi(user);if(user)loadWardrobeFromFirestore(user);else{currentUser=null;wardrobeLoaded=false;pendingWardrobeSave=false;garments=[];savedLooks = [];
+try{loadData();populateStaticSelects();resetForm();resetWishForm();refreshAll();document.getElementById("authUserBox")?.addEventListener("click",e=>{if(e.target.closest(".user-menu"))return;toggleUserMenu()});document.getElementById("authUserBox")?.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();toggleUserMenu()}else if(e.key==="Escape")closeUserMenu()});document.addEventListener("click",e=>{const box=document.getElementById("authUserBox");if(box&&!box.contains(e.target))closeUserMenu()});document.getElementById("logoutBtn")?.addEventListener("click",e=>{e.stopPropagation();closeUserMenu();logout()});onAuthStateChanged(auth,user=>{updateAuthUi(user);if(user)loadWardrobeFromFirestore(user);else{currentUser=null;wardrobeLoaded=false;pendingWardrobeSave=false;garments=[];savedLooks = [];
 recentLooks = [];
 wishlist = [];refreshAll();setSyncStatus("Inicia sesión")}})}catch(e){alert("Había un error cargando la app: "+e.message);console.error(e)}
 </script></body></html>
