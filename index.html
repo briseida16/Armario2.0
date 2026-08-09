@@ -110,10 +110,39 @@ input{
     Iniciar sesión
 </button><div class="auth-user hidden" id="authUserBox" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false"><img class="auth-photo hidden" id="authPhoto" alt="Foto de usuario"><span class="auth-initials hidden" id="authInitials" aria-hidden="true"></span><span class="auth-menu-arrow" aria-hidden="true">▼</span><div class="user-menu hidden" id="userMenu"><button type="button">👤 Mi perfil</button><button type="button" id="logoutBtn">🚪 Cerrar sesión</button></div></div><div class="mini-badge hidden" id="syncStatus">Esperando sesión</div></div></div><div class="tabs"><button class="tab-btn active" onclick="switchView('inicio',this)">Inicio</button><button class="tab-btn" onclick="switchView('armario',this)">Mi armario</button><button class="tab-btn" onclick="switchView('anadir',this)">Añadir prenda</button><button class="tab-btn" onclick="switchView('wishlist',this)">Wishlist</button><button class="tab-btn" onclick="switchView('looks',this)">Looks</button><button class="tab-btn" onclick="switchView('favoritos',this)">Favoritos</button><details class="more-menu"><summary class="tab-btn">Más</summary><div class="more-menu-panel"><button class="tab-btn" onclick="switchView('vinted',this)">En venta</button><button class="tab-btn" onclick="switchView('papelera',this)">Papelera</button><button class="tab-btn" onclick="switchView('ajustes',this)">Ajustes</button></div></details></div></header>
 <main>
-<section id="inicio" class="view active"><div class="card hero"><h2 class="section-title">¿Qué te parece este look? 😎</h2><p id="quickLookTitle" class="muted">¿No tienes tiempo de pensar mucho?, arriesgate con esta propuesta✨</p><div id="quickLookGrid" class="mini-outfit"></div><div class="button-row" style="margin-top:14px"><label class="muted" style="display:flex;align-items:center;gap:8px;margin-right:auto"><input type="checkbox" id="quickNoCoat" onchange="generateQuickLook()"> Look sin abrigo</label><button class="primary-btn" onclick="saveQuickLook()">Me lo quedo</button><button class="ghost-btn" onclick="generateQuickLook()">Otro look</button><button class="ghost-btn" onclick="copyQuickToManual()">Editar este look</button></div></div><div class="card"><h2 class="section-title">Resumen de mi armario</h2><div class="summary-row"><div class="summary-box" style="margin-top:10px">
-    <div class="summary-number" id="sumAverageCostUse">—</div>
-    <div class="muted">💰 Coste medio por uso de mi armario</div>
-</div><div class="summary-box"><div class="summary-number" id="sumGarments">0</div><div class="muted">Prendas</div></div><div class="summary-box"><div class="summary-number" id="sumFavorites">0</div><div class="muted">Favoritas</div></div><div class="summary-box"><div class="summary-number" id="sumWishlist">0</div><div class="muted">Wishlist</div></div><div class="summary-box"><div class="summary-number" id="sumLooks">0</div><div class="muted">Looks guardados</div></div><div class="summary-box"><div class="summary-number" id="sumVinted">0</div><div class="muted">En Vinted</div></div></div></div><div class="card"><h2 class="section-title">Mudanza virtual</h2><div class="button-row"><button class="primary-btn" onclick="exportData()">Exportar armario</button><button class="ghost-btn" onclick="document.getElementById('importFile').click()">Importar armario</button><input id="importFile" type="file" accept=".json,application/json" class="hidden" onchange="importData(event)"></div><p class="muted" style="margin-bottom:0">Exporta o importa un JSON manual. Las prendas del armario se sincronizan con Firestore al iniciar sesión.</p></div><div class="card"><h2 class="section-title">Futuras versiones preparadas</h2><div id="futureGrid" class="future-grid"></div></div></section>
+<section id="inicio" class="view active"><div class="card hero"><h2 class="section-title">¿Qué te parece este look? 😎</h2><p id="quickLookTitle" class="muted">¿No tienes tiempo de pensar mucho?, arriesgate con esta propuesta✨</p><div id="quickLookGrid" class="mini-outfit"></div><div class="button-row" style="margin-top:14px"><label class="muted" style="display:flex;align-items:center;gap:8px;margin-right:auto"><input type="checkbox" id="quickNoCoat" onchange="generateQuickLook()"> Look sin abrigo</label><button class="primary-btn" onclick="saveQuickLook()">Me lo quedo</button><button class="ghost-btn" onclick="generateQuickLook()">Otro look</button><button class="ghost-btn" onclick="copyQuickToManual()">Editar este look</button></div></div><div class="card"><h2 class="section-title">Resumen de mi armario</h2>
+<div class="summary-row">
+    <div class="summary-box">
+        <div class="summary-number" id="sumGarments">0</div>
+        <div class="muted">Prendas</div>
+    </div>
+
+    <div class="summary-box">
+        <div class="summary-number" id="sumFavorites">0</div>
+        <div class="muted">Favoritas</div>
+    </div>
+
+    <div class="summary-box">
+        <div class="summary-number" id="sumWishlist">0</div>
+        <div class="muted">Wishlist</div>
+    </div>
+
+    <div class="summary-box">
+        <div class="summary-number" id="sumLooks">0</div>
+        <div class="muted">Looks guardados</div>
+    </div>
+
+    <div class="summary-box">
+        <div class="summary-number" id="sumVinted">0</div>
+        <div class="muted">En Vinted</div>
+    </div>
+</div>
+<div class="summary-row">
+    <div class="summary-box">
+        <div class="summary-number" id="sumAverageCostUse">—</div>
+        <div class="muted">💰 Coste medio por uso de mi armario</div>
+    </div>
+</div><div class="summary-number" id="sumGarments">0</div><div class="muted">Prendas</div></div><div class="summary-box"><div class="summary-number" id="sumFavorites">0</div><div class="muted">Favoritas</div></div><div class="summary-box"><div class="summary-number" id="sumWishlist">0</div><div class="muted">Wishlist</div></div><div class="summary-box"><div class="summary-number" id="sumLooks">0</div><div class="muted">Looks guardados</div></div><div class="summary-box"><div class="summary-number" id="sumVinted">0</div><div class="muted">En Vinted</div></div></div></div><div class="card"><h2 class="section-title">Mudanza virtual</h2><div class="button-row"><button class="primary-btn" onclick="exportData()">Exportar armario</button><button class="ghost-btn" onclick="document.getElementById('importFile').click()">Importar armario</button><input id="importFile" type="file" accept=".json,application/json" class="hidden" onchange="importData(event)"></div><p class="muted" style="margin-bottom:0">Exporta o importa un JSON manual. Las prendas del armario se sincronizan con Firestore al iniciar sesión.</p></div><div class="card"><h2 class="section-title">Futuras versiones preparadas</h2><div id="futureGrid" class="future-grid"></div></div></section>
 <section id="armario" class="view"><section id="armario" class="view">
     <div class="card">
         <h2 class="section-title">Mi armario</h2>
@@ -808,11 +837,20 @@ function applyWardrobeSpecialFilter(type){
 
 function renderWardrobeStats(){
     const active=garments.filter(g=>!g.eliminado_en);
+
     const totalCost=active.reduce((sum,g)=>{
         const price=Number(g.precio)||0;
         const quantity=Number(g.cantidad)||1;
         return sum+(price*quantity);
     },0);
+
+    const totalUses=active.reduce((sum,g)=>{
+        return sum+(Number(g.usos)||0);
+    },0);
+
+    const averageCostUse=totalUses>0
+        ? totalCost/totalUses
+        : 0;
 
     const unused=active.filter(g=>(g.usos||0)===0);
     const amortized=active.filter(g=>(g.usos||0)>=AMORTIZED_USES);
@@ -824,6 +862,13 @@ function renderWardrobeStats(){
         <div class="summary-box">
             <div class="summary-number">${totalCost.toFixed(2)} €</div>
             <div class="muted">💰 Coste total del armario</div>
+        </div>
+
+        <div class="summary-box">
+            <div class="summary-number">
+                ${totalUses>0 ? averageCostUse.toFixed(2)+" €" : "—"}
+            </div>
+            <div class="muted">📉 Coste medio por uso</div>
         </div>
 
         <button
