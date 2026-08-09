@@ -1277,21 +1277,23 @@ function buildLook(occasion,noCoat,bold=false){
         );
     }
 
-    return look;
-}{const pool=availablePool(occasion),bagsAllowed=document.getElementById("randomIncludeBags")?.checked??true,accAllowed=document.getElementById("randomIncludeAccessories")?.checked??true;const by=s=>pool.filter(g=>inferSlot(g)===s);let look=emptyLook();const useDress=by("vestido").length&&(!by("inferior").length||!by("interior").length||Math.random()<.35);if(!noCoat)look.abrigo=best(by("abrigo"),occasion,bold,[]);if(useDress){look.exterior=best(by("exterior"),occasion,bold,[look.abrigo].filter(Boolean));look.vestido=best(by("vestido"),occasion,bold,[look.abrigo,look.exterior].filter(Boolean))}else{look.exterior=best(by("exterior"),occasion,bold,[look.abrigo].filter(Boolean));look.interior=best(by("interior"),occasion,bold,[look.abrigo,look.exterior].filter(Boolean));look.inferior=best(by("inferior"),occasion,bold,[look.abrigo,look.exterior,look.interior].filter(Boolean))}look.calzado=best(by("calzado"),occasion,bold,Object.values(look).filter(x=>x&&!Array.isArray(x)));if(bagsAllowed)look.bolso=best(by("bolso"),occasion,bold,Object.values(look).filter(x=>x&&!Array.isArray(x)));if(accAllowed)look.accesorios=bestSome(by("accesorios"),occasion,bold,Object.values(look).filter(x=>x&&!Array.isArray(x)),3);return look}
-function renderSlot(slot,value,prefix){const el=document.getElementById(`${prefix}_${slot}`);if(!el)return;if(slot==="accesorios"){const items=Array.isArray(value)?value:[];el.innerHTML=`<div class="slot-title">Accesorios ${items.length?`(${items.length})`:""}</div>`+(items.length?items.map((g,i)=>`<div class="related-selected-card"><img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}"><div><strong>${esc(g.nombre)}</strong><div class="muted">${esc(fmtCat(g.categoria))}</div></div>${prefix==="slot"?`<button class="small-btn danger-btn" onclick="removeAccessory(${i})">Quitar</button>`:""}</div>`).join(""):'<div class="muted">Vacío</div>')+(prefix==="slot"?`<button class="small-btn" onclick="openSelector('accesorios')">+ Añadir</button>`:"");return}el.innerHTML=value?`<div class="slot-title">${slotTitles[slot]}</div><img src="${value.foto||placeholderImg}" alt="${esc(value.nombre)}"><strong>${esc(value.nombre)}</strong><div class="muted">${esc(fmtCat(value.categoria))} · ${esc(value.color||"-")}</div>${prefix==="slot"?`<button class="small-btn" onclick="removeFromLook('${slot}')">Quitar</button>`:""}`:`<div class="slot-title">${slotTitles[slot]}</div><div class="muted">Vacío</div>`}function renderCurrentLook(){Object.keys(currentLook).forEach(s=>renderSlot(s,currentLook[s],"slot"))}function renderRandomLook(){document.getElementById("randomLookTitle").textContent=lastOccasion?`Look generado para: ${fmtOcc(lastOccasion)}${lastBold?" · modo Atrévete":""}`:"Todavía no has generado ningún look.";Object.keys(randomLook).forEach(s=>renderSlot(s,randomLook[s],"random"))}function renderQuickLook(){const box=document.getElementById("quickLookGrid"),entries=Object.entries(quickLook).flatMap(([k,v])=>k==="accesorios"?(v||[]).map(a=>["Accesorio",a]):v?[[slotTitles[k],v]]:[]);box.innerHTML=entries.length?entries.map(([label,g])=>`<div class="mini-card"><img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}"><div class="mini-title">${esc(label)}</div><div class="meta">${esc(g.nombre)}</div><div class="meta">${esc(fmtCat(g.categoria))}</div></div>`).join(""):'<div class="empty">No hay prendas suficientes para generar look.</div>'}function generateQuickLook(){
+    return look;}
+function renderSlot(slot,value,prefix){const el=document.getElementById(`${prefix}_${slot}`);if(!el)return;if(slot==="accesorios"){const items=Array.isArray(value)?value:[];el.innerHTML=`<div class="slot-title">Accesorios ${items.length?`(${items.length})`:""}</div>`+(items.length?items.map((g,i)=>`<div class="related-selected-card"><img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}"><div><strong>${esc(g.nombre)}</strong><div class="muted">${esc(fmtCat(g.categoria))}</div></div>${prefix==="slot"?`<button class="small-btn danger-btn" onclick="removeAccessory(${i})">Quitar</button>`:""}</div>`).join(""):'<div class="muted">Vacío</div>')+(prefix==="slot"?`<button class="small-btn" onclick="openSelector('accesorios')">+ Añadir</button>`:"");return}el.innerHTML=value?`<div class="slot-title">${slotTitles[slot]}</div><img src="${value.foto||placeholderImg}" alt="${esc(value.nombre)}"><strong>${esc(value.nombre)}</strong><div class="muted">${esc(fmtCat(value.categoria))} · ${esc(value.color||"-")}</div>${prefix==="slot"?`<button class="small-btn" onclick="removeFromLook('${slot}')">Quitar</button>`:""}`:`<div class="slot-title">${slotTitles[slot]}</div><div class="muted">Vacío</div>`}function renderCurrentLook(){Object.keys(currentLook).forEach(s=>renderSlot(s,currentLook[s],"slot"))}function renderRandomLook(){document.getElementById("randomLookTitle").textContent=lastOccasion?`Look generado para: ${fmtOcc(lastOccasion)}${lastBold?" · modo Atrévete":""}`:"Todavía no has generado ningún look.";Object.keys(randomLook).forEach(s=>renderSlot(s,randomLook[s],"random"))}function renderQuickLook(){const box=document.getElementById("quickLookGrid"),entries=Object.entries(quickLook).flatMap(([k,v])=>k==="accesorios"?(v||[]).map(a=>["Accesorio",a]):v?[[slotTitles[k],v]]:[]);box.innerHTML=entries.length?entries.map(([label,g])=>`<div class="mini-card"><img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}"><div class="mini-title">${esc(label)}</div><div class="meta">${esc(g.nombre)}</div><div class="meta">${esc(fmtCat(g.categoria))}</div></div>`).join(""):'<div class="empty">No hay prendas suficientes para generar look.</div>'}
+const QUICK_LOOK_REFRESH_MS = 24 * 60 * 60 * 1000;
+
+function generateQuickLook(){
+    if(!garments.length)return;
+
     quickLook=buildLook(
         "casual",
-        document.getElementById("quickNoCoat").checked,
+        document.getElementById("quickNoCoat")?.checked ?? false,
         false
     );
-
-    const today=new Date().toISOString().slice(0,10);
 
     localStorage.setItem(
         "bricloset_quick_look_day",
         JSON.stringify({
-            fecha:today,
+            generadoEn:Date.now(),
             look:mapLookToIds(quickLook)
         })
     );
@@ -1305,15 +1307,20 @@ function renderSlot(slot,value,prefix){const el=document.getElementById(`${prefi
 function ensureDailyQuickLook(){
     if(!garments.length)return;
 
-    const today=new Date().toISOString().slice(0,10);
-
     const saved=safeParse(
         localStorage.getItem("bricloset_quick_look_day"),
         null
     );
-    if(saved?.fecha===today && saved.look){
-        const restored=idsToLook(saved.look);
 
+    const ahora=Date.now();
+    const generadoEn=Number(saved?.generadoEn || 0);
+
+    if(
+        saved?.look &&
+        generadoEn &&
+        ahora-generadoEn < QUICK_LOOK_REFRESH_MS
+    ){
+        const restored=idsToLook(saved.look);
         if(hasLook(restored)){
             quickLook=restored;
             return;
