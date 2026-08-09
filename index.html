@@ -110,8 +110,13 @@ input{
     Iniciar sesión
 </button><div class="auth-user hidden" id="authUserBox" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false"><img class="auth-photo hidden" id="authPhoto" alt="Foto de usuario"><span class="auth-initials hidden" id="authInitials" aria-hidden="true"></span><span class="auth-menu-arrow" aria-hidden="true">▼</span><div class="user-menu hidden" id="userMenu"><button type="button">👤 Mi perfil</button><button type="button" id="logoutBtn">🚪 Cerrar sesión</button></div></div><div class="mini-badge hidden" id="syncStatus">Esperando sesión</div></div></div><div class="tabs"><button class="tab-btn active" onclick="switchView('inicio',this)">Inicio</button><button class="tab-btn" onclick="switchView('armario',this)">Mi armario</button><button class="tab-btn" onclick="switchView('anadir',this)">Añadir prenda</button><button class="tab-btn" onclick="switchView('wishlist',this)">Wishlist</button><button class="tab-btn" onclick="switchView('looks',this)">Looks</button><button class="tab-btn" onclick="switchView('favoritos',this)">Favoritos</button><details class="more-menu"><summary class="tab-btn">Más</summary><div class="more-menu-panel"><button class="tab-btn" onclick="switchView('vinted',this)">En venta</button><button class="tab-btn" onclick="switchView('papelera',this)">Papelera</button><button class="tab-btn" onclick="switchView('ajustes',this)">Ajustes</button></div></details></div></header>
 <main>
-<section id="inicio" class="view active"><div class="card hero"><h2 class="section-title">¿Qué te parece este look? 😎</h2><p id="quickLookTitle" class="muted">¿No tienes tiempo de pensar mucho?, arriesgate con esta propuesta✨</p><div id="quickLookGrid" class="mini-outfit"></div><div class="button-row" style="margin-top:14px"><label class="muted" style="display:flex;align-items:center;gap:8px;margin-right:auto"><input type="checkbox" id="quickNoCoat" onchange="generateQuickLook()"> Look sin abrigo</label><button class="primary-btn" onclick="saveQuickLook()">Me lo quedo</button><button class="ghost-btn" onclick="generateQuickLook()">Otro look</button><button class="ghost-btn" onclick="copyQuickToManual()">Editar este look</button></div></div><div class="card"><h2 class="section-title">Resumen de mi armario</h2><div class="summary-row"><div class="summary-box"><div class="summary-number" id="sumGarments">0</div><div class="muted">Prendas</div></div><div class="summary-box"><div class="summary-number" id="sumFavorites">0</div><div class="muted">Favoritas</div></div><div class="summary-box"><div class="summary-number" id="sumWishlist">0</div><div class="muted">Wishlist</div></div><div class="summary-box"><div class="summary-number" id="sumLooks">0</div><div class="muted">Looks guardados</div></div><div class="summary-box"><div class="summary-number" id="sumVinted">0</div><div class="muted">En Vinted</div></div></div></div><div class="card"><h2 class="section-title">Mudanza virtual</h2><div class="button-row"><button class="primary-btn" onclick="exportData()">Exportar armario</button><button class="ghost-btn" onclick="document.getElementById('importFile').click()">Importar armario</button><input id="importFile" type="file" accept=".json,application/json" class="hidden" onchange="importData(event)"></div><p class="muted" style="margin-bottom:0">Exporta o importa un JSON manual. Las prendas del armario se sincronizan con Firestore al iniciar sesión.</p></div><div class="card"><h2 class="section-title">Futuras versiones preparadas</h2><div id="futureGrid" class="future-grid"></div></div></section>
-<section id="armario" class="view"><div class="card"><h2 class="section-title">Mi armario</h2><div class="filter-row"><input id="searchInput" placeholder="Buscar por nombre, color, comentarios..." oninput="renderWardrobe()"><button class="ghost-btn" type="button" onclick="clearWardrobeFilters()">✕ Limpiar filtros</button><button class="ghost-btn" type="button" onclick="clearWardrobeFilters()">✕ Limpiar filtros</button><select id="filterGroup" onchange="renderWardrobe()"><option value="">Todos los grupos</option></select><select id="filterCategory" onchange="renderWardrobe()"><option value="">Todas las categorías</option></select><select id="filterOccasion" onchange="renderWardrobe()"><option value="">Todas las ocasiones</option></select><select id="filterFavorite" onchange="renderWardrobe()"><option value="">Favoritas y no favoritas</option><option value="true">Solo favoritas</option><option value="false">Solo no favoritas</option></select><select id="filterBrand" onchange="renderWardrobe()"><option value="">Todas las marcas</option></select><select id="filterSeason" onchange="renderWardrobe()"><option value="">Todas las temporadas</option></select><select id="filterSize" onchange="renderWardrobe()"><option value="">Todas las tallas</option></select><select id="sortWardrobe" onchange="renderWardrobe()"><option value="reciente">Más recientes primero</option><option value="usos_desc">Más usadas primero</option><option value="usos_asc">Menos usadas primero</option><option value="az">Nombre A-Z</option></select></div><div id="wardrobeSummary" class="summary-row"></div></div><div id="wardrobeGrid"></div></section>
+<section id="inicio" class="view active"><div class="card hero"><h2 class="section-title">¿Qué te parece este look? 😎</h2><p id="quickLookTitle" class="muted">¿No tienes tiempo de pensar mucho?, arriesgate con esta propuesta✨</p><div id="quickLookGrid" class="mini-outfit"></div><div class="button-row" style="margin-top:14px"><label class="muted" style="display:flex;align-items:center;gap:8px;margin-right:auto"><input type="checkbox" id="quickNoCoat" onchange="generateQuickLook()"> Look sin abrigo</label><button class="primary-btn" onclick="saveQuickLook()">Me lo quedo</button><button class="ghost-btn" onclick="generateQuickLook()">Otro look</button><button class="ghost-btn" onclick="copyQuickToManual()">Editar este look</button></div></div><div class="card"><h2 class="section-title">Resumen de mi armario</h2><div class="summary-row"><div class="summary-box" style="margin-top:10px">
+    <div class="summary-number" id="sumAverageCostUse">—</div>
+    <div class="muted">💰 Coste medio por uso de mi armario</div>
+</div><div class="summary-box"><div class="summary-number" id="sumGarments">0</div><div class="muted">Prendas</div></div><div class="summary-box"><div class="summary-number" id="sumFavorites">0</div><div class="muted">Favoritas</div></div><div class="summary-box"><div class="summary-number" id="sumWishlist">0</div><div class="muted">Wishlist</div></div><div class="summary-box"><div class="summary-number" id="sumLooks">0</div><div class="muted">Looks guardados</div></div><div class="summary-box"><div class="summary-number" id="sumVinted">0</div><div class="muted">En Vinted</div></div></div></div><div class="card"><h2 class="section-title">Mudanza virtual</h2><div class="button-row"><button class="primary-btn" onclick="exportData()">Exportar armario</button><button class="ghost-btn" onclick="document.getElementById('importFile').click()">Importar armario</button><input id="importFile" type="file" accept=".json,application/json" class="hidden" onchange="importData(event)"></div><p class="muted" style="margin-bottom:0">Exporta o importa un JSON manual. Las prendas del armario se sincronizan con Firestore al iniciar sesión.</p></div><div class="card"><h2 class="section-title">Futuras versiones preparadas</h2><div id="futureGrid" class="future-grid"></div></div></section>
+<section id="armario" class="view"><div class="card"><h2 class="section-title">Mi armario</h2><div class="filter-row"><input id="searchInput" placeholder="Buscar por nombre, color, comentarios..." oninput="renderWardrobe()"><button class="ghost-btn" type="button" onclick="clearWardrobeFilters()">✕ Limpiar filtros</button><button class="ghost-btn" type="button" onclick="clearWardrobeFilters()">✕ Limpiar filtros</button><select id="filterGroup" onchange="renderWardrobe()"><option value="">Todos los grupos</option></select><select id="filterCategory" onchange="renderWardrobe()"><option value="">Todas las categorías</option></select><select id="filterOccasion" onchange="renderWardrobe()"><option value="">Todas las ocasiones</option></select><select id="filterFavorite" onchange="renderWardrobe()"><option value="">Favoritas y no favoritas</option><option value="true">Solo favoritas</option><option value="false">Solo no favoritas</option></select><select id="filterBrand" onchange="renderWardrobe()"><option value="">Todas las marcas</option></select><select id="filterSeason" onchange="renderWardrobe()"><option value="">Todas las temporadas</option></select><select id="filterSize" onchange="renderWardrobe()"><option value="">Todas las tallas</option></select><select id="sortWardrobe" onchange="renderWardrobe()"><option value="reciente">Más recientes primero</option><option value="usos_desc">Más usadas primero</option><option value="usos_asc">Menos usadas primero</option><option value="az">Nombre A-Z</option></select></div><div id="wardrobeSummary" class="summary-row"></div></div><div id="wardrobeGrid"></div>
+
+<div id="wardrobeStats" class="summary-row"></div></section>
 <section id="anadir" class="view"><div class="card"><h2 class="section-title" id="formTitle">Añadir prenda</h2><div class="form-grid"><div class="field"><label>Foto</label><input id="foto" type="file" accept="image/*"></div><div class="field"><label>Nombre</label><input id="nombre" placeholder="Ej. Blazer rosa palo"></div><div class="field">
     <label>Grupo</label>
     <select id="grupo" onchange="populateCategoryOptions(this.value)"></select>
@@ -545,68 +550,167 @@ function saveGarment(){const file=document.getElementById("foto").files[0],old=f
 function compressImage(file,maxDim=600,quality=.55){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=e=>{const img=new Image();img.onload=()=>{let w=img.width,h=img.height;if(w>h&&w>maxDim){h=Math.round(h*maxDim/w);w=maxDim}else if(h>=w&&h>maxDim){w=Math.round(w*maxDim/h);h=maxDim}const canvas=document.createElement("canvas");canvas.width=w;canvas.height=h;canvas.getContext("2d").drawImage(img,0,0,w,h);resolve(canvas.toDataURL("image/jpeg",quality))};img.onerror=reject;img.src=e.target.result};reader.onerror=reject;reader.readAsDataURL(file)})}
 function editGarment(id){const g=findGarment(id);if(!g)return;editingGarmentId=id;document.getElementById("nombre").value=g.nombre||"";document.getElementById("grupo").value=g.grupo||"parte_superior";populateCategoryOptions(g.grupo,g.categoria);document.getElementById("color").value=g.color||"";document.getElementById("talla").value=g.talla||"";document.getElementById("marca").value=g.marca||"";const temporadas = Array.isArray(g.temporada)?g.temporada:[g.temporada||"todo_anio"];
 setChecks("temporadaChecks", temporadas);;document.getElementById("estado").value = g.estado||"bueno";document.getElementById("precio").value=g.precio||"";document.getElementById("cantidad").value=g.cantidad||1;document.getElementById("basico").checked=!!g.basico;document.getElementById("favorito").value=String(!!g.favorito);document.getElementById("disponible").checked=!!g.disponible;document.getElementById("enVinted").checked=!!g.en_vinted;document.getElementById("comentarios").value=g.comentarios||"";setChecks("occasionChecks",g.ocasiones);relatedSelectedIds=[...(g.relacionadas||[])];renderRelatedSelect();document.getElementById("formTitle").textContent="Editar prenda";switchView("anadir")}
-function garmentCard(g){const rel=(g.relacionadas||[]).map(id=>findGarment(id)?.nombre).filter(Boolean).slice(0,3).join(", ");return`<div class="item-card"><img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}"><div class="item-body"><p class="item-name">${esc(g.nombre)}</p><p class="meta"><strong>Grupo:</strong> ${esc(fmtGroup(g.grupo) || "-")}</p>
+function garmentCard(g){
+    const rel=(g.relacionadas||[])
+        .map(id=>findGarment(id)?.nombre)
+        .filter(Boolean)
+        .slice(0,3)
+        .join(", ");
 
-<p class="meta"><strong>Categoría:</strong> ${esc(fmtCat(g.categoria) || "-")}</p>
+    return `
+    <div class="item-card">
+        <img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}">
 
-<p class="meta"><strong>Estado:</strong> ${esc(fmtState(g.estado) || "-")}</p>
+        <div class="item-body">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+                <p class="item-name" style="margin:0">${esc(g.nombre)}</p>
+                <button
+                    class="small-btn"
+                    type="button"
+                    title="Ver descripción"
+                    onclick="this.parentElement.parentElement.querySelector('.garment-details').classList.toggle('hidden');this.textContent=this.textContent.includes('Ver')?'Ocultar':'Ver'">
+                    ℹ️ Ver
+                </button>
+            </div>
 
-<p class="meta"><strong>Color:</strong> ${esc(g.color || "-")}</p>
+            <div class="garment-details hidden" style="margin-top:10px">
 
-<p class="meta"><strong>Talla:</strong> ${esc(g.talla || "-")}</p>
+                <p class="meta"><strong>Grupo:</strong> ${esc(fmtGroup(g.grupo) || "-")}</p>
 
-<p class="meta"><strong>Marca:</strong> ${esc(g.marca || "-")}</p>
+                <p class="meta"><strong>Categoría:</strong> ${esc(fmtCat(g.categoria) || "-")}</p>
 
-<p class="meta"><strong>Temporada:</strong> ${esc(fmtSeason(g.temporada) || "-")}</p>${g.precio ? `
-<p class="meta"><strong>💶 Precio:</strong> ${Number(g.precio).toFixed(2)} €</p>
-<p class="meta">
-<strong>📊 Coste/uso:</strong>
-${
-    costPerUse(g) === null
-        ? "Sin estrenar"
-        : `${costPerUse(g).toFixed(2)} €/uso`
+                <p class="meta"><strong>Estado:</strong> ${esc(fmtState(g.estado) || "-")}</p>
+
+                <p class="meta"><strong>Color:</strong> ${esc(g.color || "-")}</p>
+
+                <p class="meta"><strong>Talla:</strong> ${esc(g.talla || "-")}</p>
+
+                <p class="meta"><strong>Marca:</strong> ${esc(g.marca || "-")}</p>
+
+                <p class="meta"><strong>Temporada:</strong> ${esc(fmtSeason(g.temporada) || "-")}</p>
+
+                ${g.precio ? `
+                <p class="meta">
+                    <strong>💶 Precio:</strong> ${Number(g.precio).toFixed(2)} €
+                </p>
+
+                <p class="meta">
+                    <strong>📊 Coste/uso:</strong>
+                    ${
+                        costPerUse(g) === null
+                            ? "Sin estrenar"
+                            : `${costPerUse(g).toFixed(2)} €/uso`
+                    }
+                </p>` : ""}
+
+                <p class="meta"><strong>Cantidad:</strong> x${g.cantidad||1}</p>
+
+                <p class="meta">
+                    <strong>Ocasiones:</strong>
+                    ${esc((g.ocasiones||[]).map(fmtOcc).join(", "))}
+                </p>
+
+                <p class="meta">
+                    🔄 ${g.usos || 0} ${(g.usos || 0) === 1 ? "uso" : "usos"}
+                </p>
+
+                <p class="meta">
+                    📅 Último uso:
+                    ${g.ultimo_uso ? new Date(g.ultimo_uso).toLocaleDateString() : "Nunca"}
+                </p>
+
+                ${g.comentarios
+                    ? `<p class="meta">💬 ${esc(g.comentarios)}</p>`
+                    : ""}
+
+                ${rel
+                    ? `<p class="meta">🔗 ${esc(rel)}</p>`
+                    : ""}
+
+                <div style="margin-top:8px">
+                    ${g.basico ? '<span class="pill">Básico</span>' : ''}
+                    ${g.favorito ? '<span class="pill">Favorita</span>' : ''}
+                    ${g.en_vinted ? '<span class="pill">Vinted</span>' : ''}
+                </div>
+
+                <div class="button-row" style="margin-top:10px">
+
+                    <button class="small-btn"
+                        title="Editar prenda"
+                        onclick="editGarment('${g.id}')">
+                        ✏️
+                    </button>
+
+                    <button class="small-btn"
+                        title="Añadir uso"
+                        onclick="markUsed('${g.id}')">
+                        🔄
+                    </button>
+
+                    <button class="small-btn"
+                        title="${g.favorito ? "Quitar de favoritas" : "Marcar como favorita"}"
+                        onclick="toggleFavorite('${g.id}')">
+                        ${g.favorito ? "❤️" : "🤍"}
+                    </button>
+
+                    <button class="small-btn"
+                        title="Vinted"
+                        onclick="toggleVinted('${g.id}')">
+                        🛍️
+                    </button>
+
+                    <button class="small-btn danger-btn"
+                        title="Eliminar"
+                        onclick="deleteGarment('${g.id}')">
+                        🗑️
+                    </button>
+
+                </div>
+            </div>
+        </div>
+    </div>`;
 }
-</p>` : ""}<p class="meta"><strong>Cantidad:</strong> x${g.cantidad||1}</p><p class="meta"><strong>Ocasiones:</strong> ${esc((g.ocasiones||[]).map(fmtOcc).join(", "))}</p><p class="meta">🔄 ${g.usos || 0} ${(g.usos || 0) === 1 ? "uso" : "usos"}</p>
-<p class="meta">📅 Último uso: ${
-    g.ultimo_uso
-        ? new Date(g.ultimo_uso).toLocaleDateString()
-        : "Nunca"
-}</p>${g.comentarios?`<p class="meta">💬 ${esc(g.comentarios)}</p>`:""}${rel?`<p class="meta">🔗 ${esc(rel)}</p>`:""}${g.basico?'<span class="pill">Básico</span>':''}${g.favorito?'<span class="pill">Favorita</span>':''}${g.en_vinted?'<span class="pill">Vinted</span>':''}<div class="button-row" style="margin-top:10px">
-    <button class="small-btn"
-        title="Editar prenda"
-        onclick="editGarment('${g.id}')">✏️</button>
-    <button class="small-btn"
-        title="Añadir un uso"
-        onclick="markUsed('${g.id}')">🔄</button>
-    <button class="small-btn"
-        title="${g.favorito ? "Quitar de favoritas" : "Marcar como favorita"}"
-        onclick="toggleFavorite('${g.id}')">
-        ${g.favorito ? "❤️" : "🤍"}
-    </button>
-    <button class="small-btn"
-        title="${g.en_vinted ? "Quitar de Vinted" : "Marcar como en Vinted"}"
-        onclick="toggleVinted('${g.id}')">🛍️</button>
-    <button class="small-btn danger-btn"
-        title="Eliminar prenda"
-        onclick="deleteGarment('${g.id}')">🗑️</button>
-</div>
-</div></div>`;
-}
-function clearWardrobeFilters(){
-    document.getElementById("searchInput").value="";
-    document.getElementById("filterGroup").value="";
-    document.getElementById("filterCategory").value="";
-    document.getElementById("filterOccasion").value="";
-    document.getElementById("filterFavorite").value="";
-    document.getElementById("filterBrand").value="";
-    document.getElementById("filterSeason").value="";
-    document.getElementById("filterSize").value="";
-    document.getElementById("sortWardrobe").value="reciente";
-    renderWardrobe();
 }function filtersActive(){return["searchInput","filterGroup","filterCategory","filterOccasion","filterFavorite","filterBrand","filterSeason","filterSize"].some(id=>document.getElementById(id)?.value)}function fillFilterOptions(){const active=garments.filter(g=>!g.eliminado_en),cur={};["filterGroup","filterCategory","filterOccasion","filterBrand","filterSeason","filterSize"].forEach(id=>cur[id]=document.getElementById(id)?.value||"");document.getElementById("filterGroup").innerHTML='<option value="">Todos los grupos</option>'+Object.entries(groupLabels).map(([v,l])=>`<option value="${v}" ${v===cur.filterGroup?"selected":""}>${l}</option>`).join("");document.getElementById("filterCategory").innerHTML='<option value="">Todas las categorías</option>'+Object.values(categoryOptions).flat().map(([v,l])=>`<option value="${v}" ${v===cur.filterCategory?"selected":""}>${l}</option>`).join("");document.getElementById("filterOccasion").innerHTML='<option value="">Todas las ocasiones</option>'+occasions.map(([v,l])=>`<option value="${v}" ${v===cur.filterOccasion?"selected":""}>${l}</option>`).join("");document.getElementById("filterSeason").innerHTML='<option value="">Todas las temporadas</option>'+seasons.map(([v,l])=>`<option value="${v}" ${v===cur.filterSeason?"selected":""}>${l}</option>`).join("");const brands=[...new Set(active.map(g=>g.marca).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"es")),sizes=[...new Set(active.map(g=>g.talla).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"es",{numeric:true}));document.getElementById("filterBrand").innerHTML='<option value="">Todas las marcas</option>'+brands.map(b=>`<option value="${esc(b)}" ${b===cur.filterBrand?"selected":""}>${esc(b)}</option>`).join("");document.getElementById("filterSize").innerHTML='<option value="">Todas las tallas</option>'+sizes.map(s=>`<option value="${esc(s)}" ${s===cur.filterSize?"selected":""}>${esc(s)}</option>`).join("")}
-function filteredGarments(){const q=document.getElementById("searchInput").value.trim().toLowerCase(),group=document.getElementById("filterGroup").value,cat=document.getElementById("filterCategory").value,occ=document.getElementById("filterOccasion").value,fav=document.getElementById("filterFavorite").value,brand=document.getElementById("filterBrand").value,season=document.getElementById("filterSeason").value,size=document.getElementById("filterSize").value,sort=document.getElementById("sortWardrobe").value;let data=garments.filter(g=>{if(g.eliminado_en)return false;const hay=`${g.nombre} ${g.color} ${g.categoria} ${g.marca||""} ${g.comentarios} ${(g.ocasiones||[]).join(" ")}`.toLowerCase();return(!q||hay.includes(q))&&(!group||g.grupo===group)&&(!cat||g.categoria===cat)&&(!occ||(g.ocasiones||[]).includes(occ))&&(fav===""||String(!!g.favorito)===fav)&&(!brand||g.marca===brand)&&(!season ||
-(Array.isArray(g.temporada)?g.temporada.includes(season):(g.temporada||"todo_anio")=== season))&&(!size||g.talla===size)});if(sort==="usos_desc")data.sort((a,b)=>(b.usos||0)-(a.usos||0));else if(sort==="usos_asc")data.sort((a,b)=>(a.usos||0)-(b.usos||0));else if(sort==="az")data.sort((a,b)=>(a.nombre||"").localeCompare(b.nombre||"","es"));return data}
-function renderWardrobeSummary(){const active=garments.filter(g=>!g.eliminado_en),box=document.getElementById("wardrobeSummary");const counts={};Object.keys(groupLabels).forEach(g=>counts[g]=0);active.forEach(g=>counts[g.grupo]=(counts[g.grupo]||0)+1);box.innerHTML =
+function filteredGarments(){
+    const q=document.getElementById("searchInput").value.trim().toLowerCase();
+    const group=document.getElementById("filterGroup").value;
+    const cat=document.getElementById("filterCategory").value;
+    const occ=document.getElementById("filterOccasion").value;
+    const fav=document.getElementById("filterFavorite").value;
+    const brand=document.getElementById("filterBrand").value;
+    const season=document.getElementById("filterSeason").value;
+    const size=document.getElementById("filterSize").value;
+    const sort=document.getElementById("sortWardrobe").value;
+
+    let data=garments.filter(g=>{
+        if(g.eliminado_en)return false;
+
+        if(activeSummaryFilter==="unused" && (g.usos||0)!==0)return false;
+        if(activeSummaryFilter==="amortized" && (g.usos||0)<AMORTIZED_USES)return false;
+
+        const hay=`${g.nombre} ${g.color} ${g.categoria} ${g.marca||""} ${g.comentarios} ${(g.ocasiones||[]).join(" ")}`.toLowerCase();
+
+        return (!q||hay.includes(q))
+            && (!group||g.grupo===group)
+            && (!cat||g.categoria===cat)
+            && (!occ||(g.ocasiones||[]).includes(occ))
+            && (fav===""||String(!!g.favorito)===fav)
+            && (!brand||g.marca===brand)
+            && (!season||(Array.isArray(g.temporada)
+                ? g.temporada.includes(season)
+                : (g.temporada||"todo_anio")===season))
+            && (!size||g.talla===size);
+    });
+
+    if(sort==="usos_desc")
+        data.sort((a,b)=>(b.usos||0)-(a.usos||0));
+    else if(sort==="usos_asc")
+        data.sort((a,b)=>(a.usos||0)-(b.usos||0));
+    else if(sort==="az")
+        data.sort((a,b)=>(a.nombre||"").localeCompare(b.nombre||"","es"));
+
+    return data;
+}function renderWardrobeSummary(){const active=garments.filter(g=>!g.eliminado_en),box=document.getElementById("wardrobeSummary");const counts={};Object.keys(groupLabels).forEach(g=>counts[g]=0);active.forEach(g=>counts[g.grupo]=(counts[g.grupo]||0)+1);box.innerHTML =
 `<div
     class="summary-box ${activeSummaryFilter===""?"active-summary":""}"
     onclick="applySummaryFilter('')"
@@ -621,17 +725,107 @@ function renderWardrobeSummary(){const active=garments.filter(g=>!g.eliminado_en
 <div class="summary-number">${v}</div>
 <div class="muted">${esc(fmtGroup(k))}</div>
 </div>`).join("")}
-function renderWardrobe(){
-    activeSummaryFilter = document.getElementById("filterGroup").value;
+const AMORTIZED_USES = 10;
+
+function clearWardrobeSpecialFilters(){
+    activeSummaryFilter="";
+    document.getElementById("searchInput").value="";
+    document.getElementById("filterGroup").value="";
+    document.getElementById("filterCategory").value="";
+    document.getElementById("filterOccasion").value="";
+    document.getElementById("filterFavorite").value="";
+    document.getElementById("filterBrand").value="";
+    document.getElementById("filterSeason").value="";
+    document.getElementById("filterSize").value="";
+}
+
+function applyWardrobeSpecialFilter(type){
+    clearWardrobeSpecialFilters();
+    activeSummaryFilter=type;
+    renderWardrobe();
+    document.getElementById("wardrobeGrid")?.scrollIntoView({
+        behavior:"smooth",
+        block:"start"
+    });
+}
+
+function renderWardrobeStats(){
+    const active=garments.filter(g=>!g.eliminado_en);
+    const totalCost=active.reduce((sum,g)=>{
+        const price=Number(g.precio)||0;
+        const quantity=Number(g.cantidad)||1;
+        return sum+(price*quantity);
+    },0);
+
+    const unused=active.filter(g=>(g.usos||0)===0);
+    const amortized=active.filter(g=>(g.usos||0)>=AMORTIZED_USES);
+
+    const box=document.getElementById("wardrobeStats");
+    if(!box)return;
+
+    box.innerHTML=`
+        <div class="summary-box">
+            <div class="summary-number">${totalCost.toFixed(2)} €</div>
+            <div class="muted">💰 Coste total del armario</div>
+        </div>
+
+        <button
+            type="button"
+            class="summary-box"
+            onclick="applyWardrobeSpecialFilter('unused')"
+            style="text-align:left;cursor:pointer;border:1px solid var(--line)">
+            <div class="summary-number">${unused.length}</div>
+            <div class="muted">✨ Sin estrenar</div>
+        </button>
+
+        <button
+            type="button"
+            class="summary-box"
+            onclick="applyWardrobeSpecialFilter('amortized')"
+            style="text-align:left;cursor:pointer;border:1px solid var(--line)">
+            <div class="summary-number">${amortized.length}</div>
+            <div class="muted">🔥 Muy usadas / amortizadas</div>
+        </button>
+    `;
+}function renderWardrobe(){
     renderWardrobeSummary();
-    const data = filteredGarments(),
-          box = document.getElementById("wardrobeGrid");
+    renderWardrobeStats();
+
+    const data=filteredGarments();
+    const box=document.getElementById("wardrobeGrid");
+
     if(!data.length){
         box.className="";
-        box.innerHTML=`<div class="empty">${filtersActive()?"No hay prendas con esos filtros.":"Tu armario está vacío. Añade tu primera prenda para empezar."}</div>`;
+        box.innerHTML=`
+            <div class="empty">
+                ${filtersActive() || activeSummaryFilter
+                    ? "No hay prendas con esos filtros."
+                    : "Tu armario está vacío. Añade tu primera prenda para empezar."}
+            </div>`;
         return;
-    }if(!filtersActive()){box.className="category-layout";box.innerHTML=Object.entries(groupLabels).map(([gr,label])=>{const items=data.filter(g=>g.grupo===gr);return`<details class="category-panel" open><summary>${esc(label)} (${items.length})</summary><div class="category-content">${items.length?`<div class="grid">${items.map(garmentCard).join("")}</div>`:'<div class="empty">Sin prendas en esta categoría.</div>'}</div></details>`}).join("")}else{box.className="grid";box.innerHTML=data.map(garmentCard).join("")}}
-function applySummaryFilter(group){
+    }
+
+    if(!filtersActive() && !activeSummaryFilter){
+        box.className="category-layout";
+
+        box.innerHTML=Object.entries(groupLabels).map(([gr,label])=>{
+            const items=data.filter(g=>g.grupo===gr);
+
+            return `
+            <details class="category-panel" open>
+                <summary>${esc(label)} (${items.length})</summary>
+                <div class="category-content">
+                    ${items.length
+                        ? `<div class="grid">${items.map(garmentCard).join("")}</div>`
+                        : '<div class="empty">Sin prendas en esta categoría.</div>'}
+                </div>
+            </details>`;
+        }).join("");
+    }else{
+        box.className="grid";
+        box.innerHTML=data.map(garmentCard).join("");
+    }
+}function applySummaryFilter(group){
     activeSummaryFilter = group;
     document.getElementById("filterGroup").value = group;
     renderWardrobeSummary();
@@ -648,7 +842,41 @@ function outfitSlotsHtml(prefix){return Object.keys(emptyLook()).map(k=>`<div cl
 function renderSlot(slot,value,prefix){const el=document.getElementById(`${prefix}_${slot}`);if(!el)return;if(slot==="accesorios"){const items=Array.isArray(value)?value:[];el.innerHTML=`<div class="slot-title">Accesorios ${items.length?`(${items.length})`:""}</div>`+(items.length?items.map((g,i)=>`<div class="related-selected-card"><img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}"><div><strong>${esc(g.nombre)}</strong><div class="muted">${esc(fmtCat(g.categoria))}</div></div>${prefix==="slot"?`<button class="small-btn danger-btn" onclick="removeAccessory(${i})">Quitar</button>`:""}</div>`).join(""):'<div class="muted">Vacío</div>')+(prefix==="slot"?`<button class="small-btn" onclick="openSelector('accesorios')">+ Añadir</button>`:"");return}el.innerHTML=value?`<div class="slot-title">${slotTitles[slot]}</div><img src="${value.foto||placeholderImg}" alt="${esc(value.nombre)}"><strong>${esc(value.nombre)}</strong><div class="muted">${esc(fmtCat(value.categoria))} · ${esc(value.color||"-")}</div>${prefix==="slot"?`<button class="small-btn" onclick="removeFromLook('${slot}')">Quitar</button>`:""}`:`<div class="slot-title">${slotTitles[slot]}</div><div class="muted">Vacío</div>`}function renderCurrentLook(){Object.keys(currentLook).forEach(s=>renderSlot(s,currentLook[s],"slot"))}function renderRandomLook(){document.getElementById("randomLookTitle").textContent=lastOccasion?`Look generado para: ${fmtOcc(lastOccasion)}${lastBold?" · modo Atrévete":""}`:"Todavía no has generado ningún look.";Object.keys(randomLook).forEach(s=>renderSlot(s,randomLook[s],"random"))}function renderQuickLook(){const box=document.getElementById("quickLookGrid"),entries=Object.entries(quickLook).flatMap(([k,v])=>k==="accesorios"?(v||[]).map(a=>["Accesorio",a]):v?[[slotTitles[k],v]]:[]);box.innerHTML=entries.length?entries.map(([label,g])=>`<div class="mini-card"><img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}"><div class="mini-title">${esc(label)}</div><div class="meta">${esc(g.nombre)}</div><div class="meta">${esc(fmtCat(g.categoria))}</div></div>`).join(""):'<div class="empty">No hay prendas suficientes para generar look.</div>'}function generateQuickLook(){quickLook=buildLook("casual",document.getElementById("quickNoCoat").checked,false);document.getElementById("quickLookTitle").textContent="Propuesta rápida con lógica de personal shopper ✨";renderQuickLook()}function generateLook(occasion,bold=false){lastOccasion=occasion;lastBold=bold;randomLook=buildLook(occasion,document.getElementById("randomNoCoat").checked,bold);renderRandomLook()}function repeatLastLook(){generateLook(lastOccasion||"casual",lastBold)}function openSelector(slot){currentSlot=slot;document.getElementById("selectorCard").classList.remove("hidden");const list=garments.filter(g=>g.disponible&&!g.vendida&&!g.eliminado_en&&inferSlot(g)===slot);document.getElementById("selectorGrid").innerHTML=list.length?list.map(g=>`<div class="item-card"><img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}"><div class="item-body"><p class="item-name">${esc(g.nombre)}</p><p class="meta">${esc(fmtCat(g.categoria))}</p><button class="small-btn" onclick="selectGarmentForSlot('${g.id}')">Seleccionar</button></div></div>`).join(""):'<div class="empty">No hay prendas disponibles.</div>'}function selectGarmentForSlot(id){const g=findGarment(id);if(!g||!currentSlot)return;if(currentSlot==="accesorios"){if(!currentLook.accesorios.some(a=>a.id===id))currentLook.accesorios.push(g)}else{if(currentSlot==="vestido"){currentLook.interior=null;currentLook.inferior=null}else if(["interior","inferior"].includes(currentSlot))currentLook.vestido=null;currentLook[currentSlot]=g}renderCurrentLook();document.getElementById("selectorCard").classList.add("hidden")}function removeFromLook(slot){currentLook[slot]=null;renderCurrentLook()}function removeAccessory(i){currentLook.accesorios.splice(i,1);renderCurrentLook()}function clearLook(){currentLook=emptyLook();renderCurrentLook();document.getElementById("selectorCard").classList.add("hidden")}function mapLookToIds(look){return{abrigo:look.abrigo?.id||null,exterior:look.exterior?.id||null,interior:look.interior?.id||null,inferior:look.inferior?.id||null,vestido:look.vestido?.id||null,calzado:look.calzado?.id||null,bolso:look.bolso?.id||null,accesorios:(look.accesorios||[]).map(a=>a.id)}}function idsToLook(l){return{abrigo:findGarment(l.abrigo),exterior:findGarment(l.exterior),interior:findGarment(l.interior),inferior:findGarment(l.inferior),vestido:findGarment(l.vestido),calzado:findGarment(l.calzado),bolso:findGarment(l.bolso),accesorios:normalizeIds(l.accesorios).map(findGarment).filter(Boolean)}}function hasLook(look){return Object.entries(look).some(([k,v])=>k==="accesorios"?(v||[]).length:!!v)}function addUsageFromLook(look){["abrigo","exterior","interior","inferior","vestido","calzado","bolso"].forEach(k=>look[k]?.id&&markUsedSilent(look[k].id));(look.accesorios||[]).forEach(a=>a?.id&&markUsedSilent(a.id))}function markUsedSilent(id){const g=findGarment(id);if(g){g.usos=(g.usos||0)+1;g.ultimo_uso=new Date().toISOString()}}function saveLookObject(look,name,occasion,source){if(!hasLook(look))return toast("No hay look para guardar.","warn");addUsageFromLook(look);const item={id:uid(),nombre:name,ocasion,source,fecha:new Date().toISOString(),favorito:false,...mapLookToIds(look)};savedLooks.push(item);recentLooks.unshift({...item,id:uid(),nombre:`Usado ${new Date().toLocaleString()}`});recentLooks=recentLooks.slice(0,10);persist();refreshAll();toast("Look guardado ✅")}function saveQuickLook(){saveLookObject(quickLook,`Look rápido ${savedLooks.length+1}`,"casual","rápido")}function saveRandomLook(){saveLookObject(randomLook,`Look ${savedLooks.length+1}`,lastOccasion||"casual","aleatorio")}function saveCurrentLook(){const occ=Object.values(currentLook).find(v=>v&&!Array.isArray(v))?.ocasiones?.[0]||"casual";saveLookObject(currentLook,`Look ${savedLooks.length+1}`,occ,"manual")}function copyQuickToManual(){currentLook={...quickLook,accesorios:[...(quickLook.accesorios||[])]};renderCurrentLook();switchView("crearLook")}function copyRandomToManual(){currentLook={...randomLook,accesorios:[...(randomLook.accesorios||[])]};renderCurrentLook();switchView("crearLook")}
 function savedLookCard(l,editable=true){const look=idsToLook(l),first=look.abrigo||look.exterior||look.interior||look.inferior||look.vestido||look.calzado||look.bolso||look.accesorios[0],count=[look.abrigo,look.exterior,look.interior,look.inferior,look.vestido,look.calzado,look.bolso].filter(Boolean).length+look.accesorios.length;return`<div class="item-card"><img src="${first?.foto||placeholderImg}" alt="Look"><div class="item-body"><p class="item-name">${esc(l.nombre)}</p><p class="meta">Ocasión: ${esc(fmtOcc(l.ocasion||"-"))}</p><p class="meta">Prendas: ${count}</p>${l.favorito?'<span class="pill">Look favorito</span>':''}${editable?`<div class="button-row" style="margin-top:10px"><button class="small-btn" onclick="loadSavedLook('${l.id}')">Abrir</button><button class="small-btn" onclick="toggleLookFavorite('${l.id}')">${l.favorito?'Quitar ♥':'Favorito ♥'}</button><button class="small-btn danger-btn" onclick="deleteSavedLook('${l.id}')">Eliminar</button></div>`:""}</div></div>`}function loadSavedLook(id){const l=savedLooks.find(x=>x.id===id);if(l){currentLook=idsToLook(l);renderCurrentLook();switchView("crearLook")}}function toggleLookFavorite(id){const l=savedLooks.find(x=>x.id===id);if(l){l.favorito=!l.favorito;persist();refreshAll()}}function deleteSavedLook(id){savedLooks=savedLooks.filter(l=>l.id!==id);persist();refreshAll()}
 function resetWishForm(){editingWishId=null;["wishNombre","wishMarca","wishPrecio","wishEnlace","wishComentarios"].forEach(id=>document.getElementById(id).value="");document.getElementById("wishPrioridad").value="Alta";document.getElementById("wishFoto").value=""}function saveWish(){const file=document.getElementById("wishFoto").files[0],old=wishlist.find(w=>w.id===editingWishId)||{},data=migrateWish({id:editingWishId||uid(),foto:old.foto,nombre:document.getElementById("wishNombre").value.trim(),marca:document.getElementById("wishMarca").value.trim(),precio:document.getElementById("wishPrecio").value,enlace:document.getElementById("wishEnlace").value.trim(),prioridad:document.getElementById("wishPrioridad").value,comentarios:document.getElementById("wishComentarios").value.trim()});if(!data.nombre)return toast("Pon al menos un nombre en la wishlist.","warn");const finish=w=>{if(editingWishId){const i=wishlist.findIndex(x=>x.id===editingWishId);if(i!==-1)wishlist[i]=w}else wishlist.unshift(w);persist();resetWishForm();refreshAll();toast("Wishlist guardada ✅")};file?compressImage(file).then(url=>{data.foto=url;finish(data)}).catch(()=>finish(data)):finish(data)}function wishToWardrobe(id){const w=wishlist.find(x=>x.id===id);if(!w)return;garments.unshift(migrateGarment({nombre:w.nombre,marca:w.marca,precio:w.precio,comentarios:w.comentarios,foto:w.foto,grupo:"parte_superior",categoria:"camiseta",temporada:"todo_anio",ocasiones:["casual"],cantidad:1,disponible:true}));wishlist=wishlist.filter(x=>x.id!==id);persist();refreshAll();switchView("armario");toast("Añadido al armario ✅")}function deleteWish(id){wishlist=wishlist.filter(w=>w.id!==id);persist();refreshAll()}function renderWishlist(){document.getElementById("wishlistGrid").innerHTML=wishlist.length?wishlist.map(w=>`<div class="item-card"><img src="${w.foto||placeholderImg}" alt="${esc(w.nombre)}"><div class="item-body"><p class="item-name">${esc(w.nombre)}</p>${w.marca?`<p class="meta">Marca: ${esc(w.marca)}</p>`:""}${w.precio?`<p class="meta">Precio: ${esc(w.precio)} €</p>`:""}<p class="meta">Prioridad: ${esc(w.prioridad)}</p>${w.enlace?`<p class="meta"><a href="${esc(w.enlace)}" target="_blank" rel="noopener noreferrer">Enlace de compra</a></p>`:""}${w.comentarios?`<p class="meta">💬 ${esc(w.comentarios)}</p>`:""}<div class="button-row" style="margin-top:10px"><button class="small-btn" onclick="wishToWardrobe('${w.id}')">Añadir al armario</button><button class="small-btn danger-btn" onclick="deleteWish('${w.id}')">Eliminar</button></div></div></div>`).join(""):'<div class="empty">Tu wishlist está vacía.</div>'}
-function renderFavorites(){document.getElementById("favoritesGrid").innerHTML=garments.filter(g=>g.favorito&&!g.eliminado_en).map(garmentCard).join("")||'<div class="empty">No tienes prendas favoritas todavía.</div>';document.getElementById("favoriteLooksGrid").innerHTML=savedLooks.filter(l=>l.favorito).map(savedLookCard).join("")||'<div class="empty">No tienes looks favoritos todavía.</div>';document.getElementById("recentLooksGrid").innerHTML=recentLooks.map(l=>savedLookCard(l,false)).join("")||'<div class="empty">Todavía no has usado looks.</div>';document.getElementById("savedLooksGrid").innerHTML=savedLooks.map(l=>savedLookCard(l,true)).join("")||'<div class="empty">No has guardado looks todavía.</div>'}function renderVinted(){const items=garments.filter(g=>(g.en_vinted||g.vendida)&&!g.eliminado_en);document.getElementById("vintedGrid").innerHTML=items.length?items.map(garmentCard).join(""):'<div class="empty">No tienes prendas en Vinted.</div>'}function updateSummary(){const active=garments.filter(g=>!g.eliminado_en);document.getElementById("sumGarments").textContent=active.length;document.getElementById("sumFavorites").textContent=active.filter(g=>g.favorito).length;document.getElementById("sumWishlist").textContent=wishlist.length;document.getElementById("sumLooks").textContent=savedLooks.length;document.getElementById("sumVinted").textContent=active.filter(g=>g.en_vinted).length}
+function renderFavorites(){document.getElementById("favoritesGrid").innerHTML=garments.filter(g=>g.favorito&&!g.eliminado_en).map(garmentCard).join("")||'<div class="empty">No tienes prendas favoritas todavía.</div>';document.getElementById("favoriteLooksGrid").innerHTML=savedLooks.filter(l=>l.favorito).map(savedLookCard).join("")||'<div class="empty">No tienes looks favoritos todavía.</div>';document.getElementById("recentLooksGrid").innerHTML=recentLooks.map(l=>savedLookCard(l,false)).join("")||'<div class="empty">Todavía no has usado looks.</div>';document.getElementById("savedLooksGrid").innerHTML=savedLooks.map(l=>savedLookCard(l,true)).join("")||'<div class="empty">No has guardado looks todavía.</div>'}function renderVinted(){const items=garments.filter(g=>(g.en_vinted||g.vendida)&&!g.eliminado_en);document.getElementById("vintedGrid").innerHTML=items.length?items.map(garmentCard).join(""):'<div class="empty">No tienes prendas en Vinted.</div>'}function updateSummary(){
+    const active=garments.filter(g=>!g.eliminado_en);
+
+    document.getElementById("sumGarments").textContent=active.length;
+    document.getElementById("sumFavorites").textContent=active.filter(g=>g.favorito).length;
+    document.getElementById("sumWishlist").textContent=wishlist.length;
+    document.getElementById("sumLooks").textContent=savedLooks.length;
+    document.getElementById("sumVinted").textContent=active.filter(g=>g.en_vinted).length;
+
+    const priced=active.filter(g=>
+        Number(g.precio)>0 &&
+        Number(g.usos)>0
+    );
+
+    const totalCost=priced.reduce((sum,g)=>
+        sum+(Number(g.precio)||0)*(Number(g.cantidad)||1),0
+    );
+
+    const totalUses=priced.reduce((sum,g)=>
+        sum+(Number(g.usos)||0),0
+    );
+
+    const average=totalUses>0
+        ? totalCost/totalUses
+        : null;
+
+    const averageBox=document.getElementById("sumAverageCostUse");
+
+    if(averageBox){
+        averageBox.textContent=
+            average===null
+                ? "—"
+                : `${average.toFixed(2)} €`;
+    }
+};document.getElementById("sumGarments").textContent=active.length;document.getElementById("sumFavorites").textContent=active.filter(g=>g.favorito).length;document.getElementById("sumWishlist").textContent=wishlist.length;document.getElementById("sumLooks").textContent=savedLooks.length;document.getElementById("sumVinted").textContent=active.filter(g=>g.en_vinted).length}
 function exportData(){const backup={version:APP_DATA_VERSION,exportado_en:new Date().toISOString(),garments,savedLooks,recentLooks,wishlist};const blob=new Blob([JSON.stringify(backup,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`bricloset-backup-${new Date().toISOString().slice(0,10)}.json`;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url)}function importData(e){const file=e.target.files?.[0];if(!file)return;const r=new FileReader();r.onload=x=>{try{const migrated=migrateBackup(JSON.parse(x.target.result));garments=migrated.garments;savedLooks=migrated.savedLooks;recentLooks=migrated.recentLooks;wishlist=migrated.wishlist;persist();refreshAll();toast("Armario importado correctamente ✅")}catch(err){toast("No he podido importar el archivo.","warn");console.error(err)}finally{e.target.value=""}};r.readAsText(file)}
 function refreshAll(){updateSummary();fillFilterOptions();renderRelatedSelect();renderWardrobe();renderTrash();renderCurrentLook();renderRandomLook();renderQuickLook();renderWishlist();renderFavorites();renderVinted()}function toast(msg,type="ok"){const box=document.getElementById("toastBox");if(!box)return alert(msg);const t=document.createElement("div");t.className=`toast toast-${type}`;t.textContent=msg;box.appendChild(t);requestAnimationFrame(()=>t.classList.add("show"));setTimeout(()=>{t.classList.remove("show");setTimeout(()=>t.remove(),300)},3200)}
 const IDB_NAME="bricloset_mirror_db",IDB_STORE="backups";function idbOpen(){return new Promise((resolve,reject)=>{const req=indexedDB.open(IDB_NAME,1);req.onupgradeneeded=()=>req.result.createObjectStore(IDB_STORE);req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}async function mirrorToIndexedDB(){try{const db=await idbOpen(),tx=db.transaction(IDB_STORE,"readwrite");tx.objectStore(IDB_STORE).put({version:APP_DATA_VERSION,savedLooks,recentLooks,wishlist,guardado_en:new Date().toISOString()},"latest")}catch(e){console.warn("No se pudo espejar en IndexedDB",e)}}async function recoverFromIndexedDB(){try{const db=await idbOpen(),tx=db.transaction(IDB_STORE,"readonly"),req=tx.objectStore(IDB_STORE).get("latest");return new Promise(res=>{req.onsuccess=()=>res(req.result||null);req.onerror=()=>res(null)})}catch(e){return null}}
