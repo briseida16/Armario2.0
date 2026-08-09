@@ -96,7 +96,11 @@ input{
     color:var(--text);
     box-shadow:var(--shadow);
 }.check-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:8px;padding:10px;border:1px solid var(--line);border-radius:16px;background:#fff}.check-grid label{display:flex;gap:7px;align-items:center;font-weight:700;color:var(--muted)}
-.outfit-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}.slot{background:rgba(255,255,255,.75);border:2px dashed #ead2df;border-radius:20px;padding:12px;min-height:225px;display:flex;flex-direction:column;gap:8px}.slot-title{font-weight:900;color:#6e5361}.slot img{width:100%;border-radius:14px;aspect-ratio:1/1;object-fit:cover;background:#f2edf0}.occasion-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:10px}.occasion-btn{padding:18px 12px;background:#fff;color:var(--text);border:1px solid var(--line);box-shadow:var(--shadow)}.empty{text-align:center;padding:22px;color:var(--muted);background:rgba(255,255,255,.7);border-radius:18px}.summary-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-top:10px}.summary-box{background:rgba(255,255,255,.82);border-radius:14px;padding:14px;border:1px solid var(--line)}.active-summary{
+.outfit-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}.slot{background:rgba(255,255,255,.75);border:2px dashed #ead2df;border-radius:20px;padding:12px;min-height:225px;display:flex;flex-direction:column;gap:8px}.slot-title{font-weight:900;color:#6e5361}.slot img{width:100%;border-radius:14px;aspect-ratio:1/1;object-fit:cover;background:#f2edf0}.occasion-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:10px}.occasion-btn{padding:18px 12px;background:#fff;color:var(--text);border:1px solid var(--line);box-shadow:var(--shadow)}.empty{text-align:center;padding:22px;color:var(--muted);background:rgba(255,255,255,.7);border-radius:18px}.summary-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-top:10px}.summary-box{background:rgba(255,255,255,.82);border-radius:14px;padding:14px;border:1px solid var(--line)}cursor:pointer;
+transition:transform .15s ease, box-shadow .15s ease;.summary-box:hover{
+    transform:translateY(-2px);
+    box-shadow:0 6px 18px rgba(0,0,0,.08);
+}.active-summary{
     border:2px solid var(--primary);
     background:rgba(230,142,186,.15);
     transform:translateY(-2px);
@@ -159,26 +163,26 @@ input{
 <main>
 <section id="inicio" class="view active"><div class="card hero"><h2 class="section-title">¿Qué te parece este look? 😎</h2><p id="quickLookTitle" class="muted">¿No tienes tiempo de pensar mucho?, arriesgate con esta propuesta✨</p><div id="quickLookGrid" class="mini-outfit"></div><div class="button-row" style="margin-top:14px"><label class="muted" style="display:flex;align-items:center;gap:8px;margin-right:auto"><input type="checkbox" id="quickNoCoat" onchange="generateQuickLook()"> Look sin abrigo</label><button class="primary-btn" onclick="saveQuickLook()">Me lo quedo</button><button class="ghost-btn" onclick="generateQuickLook()">Otro look</button><button class="ghost-btn" onclick="copyQuickToManual()">Editar este look</button></div></div><div class="card"><h2 class="section-title">Resumen de mi armario</h2>
 <div class="summary-row">
-    <div class="summary-box">
-        <div class="summary-number" id="sumGarments">0</div>
-        <div class="muted">Prendas</div>
-    </div>
-    <div class="summary-box">
-        <div class="summary-number" id="sumFavorites">0</div>
-        <div class="muted">Favoritas</div>
-    </div>
-    <div class="summary-box">
-        <div class="summary-number" id="sumWishlist">0</div>
-        <div class="muted">Wishlist</div>
-    </div>
-    <div class="summary-box">
-        <div class="summary-number" id="sumLooks">0</div>
-        <div class="muted">Looks guardados</div>
-    </div>
-    <div class="summary-box">
-        <div class="summary-number" id="sumVinted">0</div>
-        <div class="muted">En Vinted</div>
-    </div>
+   <div class="summary-box" onclick="switchView('armario')">
+    <div class="summary-number" id="sumGarments">0</div>
+    <div class="muted">Prendas</div>
+</div>
+   <div class="summary-box" onclick="switchView('favoritos')">
+    <div class="summary-number" id="sumFavorites">0</div>
+    <div class="muted">Favoritas</div>
+</div>
+    <div class="summary-box" onclick="switchView('looks')">
+    <div class="summary-number" id="sumLooks">0</div>
+    <div class="muted">Looks guardados</div>
+</div>
+    <div class="summary-box" onclick="switchView('wishlist')">
+    <div class="summary-number" id="sumWishlist">0</div>
+    <div class="muted">Wishlist</div>
+</div>
+   <div class="summary-box" onclick="switchView('vinted')">
+    <div class="summary-number" id="sumVinted">0</div>
+    <div class="muted">En Vinted</div>
+</div>
 </div>
 <div class="summary-row">
     <div class="summary-box">
@@ -199,7 +203,7 @@ input{
 <div class="card">
     <h2 class="section-title">Futuras versiones preparadas</h2>
     <div id="futureGrid" class="future-grid"></div>
-</div><div class="button-row"><button class="primary-btn" onclick="exportData()">Exportar armario</button><button class="ghost-btn" onclick="document.getElementById('importFile').click()">Importar armario</button><input id="importFile" type="file" accept=".json,application/json" class="hidden" onchange="importData(event)"></div><p class="muted" style="margin-bottom:0">Exporta o importa un JSON manual. Las prendas del armario se sincronizan con Firestore al iniciar sesión.</p></div><div class="card"><h2 class="section-title">Futuras versiones preparadas</h2><div id="futureGrid" class="future-grid"></div></div></section>
+</div></section>
 <section id="armario" class="view">
     <div class="card">
         <h2 class="section-title">Mi armario</h2>
