@@ -114,9 +114,66 @@ input{
     <div class="summary-number" id="sumAverageCostUse">—</div>
     <div class="muted">💰 Coste medio por uso de mi armario</div>
 </div><div class="summary-box"><div class="summary-number" id="sumGarments">0</div><div class="muted">Prendas</div></div><div class="summary-box"><div class="summary-number" id="sumFavorites">0</div><div class="muted">Favoritas</div></div><div class="summary-box"><div class="summary-number" id="sumWishlist">0</div><div class="muted">Wishlist</div></div><div class="summary-box"><div class="summary-number" id="sumLooks">0</div><div class="muted">Looks guardados</div></div><div class="summary-box"><div class="summary-number" id="sumVinted">0</div><div class="muted">En Vinted</div></div></div></div><div class="card"><h2 class="section-title">Mudanza virtual</h2><div class="button-row"><button class="primary-btn" onclick="exportData()">Exportar armario</button><button class="ghost-btn" onclick="document.getElementById('importFile').click()">Importar armario</button><input id="importFile" type="file" accept=".json,application/json" class="hidden" onchange="importData(event)"></div><p class="muted" style="margin-bottom:0">Exporta o importa un JSON manual. Las prendas del armario se sincronizan con Firestore al iniciar sesión.</p></div><div class="card"><h2 class="section-title">Futuras versiones preparadas</h2><div id="futureGrid" class="future-grid"></div></div></section>
-<section id="armario" class="view"><div class="card"><h2 class="section-title">Mi armario</h2><div class="filter-row"><input id="searchInput" placeholder="Buscar por nombre, color, comentarios..." oninput="renderWardrobe()"><button class="ghost-btn" type="button" onclick="clearWardrobeFilters()">✕ Limpiar filtros</button><button class="ghost-btn" type="button" onclick="clearWardrobeFilters()">✕ Limpiar filtros</button><select id="filterGroup" onchange="renderWardrobe()"><option value="">Todos los grupos</option></select><select id="filterCategory" onchange="renderWardrobe()"><option value="">Todas las categorías</option></select><select id="filterOccasion" onchange="renderWardrobe()"><option value="">Todas las ocasiones</option></select><select id="filterFavorite" onchange="renderWardrobe()"><option value="">Favoritas y no favoritas</option><option value="true">Solo favoritas</option><option value="false">Solo no favoritas</option></select><select id="filterBrand" onchange="renderWardrobe()"><option value="">Todas las marcas</option></select><select id="filterSeason" onchange="renderWardrobe()"><option value="">Todas las temporadas</option></select><select id="filterSize" onchange="renderWardrobe()"><option value="">Todas las tallas</option></select><select id="sortWardrobe" onchange="renderWardrobe()"><option value="reciente">Más recientes primero</option><option value="usos_desc">Más usadas primero</option><option value="usos_asc">Menos usadas primero</option><option value="az">Nombre A-Z</option></select></div><div id="wardrobeSummary" class="summary-row"></div></div><div id="wardrobeGrid"></div>
+<section id="armario" class="view"><section id="armario" class="view">
+    <div class="card">
+        <h2 class="section-title">Mi armario</h2>
 
-<div id="wardrobeStats" class="summary-row"></div></section>
+        <div class="filter-row">
+            <input id="searchInput"
+                   placeholder="Buscar por nombre, color, comentarios..."
+                   oninput="renderWardrobe()">
+
+            <button class="ghost-btn"
+                    type="button"
+                    onclick="clearWardrobeFilters()">
+                ✕ Limpiar filtros
+            </button>
+
+            <select id="filterGroup" onchange="renderWardrobe()">
+                <option value="">Todos los grupos</option>
+            </select>
+
+            <select id="filterCategory" onchange="renderWardrobe()">
+                <option value="">Todas las categorías</option>
+            </select>
+
+            <select id="filterOccasion" onchange="renderWardrobe()">
+                <option value="">Todas las ocasiones</option>
+            </select>
+
+            <select id="filterFavorite" onchange="renderWardrobe()">
+                <option value="">Favoritas y no favoritas</option>
+                <option value="true">Solo favoritas</option>
+                <option value="false">Solo no favoritas</option>
+            </select>
+
+            <select id="filterBrand" onchange="renderWardrobe()">
+                <option value="">Todas las marcas</option>
+            </select>
+
+            <select id="filterSeason" onchange="renderWardrobe()">
+                <option value="">Todas las temporadas</option>
+            </select>
+
+            <select id="filterSize" onchange="renderWardrobe()">
+                <option value="">Todas las tallas</option>
+            </select>
+
+            <select id="sortWardrobe" onchange="renderWardrobe()">
+                <option value="reciente">Más recientes primero</option>
+                <option value="usos_desc">Más usadas primero</option>
+                <option value="usos_asc">Menos usadas primero</option>
+                <option value="az">Nombre A-Z</option>
+            </select>
+        </div>
+
+        <div id="wardrobeSummary" class="summary-row"></div>
+
+        <div id="wardrobeStats" class="summary-row"></div>
+    </div>
+
+    <div id="wardrobeGrid"></div>
+</section>
 <section id="anadir" class="view"><div class="card"><h2 class="section-title" id="formTitle">Añadir prenda</h2><div class="form-grid"><div class="field"><label>Foto</label><input id="foto" type="file" accept="image/*"></div><div class="field"><label>Nombre</label><input id="nombre" placeholder="Ej. Blazer rosa palo"></div><div class="field">
     <label>Grupo</label>
     <select id="grupo" onchange="populateCategoryOptions(this.value)"></select>
