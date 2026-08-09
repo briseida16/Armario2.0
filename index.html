@@ -835,6 +835,17 @@ function renderWardrobeStats(){
             behavior:"smooth",
             block:"start"
         });
+}function clearWardrobeFilters(){
+    activeSummaryFilter="";
+    document.getElementById("searchInput").value="";
+    document.getElementById("filterGroup").value="";
+    document.getElementById("filterCategory").value="";
+    document.getElementById("filterOccasion").value="";
+    document.getElementById("filterFavorite").value="";
+    document.getElementById("filterBrand").value="";
+    document.getElementById("filterSeason").value="";
+    document.getElementById("filterSize").value="";
+    renderWardrobe();
 }window.applySummaryFilter = applySummaryFilter;
 function renderTrash(){const box=document.getElementById("trashGrid"),items=garments.filter(g=>g.eliminado_en);box.innerHTML=items.length?items.map(g=>`<div class="item-card"><img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}"><div class="item-body"><p class="item-name">${esc(g.nombre)}</p><p class="meta">Se borrará definitivamente en ${Math.max(0,30-Math.floor((Date.now()-new Date(g.eliminado_en).getTime())/86400000))} día(s)</p><div class="button-row" style="margin-top:10px"><button class="small-btn" onclick="restoreGarment('${g.id}')">Restaurar</button><button class="small-btn danger-btn" onclick="deleteGarmentForever('${g.id}')">Borrar ya</button></div></div></div>`).join(""):'<div class="empty">La papelera está vacía.</div>'}
 function markUsed(id){const g=findGarment(id);if(g){g.usos=(g.usos||0)+1;g.ultimo_uso=new Date().toISOString();persist();refreshAll()}}function toggleFavorite(id){const g=findGarment(id);if(g){g.favorito=!g.favorito;persist();refreshAll()}}function toggleVinted(id){const g=findGarment(id);if(g){g.en_vinted=!g.en_vinted;persist();refreshAll()}}function deleteGarment(id){const g=findGarment(id);if(!g||!confirm(`¿Mover "${g.nombre}" a la papelera? Podrás recuperarla durante 30 días.`))return;g.eliminado_en=new Date().toISOString();persist();refreshAll();toast("Prenda movida a la papelera 🗑️")}function restoreGarment(id){const g=findGarment(id);if(g){g.eliminado_en=null;persist();refreshAll();toast("Prenda restaurada ✅")}}function deleteGarmentForever(id){const g=findGarment(id);if(!g||!confirm(`Esto borrará "${g.nombre}" para siempre. ¿Seguro?`))return;garments=garments.filter(x=>x.id!==id);savedLooks=savedLooks.map(l=>cleanLookIds(l,id));recentLooks=recentLooks.map(l=>cleanLookIds(l,id));persist();refreshAll()}function purgeOldTrash(){const limit=Date.now()-30*24*60*60*1000;garments=garments.filter(g=>!g.eliminado_en||new Date(g.eliminado_en).getTime()>=limit)}function cleanLookIds(l,id){const x={...l};["abrigo","exterior","interior","inferior","vestido","calzado","bolso"].forEach(k=>{if(x[k]===id)x[k]=null});x.accesorios=normalizeIds(x.accesorios).filter(a=>a!==id);return x}
