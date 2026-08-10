@@ -360,7 +360,83 @@ header.compact ~ #subnavFloatingMenu{top:58px}
     .looks-carousel-card img{height:108px}
     .looks-selector-filters{grid-template-columns:1fr}
 }
-</style></head><body><header><h1>BriCloset ✨</h1><div class="subtitle">🌸 Toda tu ropa en un solo armario virtual, crea looks diferentes y utiliza todo lo que tienes para explotar tu potencial 🌸</div><div class="top-actions"><div class="auth-panel"><button type="button" class="primary-btn" id="loginBtn" onclick="openLoginModal()">
+
+<style>
+.looks-saved-list{display:flex;gap:12px;overflow-x:auto;padding:4px 2px 12px;scroll-snap-type:x proximity}
+.looks-saved-mini{flex:0 0 185px;scroll-snap-align:start;border:1px solid var(--line);border-radius:18px;background:#fff;padding:9px}
+.looks-saved-mini img{width:100%;height:145px;object-fit:cover;border-radius:13px}
+.looks-saved-mini .mini-title{margin-top:7px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.looks-saved-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:9px}
+.looks-saved-actions button{font-size:.74rem;padding:8px 5px}
+.looks-saved-actions .danger-btn{grid-column:1/-1}
+.look-save-modal{position:fixed;inset:0;z-index:5000;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(55,38,48,.42);backdrop-filter:blur(3px)}
+.look-save-modal.hidden{display:none}
+.look-save-dialog{position:relative;width:min(460px,100%);padding:24px;border-radius:24px;background:#fff;border:1px solid var(--line);box-shadow:0 20px 60px rgba(55,38,48,.25)}
+.look-save-dialog h2{margin:0 0 6px}
+.look-save-close{position:absolute;top:10px;right:12px;width:34px;height:34px;border:0;border-radius:50%;background:#f7edf2;font-size:1.4rem;cursor:pointer}
+.look-save-field{display:flex;flex-direction:column;gap:7px;margin-top:14px;font-weight:900;font-size:.9rem}.look-save-optional{font-size:.8rem;font-weight:400}
+.look-save-field input,.look-save-field select{width:100%;box-sizing:border-box;padding:12px;border:1px solid var(--line);border-radius:12px;background:#fff;font:inherit;color:#463641}
+@media(max-width:680px){
+    .looks-saved-mini{flex-basis:155px}
+    .looks-saved-mini img{height:125px}
+}
+</style></style>
+<style id="shared-subnav-position-fix">
+/* Todos los submenús usan exactamente el mismo patrón que el de Looks:
+   cuadradito arriba + desplegable pegado a su izquierda. */
+#subnavFloatingBtn{
+    position:fixed !important;
+    top:118px !important;
+    right:16px !important;
+    left:auto !important;
+    z-index:5001 !important;
+}
+#subnavFloatingMenu{
+    position:fixed !important;
+    top:118px !important;
+    right:72px !important;
+    left:auto !important;
+    z-index:5000 !important;
+    min-width:205px;
+}
+#looksFloatingMenuBtn,
+#looksFloatingMenu{
+    display:none !important;
+}
+@media(max-width:680px){
+    #subnavFloatingBtn{top:108px !important;right:12px !important}
+    #subnavFloatingMenu{top:108px !important;right:62px !important;min-width:190px}
+}
+header.compact ~ #subnavFloatingBtn{top:58px !important}
+header.compact ~ #subnavFloatingMenu{top:58px !important}
+</style>
+
+<style id="subnav-drop-fix">
+#subnavFloatingBtn{
+    position:fixed !important;
+    top:150px !important;
+    right:16px !important;
+    left:auto !important;
+    z-index:5001 !important;
+}
+#subnavFloatingMenu{
+    position:fixed !important;
+    top:202px !important;
+    right:16px !important;
+    left:auto !important;
+    z-index:5000 !important;
+    min-width:205px;
+    transform-origin:top right;
+}
+#looksFloatingMenuBtn,#looksFloatingMenu{display:none !important}
+@media(max-width:680px){
+    #subnavFloatingBtn{top:145px !important;right:12px !important}
+    #subnavFloatingMenu{top:195px !important;right:12px !important;min-width:190px}
+}
+header.compact ~ #subnavFloatingBtn{top:58px !important}
+header.compact ~ #subnavFloatingMenu{top:108px !important}
+</style>
+</head><body><header><h1>BriCloset ✨</h1><div class="subtitle">🌸 Toda tu ropa en un solo armario virtual, crea looks diferentes y utiliza todo lo que tienes para explotar tu potencial 🌸</div><div class="top-actions"><div class="auth-panel"><button type="button" class="primary-btn" id="loginBtn" onclick="openLoginModal()">
     Iniciar sesión
 </button><div class="auth-user hidden" id="authUserBox" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false"><img class="auth-photo hidden" id="authPhoto" alt="Foto de usuario"><span class="auth-initials hidden" id="authInitials" aria-hidden="true"></span><span class="auth-menu-arrow" aria-hidden="true">▼</span><div class="user-menu hidden" id="userMenu"><button type="button">👤 Mi perfil</button><button type="button" id="logoutBtn">🚪 Cerrar sesión</button></div></div><div class="mini-badge hidden" id="syncStatus">Esperando sesión</div></div></div><div class="tabs"><button class="tab-btn active" onclick="switchView('inicio',this)">Inicio</button><button class="tab-btn" onclick="switchView('armario',this)">Mi armario</button><button class="tab-btn" onclick="switchView('anadir',this)">Añadir prenda</button><button class="tab-btn" onclick="switchView('looks',this)">Looks</button>
 <button class="tab-btn" onclick="switchView('wishlist',this)">Wishlist</button><button class="tab-btn" onclick="switchView('favoritos',this)">Favoritos</button><button class="tab-btn" onclick="switchView('vinted',this)">🛍️ Vinted</button><details class="more-menu"><summary class="tab-btn">Más</summary><div class="more-menu-panel"><button class="tab-btn" onclick="switchView('vinted',this)">En venta</button><button class="tab-btn" onclick="switchView('papelera',this)">Papelera</button><button class="tab-btn" onclick="switchView('ajustes',this)">Ajustes</button></div></details></div></header>
@@ -633,7 +709,7 @@ header.compact ~ #subnavFloatingMenu{top:58px}
                 <option value="">Elige un grupo...</option>
             </select>
         </label>
-        <label class="combine-select-label">Categoría <span class="muted">(opcional)</span>
+        <label class="combine-select-label">Categoría <span class="muted look-save-optional">(opcional)</span>
             <select id="combineCategorySelect" onchange="chooseCombineCategory(this.value)" disabled>
                 <option value="">Todas las categorías</option>
             </select>
@@ -678,6 +754,24 @@ header.compact ~ #subnavFloatingMenu{top:58px}
     </div>
 </div>
 
+
+<div id="lookSaveModal" class="look-save-modal hidden" aria-hidden="true">
+    <div class="look-save-dialog" role="dialog" aria-modal="true" aria-labelledby="lookSaveTitle">
+        <button type="button" class="look-save-close" onclick="closeOwnLookSaveModal()" aria-label="Cerrar">×</button>
+        <h2 id="lookSaveTitle">✨ Da nombre a tu look</h2>
+        <p class="muted">Ponle un nombre para encontrarlo fácilmente después.</p>
+        <label class="look-save-field">Nombre del look
+            <input id="lookSaveName" type="text" maxlength="60" placeholder="Ej. Look para concierto">
+        </label>
+        <label class="look-save-field">Ocasión <span class="muted">(opcional)</span>
+            <select id="lookSaveOccasion"></select>
+        </label>
+        <div class="button-row" style="margin-top:16px">
+            <button type="button" class="primary-btn" onclick="confirmOwnLookSave()">Guardar</button>
+            <button type="button" class="ghost-btn" onclick="closeOwnLookSaveModal()">Cancelar</button>
+        </div>
+    </div>
+</div>
 <div class="card" id="createOwnLookCard">
     <h2 class="section-title">🎨 Crea tu propio look</h2>
     <p class="muted">Selecciona las prendas que quieras combinar y guárdalo cuando estés contenta con el resultado.</p>
@@ -1706,14 +1800,21 @@ function renderSavedLooksCarousel(){
         box.innerHTML='<div class="empty">Todavía no tienes looks guardados. Cuando guardes el primero aparecerá aquí ✨</div>';
         return;
     }
-    box.innerHTML=savedLooks.slice(0,12).map(l=>{
+    box.className="looks-saved-list";
+    box.innerHTML=savedLooks.slice(0,20).map(l=>{
         const look=idsToLook(l);
         const first=look.abrigo||look.exterior||look.interior||look.inferior||look.vestido||look.calzado||look.bolso||look.accesorios[0];
-        return `<div class="looks-carousel-card" onclick="loadSavedLook('${l.id}')">
+        const count=[look.abrigo,look.exterior,look.interior,look.inferior,look.vestido,look.calzado,look.bolso].filter(Boolean).length+(look.accesorios||[]).length;
+        return `<article class="looks-saved-mini">
             <img src="${first?.foto||placeholderImg}" alt="Look">
-            <div class="mini-title">${esc(l.nombre)}</div>
-            <div class="meta">${esc(fmtOcc(l.ocasion||"-"))}</div>
-        </div>`;
+            <div class="mini-title">${esc(l.nombre||"Look sin nombre")}</div>
+            <div class="meta">${l.ocasion?esc(fmtOcc(l.ocasion)):"Sin ocasión"} · ${count} prendas</div>
+            <div class="looks-saved-actions">
+                <button type="button" class="small-btn" onclick="editSavedLook('${l.id}')">Editar</button>
+                <button type="button" class="small-btn" onclick="useSavedLook('${l.id}')">Uso</button>
+                <button type="button" class="small-btn danger-btn" onclick="deleteSavedLook('${l.id}')">Eliminar</button>
+            </div>
+        </article>`;
     }).join("");
 }
 
@@ -1975,12 +2076,136 @@ function selectOwnGarment(id){
 function closeOwnLookSelector(){document.getElementById("ownLookSelector")?.classList.add("hidden")}
 function removeOwnSlot(slot){ownLook[slot]=null;renderOwnLook()}
 function removeOwnAccessory(i){ownLook.accesorios.splice(i,1);renderOwnLook()}
+let editingSavedLookId=null;
+
+function fillOwnLookSaveOccasions(selected=""){
+    const select=document.getElementById("lookSaveOccasion");
+    if(!select)return;
+    select.innerHTML=`<option value="">Sin ocasión</option>`+
+        occasions.map(([v,l])=>`<option value="${v}">${l}</option>`).join("");
+    select.value=selected||"";
+}
+
+function openOwnLookSaveModal(editId=null){
+    if(!hasLook(ownLook))return toast("Añade alguna prenda al look.","warn");
+    editingSavedLookId=editId||null;
+    const existing=editId?savedLooks.find(l=>l.id===editId):null;
+    document.getElementById("lookSaveTitle").textContent=existing?"✨ Edita tu look":"✨ Da nombre a tu look";
+    document.getElementById("lookSaveName").value=existing?.nombre||"";
+    fillOwnLookSaveOccasions(existing?.ocasion||"");
+    const modal=document.getElementById("lookSaveModal");
+    modal?.classList.remove("hidden");
+    modal?.setAttribute("aria-hidden","false");
+    requestAnimationFrame(()=>document.getElementById("lookSaveName")?.focus());
+}
+
+function closeOwnLookSaveModal(){
+    editingSavedLookId=null;
+    const modal=document.getElementById("lookSaveModal");
+    modal?.classList.add("hidden");
+    modal?.setAttribute("aria-hidden","true");
+}
+
+function confirmOwnLookSave(){
+    const name=document.getElementById("lookSaveName")?.value.trim();
+    const occasion=document.getElementById("lookSaveOccasion")?.value||"";
+
+    if(!name){
+        toast("Pon un nombre para el look.","warn");
+        return;
+    }
+    if(!hasLook(ownLook)){
+        toast("Añade alguna prenda al look.","warn");
+        return;
+    }
+
+    const wasEditing=!!editingSavedLookId;
+    try{
+        if(wasEditing){
+            const item=savedLooks.find(l=>l.id===editingSavedLookId);
+            if(!item){
+                toast("No se encontró ese look.","warn");
+                return;
+            }
+            Object.assign(item,{
+                nombre:name,
+                ocasion,
+                fecha:new Date().toISOString(),
+                ...mapLookToIds(ownLook)
+            });
+        }else{
+            savedLooks.unshift({
+                id:uid(),
+                nombre:name,
+                ocasion,
+                source:"propio",
+                fecha:new Date().toISOString(),
+                favorito:false,
+                ...mapLookToIds(ownLook)
+            });
+        }
+
+        // Persistencia local del look, aislada del resto de la app.
+        storage.set(STORAGE_LOOKS,JSON.stringify(savedLooks));
+
+        // La selección ya está guardada: ahora limpiamos solo el creador.
+        closeOwnLookSaveModal();
+        ownLook=emptyLook();
+        editingSavedLookId=null;
+        closeOwnLookSelector();
+        renderOwnLook();
+
+        // Actualizamos únicamente la zona que ha cambiado.
+        renderSavedLooksCarousel();
+
+        // Firestore/IndexedDB no puede bloquear el guardado local.
+        try{persist()}catch(e){console.warn("Sincronización del look pendiente:",e)}
+
+        document.getElementById("savedLooksCarouselCard")?.scrollIntoView({
+            behavior:"smooth",
+            block:"start"
+        });
+        toast(wasEditing?"Look actualizado ✅":"Look guardado ✅");
+    }catch(error){
+        console.error("Error guardando look:",error);
+        toast("No se ha podido guardar el look. Prueba de nuevo.","warn");
+    }
+}
+
 function saveOwnLook(){
     if(!hasLook(ownLook))return toast("Añade alguna prenda al look.","warn");
-    saveLookObject(ownLook,`Look ${savedLooks.length+1}`,"manual","propio");
-    ownLook=emptyLook();renderOwnLook();
+    openOwnLookSaveModal(editingSavedLookId);
 }
-function cancelOwnLook(){ownLook=emptyLook();closeOwnLookSelector();renderOwnLook()}
+function cancelOwnLook(){ownLook=emptyLook();editingSavedLookId=null;closeOwnLookSelector();renderOwnLook()}
+
+function editSavedLook(id){
+    const item=savedLooks.find(l=>l.id===id);
+    if(!item)return;
+    ownLook=idsToLook(item);
+    editingSavedLookId=id;
+    renderOwnLook();
+    closeOwnLookSelector();
+    document.getElementById("createOwnLookCard")?.scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+function useSavedLook(id){
+    const item=savedLooks.find(l=>l.id===id);
+    if(!item)return;
+    const look=idsToLook(item);
+    addUsageFromLook(look);
+    persist();
+    toast("Uso añadido a las prendas del look ✨");
+}
+
+function deleteSavedLook(id){
+    const item=savedLooks.find(l=>l.id===id);
+    if(!item)return;
+    if(!confirm(`¿Eliminar el look "${item.nombre||"sin nombre"}"?\n\nLas prendas de tu armario NO se eliminarán.`))return;
+    savedLooks=savedLooks.filter(l=>l.id!==id);
+    persist();
+    refreshAll();
+    toast("Look eliminado. Las prendas siguen en tu armario ✅");
+}
 
 function renderCurrentLook(){Object.keys(currentLook).forEach(s=>renderSlot(s,currentLook[s],"slot"))}function renderRandomLook(){document.getElementById("randomLookTitle").textContent=lastOccasion?`Look generado para: ${fmtOcc(lastOccasion)}${lastBold?" · modo Atrévete":""}`:"Todavía no has generado ningún look.";Object.keys(randomLook).forEach(s=>renderSlot(s,randomLook[s],"random"))}function renderQuickLook(){const box=document.getElementById("quickLookGrid"),entries=Object.entries(quickLook).flatMap(([k,v])=>k==="accesorios"?(v||[]).map(a=>["Accesorio",a]):v?[[slotTitles[k],v]]:[]);box.innerHTML=entries.length?entries.map(([label,g])=>`<div class="mini-card"><img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}"><div class="mini-title">${esc(label)}</div><div class="meta">${esc(g.nombre)}</div><div class="meta">${esc(fmtCat(g.categoria))}</div></div>`).join(""):'<div class="empty">No hay prendas suficientes para generar look.</div>'}
 const QUICK_LOOK_REFRESH_MS = 24 * 60 * 60 * 1000;
@@ -2051,8 +2276,8 @@ function ensureDailyQuickLook(){
         }
     }
     generateQuickLook();
-}function generateLook(occasion,bold=false){lastOccasion=occasion;lastBold=bold;randomLook=buildLook(occasion,document.getElementById("randomNoCoat").checked,bold);renderRandomLook()}function repeatLastLook(){generateLook(lastOccasion||"casual",lastBold)}function openSelector(slot){currentSlot=slot;document.getElementById("selectorCard").classList.remove("hidden");const list=garments.filter(g=>g.disponible&&!g.vendida&&!g.eliminado_en&&inferSlot(g)===slot);document.getElementById("selectorGrid").innerHTML=list.length?list.map(g=>`<div class="item-card"><img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}"><div class="item-body"><p class="item-name">${esc(g.nombre)}</p><p class="meta">${esc(fmtCat(g.categoria))}</p><button class="small-btn" onclick="selectGarmentForSlot('${g.id}')">Seleccionar</button></div></div>`).join(""):'<div class="empty">No hay prendas disponibles.</div>'}function selectGarmentForSlot(id){const g=findGarment(id);if(!g||!currentSlot)return;if(currentSlot==="accesorios"){if(!currentLook.accesorios.some(a=>a.id===id))currentLook.accesorios.push(g)}else{if(currentSlot==="vestido"){currentLook.interior=null;currentLook.inferior=null}else if(["interior","inferior"].includes(currentSlot))currentLook.vestido=null;currentLook[currentSlot]=g}renderCurrentLook();document.getElementById("selectorCard").classList.add("hidden")}function removeFromLook(slot){currentLook[slot]=null;renderCurrentLook()}function removeAccessory(i){currentLook.accesorios.splice(i,1);renderCurrentLook()}function clearLook(){currentLook=emptyLook();renderCurrentLook();document.getElementById("selectorCard").classList.add("hidden")}function mapLookToIds(look){return{abrigo:look.abrigo?.id||null,exterior:look.exterior?.id||null,interior:look.interior?.id||null,inferior:look.inferior?.id||null,vestido:look.vestido?.id||null,calzado:look.calzado?.id||null,bolso:look.bolso?.id||null,accesorios:(look.accesorios||[]).map(a=>a.id)}}function idsToLook(l){return{abrigo:findGarment(l.abrigo),exterior:findGarment(l.exterior),interior:findGarment(l.interior),inferior:findGarment(l.inferior),vestido:findGarment(l.vestido),calzado:findGarment(l.calzado),bolso:findGarment(l.bolso),accesorios:normalizeIds(l.accesorios).map(findGarment).filter(Boolean)}}function hasLook(look){return Object.entries(look).some(([k,v])=>k==="accesorios"?(v||[]).length:!!v)}function addUsageFromLook(look){["abrigo","exterior","interior","inferior","vestido","calzado","bolso"].forEach(k=>look[k]?.id&&markUsedSilent(look[k].id));(look.accesorios||[]).forEach(a=>a?.id&&markUsedSilent(a.id))}function markUsedSilent(id){const g=findGarment(id);if(g){g.usos=(g.usos||0)+1;g.ultimo_uso=new Date().toISOString()}}function saveLookObject(look,name,occasion,source){if(!hasLook(look))return toast("No hay look para guardar.","warn");addUsageFromLook(look);const item={id:uid(),nombre:name,ocasion,source,fecha:new Date().toISOString(),favorito:false,...mapLookToIds(look)};savedLooks.push(item);recentLooks.unshift({...item,id:uid(),nombre:`Usado ${new Date().toLocaleString()}`});recentLooks=recentLooks.slice(0,10);persist();refreshAll();toast("Look guardado ✅")}function saveQuickLook(){saveLookObject(quickLook,`Look rápido ${savedLooks.length+1}`,"casual","rápido")}function saveRandomLook(){saveLookObject(randomLook,`Look ${savedLooks.length+1}`,lastOccasion||"casual","aleatorio")}function saveCurrentLook(){const occ=Object.values(currentLook).find(v=>v&&!Array.isArray(v))?.ocasiones?.[0]||"casual";saveLookObject(currentLook,`Look ${savedLooks.length+1}`,occ,"manual")}function copyQuickToManual(){currentLook={...quickLook,accesorios:[...(quickLook.accesorios||[])]};renderCurrentLook();switchView("crearLook")}function copyRandomToManual(){currentLook={...randomLook,accesorios:[...(randomLook.accesorios||[])]};renderCurrentLook();switchView("crearLook")}
-function savedLookCard(l,editable=true){const look=idsToLook(l),first=look.abrigo||look.exterior||look.interior||look.inferior||look.vestido||look.calzado||look.bolso||look.accesorios[0],count=[look.abrigo,look.exterior,look.interior,look.inferior,look.vestido,look.calzado,look.bolso].filter(Boolean).length+look.accesorios.length;return`<div class="item-card"><img src="${first?.foto||placeholderImg}" alt="Look"><div class="item-body"><p class="item-name">${esc(l.nombre)}</p><p class="meta">Ocasión: ${esc(fmtOcc(l.ocasion||"-"))}</p><p class="meta">Prendas: ${count}</p>${l.favorito?'<span class="pill">Look favorito</span>':''}${editable?`<div class="button-row" style="margin-top:10px"><button class="small-btn" onclick="loadSavedLook('${l.id}')">Abrir</button><button class="small-btn" onclick="toggleLookFavorite('${l.id}')">${l.favorito?'Quitar ♥':'Favorito ♥'}</button><button class="small-btn danger-btn" onclick="deleteSavedLook('${l.id}')">Eliminar</button></div>`:""}</div></div>`}function loadSavedLook(id){const l=savedLooks.find(x=>x.id===id);if(l){currentLook=idsToLook(l);renderCurrentLook();switchView("crearLook")}}function toggleLookFavorite(id){const l=savedLooks.find(x=>x.id===id);if(l){l.favorito=!l.favorito;persist();refreshAll()}}function deleteSavedLook(id){savedLooks=savedLooks.filter(l=>l.id!==id);persist();refreshAll()}
+}function generateLook(occasion,bold=false){lastOccasion=occasion;lastBold=bold;randomLook=buildLook(occasion,document.getElementById("randomNoCoat").checked,bold);renderRandomLook()}function repeatLastLook(){generateLook(lastOccasion||"casual",lastBold)}function openSelector(slot){currentSlot=slot;document.getElementById("selectorCard").classList.remove("hidden");const list=garments.filter(g=>g.disponible&&!g.vendida&&!g.eliminado_en&&inferSlot(g)===slot);document.getElementById("selectorGrid").innerHTML=list.length?list.map(g=>`<div class="item-card"><img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}"><div class="item-body"><p class="item-name">${esc(g.nombre)}</p><p class="meta">${esc(fmtCat(g.categoria))}</p><button class="small-btn" onclick="selectGarmentForSlot('${g.id}')">Seleccionar</button></div></div>`).join(""):'<div class="empty">No hay prendas disponibles.</div>'}function selectGarmentForSlot(id){const g=findGarment(id);if(!g||!currentSlot)return;if(currentSlot==="accesorios"){if(!currentLook.accesorios.some(a=>a.id===id))currentLook.accesorios.push(g)}else{if(currentSlot==="vestido"){currentLook.interior=null;currentLook.inferior=null}else if(["interior","inferior"].includes(currentSlot))currentLook.vestido=null;currentLook[currentSlot]=g}renderCurrentLook();document.getElementById("selectorCard").classList.add("hidden")}function removeFromLook(slot){currentLook[slot]=null;renderCurrentLook()}function removeAccessory(i){currentLook.accesorios.splice(i,1);renderCurrentLook()}function clearLook(){currentLook=emptyLook();renderCurrentLook();document.getElementById("selectorCard").classList.add("hidden")}function mapLookToIds(look){return{abrigo:look.abrigo?.id||null,exterior:look.exterior?.id||null,interior:look.interior?.id||null,inferior:look.inferior?.id||null,vestido:look.vestido?.id||null,calzado:look.calzado?.id||null,bolso:look.bolso?.id||null,accesorios:(look.accesorios||[]).map(a=>a.id)}}function idsToLook(l){return{abrigo:findGarment(l.abrigo),exterior:findGarment(l.exterior),interior:findGarment(l.interior),inferior:findGarment(l.inferior),vestido:findGarment(l.vestido),calzado:findGarment(l.calzado),bolso:findGarment(l.bolso),accesorios:normalizeIds(l.accesorios).map(findGarment).filter(Boolean)}}function hasLook(look){return Object.entries(look).some(([k,v])=>k==="accesorios"?(v||[]).length:!!v)}function addUsageFromLook(look){["abrigo","exterior","interior","inferior","vestido","calzado","bolso"].forEach(k=>look[k]?.id&&markUsedSilent(look[k].id));(look.accesorios||[]).forEach(a=>a?.id&&markUsedSilent(a.id))}function markUsedSilent(id){const g=findGarment(id);if(g){g.usos=(g.usos||0)+1;g.ultimo_uso=new Date().toISOString()}}function saveLookObject(look,name,occasion,source){if(!hasLook(look))return toast("No hay look para guardar.","warn");const item={id:uid(),nombre:name,ocasion,source,fecha:new Date().toISOString(),favorito:false,...mapLookToIds(look)};savedLooks.push(item);recentLooks.unshift({...item,id:uid(),nombre:`Usado ${new Date().toLocaleString()}`});recentLooks=recentLooks.slice(0,10);persist();refreshAll();toast("Look guardado ✅")}function saveQuickLook(){saveLookObject(quickLook,`Look rápido ${savedLooks.length+1}`,"casual","rápido")}function saveRandomLook(){saveLookObject(randomLook,`Look ${savedLooks.length+1}`,lastOccasion||"casual","aleatorio")}function saveCurrentLook(){const occ=Object.values(currentLook).find(v=>v&&!Array.isArray(v))?.ocasiones?.[0]||"casual";saveLookObject(currentLook,`Look ${savedLooks.length+1}`,occ,"manual")}function copyQuickToManual(){currentLook={...quickLook,accesorios:[...(quickLook.accesorios||[])]};renderCurrentLook();switchView("crearLook")}function copyRandomToManual(){currentLook={...randomLook,accesorios:[...(randomLook.accesorios||[])]};renderCurrentLook();switchView("crearLook")}
+function savedLookCard(l,editable=true){const look=idsToLook(l),first=look.abrigo||look.exterior||look.interior||look.inferior||look.vestido||look.calzado||look.bolso||look.accesorios[0],count=[look.abrigo,look.exterior,look.interior,look.inferior,look.vestido,look.calzado,look.bolso].filter(Boolean).length+look.accesorios.length;return`<div class="item-card"><img src="${first?.foto||placeholderImg}" alt="Look"><div class="item-body"><p class="item-name">${esc(l.nombre)}</p><p class="meta">Ocasión: ${esc(fmtOcc(l.ocasion||"-"))}</p><p class="meta">Prendas: ${count}</p>${l.favorito?'<span class="pill">Look favorito</span>':''}${editable?`<div class="button-row" style="margin-top:10px"><button class="small-btn" onclick="loadSavedLook('${l.id}')">Abrir</button><button class="small-btn" onclick="toggleLookFavorite('${l.id}')">${l.favorito?'Quitar ♥':'Favorito ♥'}</button><button class="small-btn danger-btn" onclick="deleteSavedLook('${l.id}')">Eliminar</button></div>`:""}</div></div>`}function loadSavedLook(id){const l=savedLooks.find(x=>x.id===id);if(l){currentLook=idsToLook(l);renderCurrentLook();switchView("crearLook")}}function toggleLookFavorite(id){const l=savedLooks.find(x=>x.id===id);if(l){l.favorito=!l.favorito;persist();refreshAll()}}
 function resetWishForm(){editingWishId=null;["wishNombre","wishMarca","wishPrecio","wishEnlace","wishComentarios"].forEach(id=>document.getElementById(id).value="");document.getElementById("wishPrioridad").value="Alta";document.getElementById("wishFoto").value=""}function saveWish(){const file=document.getElementById("wishFoto").files[0],old=wishlist.find(w=>w.id===editingWishId)||{},data=migrateWish({id:editingWishId||uid(),foto:old.foto,nombre:document.getElementById("wishNombre").value.trim(),marca:document.getElementById("wishMarca").value.trim(),precio:document.getElementById("wishPrecio").value,enlace:document.getElementById("wishEnlace").value.trim(),prioridad:document.getElementById("wishPrioridad").value,comentarios:document.getElementById("wishComentarios").value.trim()});if(!data.nombre)return toast("Pon al menos un nombre en la wishlist.","warn");const finish=w=>{if(editingWishId){const i=wishlist.findIndex(x=>x.id===editingWishId);if(i!==-1)wishlist[i]=w}else wishlist.unshift(w);persist();resetWishForm();refreshAll();toast("Wishlist guardada ✅")};file?compressImage(file).then(url=>{data.foto=url;finish(data)}).catch(()=>finish(data)):finish(data)}function wishToWardrobe(id){const w=wishlist.find(x=>x.id===id);if(!w)return;garments.unshift(migrateGarment({nombre:w.nombre,marca:w.marca,precio:w.precio,comentarios:w.comentarios,foto:w.foto,grupo:"parte_superior",categoria:"camiseta",temporada:"todo_anio",ocasiones:["casual"],cantidad:1,disponible:true}));wishlist=wishlist.filter(x=>x.id!==id);persist();refreshAll();switchView("armario");toast("Añadido al armario ✅")}function deleteWish(id){wishlist=wishlist.filter(w=>w.id!==id);persist();refreshAll()}function renderWishlist(){document.getElementById("wishlistGrid").innerHTML=wishlist.length?wishlist.map(w=>`<div class="item-card"><img src="${w.foto||placeholderImg}" alt="${esc(w.nombre)}"><div class="item-body"><p class="item-name">${esc(w.nombre)}</p>${w.marca?`<p class="meta">Marca: ${esc(w.marca)}</p>`:""}${w.precio?`<p class="meta">Precio: ${esc(w.precio)} €</p>`:""}<p class="meta">Prioridad: ${esc(w.prioridad)}</p>${w.enlace?`<p class="meta"><a href="${esc(w.enlace)}" target="_blank" rel="noopener noreferrer">Enlace de compra</a></p>`:""}${w.comentarios?`<p class="meta">💬 ${esc(w.comentarios)}</p>`:""}<div class="button-row" style="margin-top:10px"><button class="small-btn" onclick="wishToWardrobe('${w.id}')">Añadir al armario</button><button class="small-btn danger-btn" onclick="deleteWish('${w.id}')">Eliminar</button></div></div></div>`).join(""):'<div class="empty">Tu wishlist está vacía.</div>'}
 function renderFavorites(){document.getElementById("favoritesGrid").innerHTML=garments.filter(g=>g.favorito&&!g.eliminado_en).map(garmentCard).join("")||'<div class="empty">No tienes prendas favoritas todavía.</div>';document.getElementById("favoriteLooksGrid").innerHTML=savedLooks.filter(l=>l.favorito).map(savedLookCard).join("")||'<div class="empty">No tienes looks favoritos todavía.</div>';document.getElementById("recentLooksGrid").innerHTML=recentLooks.map(l=>savedLookCard(l,false)).join("")||'<div class="empty">Todavía no has usado looks.</div>';document.getElementById("savedLooksGrid").innerHTML=savedLooks.map(l=>savedLookCard(l,true)).join("")||'<div class="empty">No has guardado looks todavía.</div>'}function renderVinted(){
     const active=garments.filter(g=>g.en_vinted&&!g.vendida&&!g.eliminado_en);
@@ -2235,7 +2460,7 @@ function updateLooksFloatingMenuVisibility(){
     const btn=document.getElementById("looksFloatingMenuBtn");
     const menu=document.getElementById("looksFloatingMenu");
     if(!btn||!menu)return;
-    const visible=document.getElementById("looks")?.classList.contains("active");
+    const visible=false;
     btn.style.display=visible?"block":"none";
     if(!visible)menu.classList.remove("open");
 }
@@ -2246,6 +2471,7 @@ const subnavConfig={
     anadir:[["anadir","➕ Nueva prenda"],["temporadaChecks","🌤️ Temporada"],["occasionChecks","🎯 Ocasiones"],["relatedOptions","🔗 Relacionadas"]],
     wishlist:[["wishlist","💖 Wishlist"],["wishlistGrid","🛍️ Mi wishlist"]],
     favoritos:[["favoritos","❤️ Favoritos"],["favoritesGrid","👗 Prendas favoritas"],["favoriteLooksGrid","✨ Looks favoritos"],["recentLooksGrid","🕘 Últimos looks"],["savedLooksGrid","💾 Looks guardados"]],
+    looks:[["savedLooksCarouselCard","💾 Looks guardados"],["looksOccasionCard","✨ ¿Qué buscamos hoy?"],["combineLookCard","👗 ¿Qué me combina con esto?"],["createOwnLookCard","🎨 Crear mi propio look"]],
     vinted:[["vinted","🛍️ Vinted"],["vintedGrid","🛒 En venta"],["vintedSoldGrid","✅ Vendidas"]],
     papelera:[["papelera","🗑️ Papelera"],["trashGrid","🧹 Prendas eliminadas"]]
 };
@@ -2258,7 +2484,7 @@ function updateSubnavVisibility(){
     const btn=document.getElementById("subnavFloatingBtn"),menu=document.getElementById("subnavFloatingMenu");
     if(!btn||!menu)return;
     const active=document.querySelector(".view.active")?.id||"";
-    const shouldShow=active!=="looks"&&!!subnavConfig[active];
+    const shouldShow=!!subnavConfig[active];
     btn.style.display=shouldShow?"block":"none";
     if(!shouldShow){closeSubnav();return;}
     menu.innerHTML=subnavConfig[active].map(([id,label])=>`<button type="button" data-subnav-target="${id}">${label}</button>`).join("");
@@ -2278,12 +2504,17 @@ function initSubnav(){
     });
     document.addEventListener("click",e=>{if(!menu.contains(e.target)&&e.target!==btn)closeSubnav();});
 }
+
+document.addEventListener("click",e=>{
+    const modal=document.getElementById("lookSaveModal");
+    if(modal&&e.target===modal)closeOwnLookSaveModal();
+});
+
 function updateHeaderOnScroll(){document.querySelector("header")?.classList.toggle("compact",window.scrollY>20);}
 window.addEventListener("scroll",updateHeaderOnScroll,{passive:true});
-
 function refreshAll(){updateSummary();ensureDailyQuickLook();fillFilterOptions();renderRelatedSelect();renderWardrobe();renderTrash();renderCurrentLook();renderRandomLook();renderQuickLook();renderWishlist();renderFavorites();renderVinted();renderSavedLooksCarousel();renderOccasionButtons();renderCombineGroups();renderLooksManualOutfit();renderOwnLook()}function toast(msg,type="ok"){const box=document.getElementById("toastBox");if(!box)return alert(msg);const t=document.createElement("div");t.className=`toast toast-${type}`;t.textContent=msg;box.appendChild(t);requestAnimationFrame(()=>t.classList.add("show"));setTimeout(()=>{t.classList.remove("show");setTimeout(()=>t.remove(),300)},3200)}
 const IDB_NAME="bricloset_mirror_db",IDB_STORE="backups";function idbOpen(){return new Promise((resolve,reject)=>{const req=indexedDB.open(IDB_NAME,1);req.onupgradeneeded=()=>req.result.createObjectStore(IDB_STORE);req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}async function mirrorToIndexedDB(){try{const db=await idbOpen(),tx=db.transaction(IDB_STORE,"readwrite");tx.objectStore(IDB_STORE).put({version:APP_DATA_VERSION,savedLooks,recentLooks,wishlist,guardado_en:new Date().toISOString()},"latest")}catch(e){console.warn("No se pudo espejar en IndexedDB",e)}}async function recoverFromIndexedDB(){try{const db=await idbOpen(),tx=db.transaction(IDB_STORE,"readonly"),req=tx.objectStore(IDB_STORE).get("latest");return new Promise(res=>{req.onsuccess=()=>res(req.result||null);req.onerror=()=>res(null)})}catch(e){return null}}
-Object.assign(window,{login,register,openLoginModal,closeLoginModal,logout,toggleRelated,switchView,populateCategoryOptions,saveGarment,resetForm,renderWardrobe,applySummaryFilter,clearWardrobeFilters,clearWardrobeSpecialFilters,applyWardrobeSpecialFilter,exportData,importData,editGarment,toggleFavorite,toggleVinted,deleteGarment,restoreGarment,deleteGarmentForever,markUsed,openSelector,selectGarmentForSlot,removeFromLook,removeAccessory,clearLook,saveCurrentLook,generateQuickLook,saveQuickLook,copyQuickToManual,generateLook,repeatLastLook,saveRandomLook,copyRandomToManual,loadSavedLook,toggleLookFavorite,deleteSavedLook,saveWish,resetWishForm,wishToWardrobe,deleteWish,generateHomeLook,saveHomeLook,dismissHomeLook,renderSavedLooksCarousel,renderOccasionButtons,renderCombineGroups,chooseCombineGroup,backToCombineGroups,chooseCombineCategory,renderCombineGarments,selectCombineGarment,generateCombineLook,saveCombineLook,openLooksManualEditor,renderLooksManualOutfit,populateLooksSelector,renderLooksSelectorCategories,renderLooksSelectorGarments,openLooksManualSelector,selectLooksManualGarment,closeLooksManualSelector,removeLooksManualSlot,removeLooksManualAccessory,cancelLooksManualEditor,saveLooksManualEditor,renderOwnLook,renderOwnSelectorCategories,renderOwnSelectorGarments,openOwnLookSelector,selectOwnGarment,closeOwnLookSelector,removeOwnSlot,removeOwnAccessory,saveOwnLook,cancelOwnLook});
+Object.assign(window,{login,register,openLoginModal,closeLoginModal,logout,toggleRelated,switchView,populateCategoryOptions,saveGarment,resetForm,renderWardrobe,applySummaryFilter,clearWardrobeFilters,clearWardrobeSpecialFilters,applyWardrobeSpecialFilter,exportData,importData,editGarment,toggleFavorite,toggleVinted,deleteGarment,restoreGarment,deleteGarmentForever,markUsed,openSelector,selectGarmentForSlot,removeFromLook,removeAccessory,clearLook,saveCurrentLook,generateQuickLook,saveQuickLook,copyQuickToManual,generateLook,repeatLastLook,saveRandomLook,copyRandomToManual,loadSavedLook,toggleLookFavorite,deleteSavedLook,saveWish,resetWishForm,wishToWardrobe,deleteWish,generateHomeLook,saveHomeLook,dismissHomeLook,renderSavedLooksCarousel,renderOccasionButtons,renderCombineGroups,chooseCombineGroup,backToCombineGroups,chooseCombineCategory,renderCombineGarments,selectCombineGarment,generateCombineLook,saveCombineLook,openLooksManualEditor,renderLooksManualOutfit,populateLooksSelector,renderLooksSelectorCategories,renderLooksSelectorGarments,openLooksManualSelector,selectLooksManualGarment,closeLooksManualSelector,removeLooksManualSlot,removeLooksManualAccessory,cancelLooksManualEditor,saveLooksManualEditor,renderOwnLook,renderOwnSelectorCategories,renderOwnSelectorGarments,openOwnLookSelector,selectOwnGarment,closeOwnLookSelector,removeOwnSlot,removeOwnAccessory,saveOwnLook,cancelOwnLook,openOwnLookSaveModal,closeOwnLookSaveModal,confirmOwnLookSave,editSavedLook,useSavedLook});
 try{loadData();populateStaticSelects();resetForm();resetWishForm();refreshAll();loadHomeWeather();document.getElementById("authUserBox")?.addEventListener("click",e=>{if(e.target.closest(".user-menu"))return;toggleUserMenu()});document.getElementById("authUserBox")?.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();toggleUserMenu()}else if(e.key==="Escape")closeUserMenu()});document.addEventListener("click",e=>{const box=document.getElementById("authUserBox");if(box&&!box.contains(e.target))closeUserMenu()});document.getElementById("logoutBtn")?.addEventListener("click",e=>{e.stopPropagation();closeUserMenu();logout()});onAuthStateChanged(auth,user=>{updateAuthUi(user);if(user)loadWardrobeFromFirestore(user);else{currentUser=null;wardrobeLoaded=false;pendingWardrobeSave=false;garments=[];savedLooks = [];
 recentLooks = [];
 wishlist = [];refreshAll();setSyncStatus("Inicia sesión")}})}catch(e){alert("Había un error cargando la app: "+e.message);console.error(e)}
