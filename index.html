@@ -604,6 +604,89 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
     opacity:1 !important;
 }
 </style>
+
+<style id="saved-looks-carousel-v29">
+#savedLooksCarousel.looks-saved-list{
+    display:flex !important;
+    flex-wrap:nowrap !important;
+    gap:14px !important;
+    overflow-x:auto !important;
+    overflow-y:hidden !important;
+    padding:4px 3px 14px !important;
+    scroll-snap-type:x mandatory !important;
+    width:100% !important;
+    box-sizing:border-box !important;
+}
+#savedLooksCarousel.looks-saved-list::-webkit-scrollbar{height:7px}
+#savedLooksCarousel .looks-saved-mini{
+    flex:0 0 220px !important;
+    width:220px !important;
+    min-width:220px !important;
+    scroll-snap-align:start !important;
+    box-sizing:border-box !important;
+    border:1px solid var(--line) !important;
+    border-radius:18px !important;
+    background:#fff !important;
+    padding:9px !important;
+}
+#savedLooksCarousel .looks-saved-mini img{
+    display:block !important;
+    width:100% !important;
+    height:200px !important;
+    aspect-ratio:1/1 !important;
+    object-fit:cover !important;
+    border-radius:13px !important;
+}
+#savedLooksCarousel .looks-saved-mini .mini-title{
+    margin-top:8px !important;
+    font-weight:900 !important;
+    white-space:nowrap !important;
+    overflow:hidden !important;
+    text-overflow:ellipsis !important;
+}
+#savedLooksCarousel .looks-saved-mini .meta{
+    margin-top:3px !important;
+    line-height:1.2 !important;
+}
+#savedLooksCarousel .looks-saved-actions{
+    display:grid !important;
+    grid-template-columns:1fr 1fr !important;
+    gap:6px !important;
+    margin-top:9px !important;
+}
+#savedLooksCarousel .looks-saved-actions .danger-btn{
+    grid-column:1/-1 !important;
+}
+@media(max-width:680px){
+    #savedLooksCarousel .looks-saved-mini{
+        flex-basis:185px !important;
+        width:185px !important;
+        min-width:185px !important;
+    }
+    #savedLooksCarousel .looks-saved-mini img{
+        height:167px !important;
+    }
+}
+</style>
+
+<style id="combine-filter-clear-v29">
+#combineLookCard .combine-filter-actions{
+    display:flex !important;
+    align-items:center !important;
+    gap:8px !important;
+    margin-top:10px !important;
+}
+#combineLookCard .combine-clear-btn{
+    padding:7px 11px !important;
+    font-size:.78rem !important;
+    border:1px solid var(--line) !important;
+    border-radius:10px !important;
+    background:#fff !important;
+    color:#6e5865 !important;
+    cursor:pointer !important;
+}
+#combineLookCard .combine-clear-btn:hover{background:#fbf1f5 !important}
+</style>
 </head><body><header><h1>BriCloset ✨</h1><div class="subtitle">🌸 Toda tu ropa en un solo armario virtual, crea looks diferentes y utiliza todo lo que tienes para explotar tu potencial 🌸</div><div class="top-actions"><div class="auth-panel"><button type="button" class="primary-btn" id="loginBtn" onclick="openLoginModal()">
     Iniciar sesión
 </button><div class="auth-user hidden" id="authUserBox" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false"><img class="auth-photo hidden" id="authPhoto" alt="Foto de usuario"><span class="auth-initials hidden" id="authInitials" aria-hidden="true"></span><span class="auth-menu-arrow" aria-hidden="true">▼</span><div class="user-menu hidden" id="userMenu"><button type="button">👤 Mi perfil</button><button type="button" id="logoutBtn">🚪 Cerrar sesión</button></div></div><div class="mini-badge hidden" id="syncStatus">Esperando sesión</div></div></div><div class="tabs"><button class="tab-btn active" onclick="switchView('inicio',this)">Inicio</button><button class="tab-btn" onclick="switchView('armario',this)">Mi armario</button><button class="tab-btn" onclick="switchView('anadir',this)">Añadir prenda</button><button class="tab-btn" onclick="switchView('looks',this)">Looks</button>
@@ -882,6 +965,9 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
                 <option value="">Todas las categorías</option>
             </select>
         </label>
+    </div>
+    <div class="combine-filter-actions">
+        <button type="button" class="combine-clear-btn" onclick="clearCombineFilters()">Limpiar filtros</button>
     </div>
     <div id="combineCategories" class="hidden"></div>
     <div id="combineGarments" class="combine-garments hidden"></div>
@@ -2030,7 +2116,7 @@ function renderSavedLooksCarousel(){
         return `<article class="looks-saved-mini">
             <img src="${first?.foto||placeholderImg}" alt="Look">
             <div class="mini-title">${esc(l.nombre||"Look sin nombre")}</div>
-            <div class="meta">${l.source==="look_del_dia"?"📅 Look del día · "+(l.fecha_planificada?formatShortDate(l.fecha_planificada):"Sin fecha"):(l.ocasion?esc(fmtOcc(l.ocasion)):"Sin ocasión")} · ${count} prendas</div>
+            <div class="meta">${l.source==="look_del_dia"?"📅 Look del día":(l.ocasion?esc(fmtOcc(l.ocasion)):"Sin ocasión")} · ${count} prendas</div>
             <div class="looks-saved-actions">
                 <button type="button" class="small-btn" onclick="editSavedLook('${l.id}')">Editar</button>
                 <button type="button" class="small-btn" onclick="useSavedLook('${l.id}')">Uso</button>
@@ -2063,6 +2149,25 @@ function updateCombineCategorySelect(){
     select.disabled=!group;
     select.innerHTML=`<option value="">Todas las categorías</option>`+
         cats.map(([v,l])=>`<option value="${v}">${l}</option>`).join("");
+}
+function clearCombineFilters(){
+    combineState.group=null;
+    combineState.category=null;
+    combineState.selected=null;
+    combineState.look=null;
+
+    const groupSelect=document.getElementById("combineGroupSelect");
+    const categorySelect=document.getElementById("combineCategorySelect");
+    if(groupSelect)groupSelect.value="";
+    if(categorySelect){
+        categorySelect.value="";
+        categorySelect.disabled=true;
+        categorySelect.innerHTML='<option value="">Todas las categorías</option>';
+    }
+
+    document.getElementById("combineGarments")?.classList.add("hidden");
+    document.getElementById("combineSelected")?.classList.add("hidden");
+    document.getElementById("combineResult")?.classList.add("hidden");
 }
 function backToCombineGroups(){
     combineState.group=null;
@@ -2329,13 +2434,17 @@ function fillOwnLookSaveOccasions(selected=""){
 function openOwnLookSaveModal(editId=null, source="propio", defaultOccasion=""){
     if(!hasLook(ownLook))return toast("Añade alguna prenda al look.","warn");
 
+    const modal=document.getElementById("lookSaveModal");
+    if(modal && modal.parentElement!==document.body){
+        document.body.appendChild(modal);
+    }
+
     editingSavedLookId=editId||null;
     const existing=editId?savedLooks.find(l=>l.id===editId):null;
     pendingSaveSource=existing?.source||source||"propio";
     pendingSaveOccasion=existing?.ocasion||defaultOccasion||"";
     saveLookType=existing?.source==="look_del_dia"?"day":"look";
 
-    const modal=document.getElementById("lookSaveModal");
     document.getElementById("lookSaveTypeStep")?.classList.remove("hidden");
     document.getElementById("lookSaveDetailsStep")?.classList.add("hidden");
     document.getElementById("saveTypeLook")?.classList.toggle("selected",saveLookType==="look");
