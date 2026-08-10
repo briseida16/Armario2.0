@@ -687,9 +687,44 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
 }
 #combineLookCard .combine-clear-btn:hover{background:#fbf1f5 !important}
 </style>
-</head><body><header><h1>BriCloset ✨</h1><div class="subtitle">🌸 Toda tu ropa en un solo armario virtual, crea looks diferentes y utiliza todo lo que tienes para explotar tu potencial 🌸</div><div class="top-actions"><div class="auth-panel"><button type="button" class="primary-btn" id="loginBtn" onclick="openLoginModal()">
+<style id="calendar-v30-css">
+#calendarPage .calbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+#calendarPage .calgrid,.calweek{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+#calendarPage .calweek div{text-align:center;font-size:.75rem;font-weight:800;padding:4px}
+#calendarPage .calday{min-height:82px;border:1px solid var(--line);border-radius:12px;background:#fff;padding:6px;text-align:left;overflow:hidden;cursor:pointer}
+#calendarPage .calday.today{box-shadow:0 0 0 2px #d99bb5 inset}.calday.sel{box-shadow:0 0 0 2px #b86f91 inset}
+#calendarPage .calnum{font-weight:900;font-size:.8rem}.caldot{display:block;font-size:.62rem;background:#fbf1f5;border-radius:6px;padding:2px 4px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#calendarPage .caldetail{margin-top:14px;padding:15px;border:1px solid var(--line);border-radius:17px;background:#fff}
+#calendarPage .calplan{border:1px solid var(--line);border-radius:14px;padding:11px;margin-top:9px}
+#calendarPage .calmodal{position:fixed;inset:0;background:#0003;display:flex;align-items:center;justify-content:center;padding:15px;z-index:100000}
+#calendarPage .calbox{background:#fff;border-radius:21px;padding:19px;width:min(420px,100%);box-shadow:0 20px 60px #0002}
+#calendarPage .calfield{margin-top:10px}.calfield label{display:block;font-size:.78rem;font-weight:800;margin-bottom:5px}.calfield input{width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--line);border-radius:10px}
+#calendarPage .calactions{display:flex;justify-content:flex-end;gap:8px;margin-top:15px}.calactions button{padding:9px 13px;border:1px solid var(--line);border-radius:10px;background:#fff}.calactions .primary{background:#222;color:#fff}
+@media(max-width:680px){#calendarPage .calday{min-height:66px;padding:5px}.caldot{font-size:.58rem}}
+</style><style id="calendar-nav-v31">
+#calendarNavButton{
+ position:fixed;right:18px;bottom:18px;z-index:5000;
+ border:1px solid var(--line,#eadde3);border-radius:15px;
+ background:#fff;padding:10px 14px;font:inherit;font-weight:900;
+ box-shadow:0 8px 25px rgba(70,40,55,.16);cursor:pointer
+}
+</style><style id="calendar-v33-css">
+.calendar-shell,.calendar-detail{background:#fff;border-radius:22px;padding:18px;margin-bottom:16px}
+.calendar-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.calendar-month-title{text-transform:capitalize;font-size:1.25rem;font-weight:900}
+.calendar-month-btn{width:38px;height:38px;border:1px solid var(--line,#eadde3);border-radius:12px;background:#fff;font-size:1.5rem;cursor:pointer}
+.calendar-week,.calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.calendar-week div{text-align:center;font-size:.75rem;font-weight:900;padding:5px}
+.calendar-day{min-height:82px;border:1px solid var(--line,#eadde3);border-radius:12px;background:#fff;padding:6px;text-align:left;cursor:pointer;overflow:hidden}
+.calendar-day.muted{opacity:.38}.calendar-day.today{box-shadow:0 0 0 2px #d88fb1 inset}.calendar-day.selected{box-shadow:0 0 0 2px #a96887 inset}
+.calendar-num{font-weight:900;font-size:.78rem}.calendar-plan-dot{display:block;margin-top:4px;padding:3px 5px;border-radius:7px;background:#fbf0f5;font-size:.6rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.calendar-add-main{margin-top:14px;border:1px solid var(--line,#eadde3);border-radius:12px;background:#d88fb1;color:#fff;font:inherit;font-weight:900;padding:10px 14px;cursor:pointer}
+.calendar-detail-title{text-transform:capitalize;font-size:1rem;font-weight:900}.calendar-plan-card{border:1px solid var(--line,#eadde3);border-radius:15px;padding:12px;margin-top:10px}.calendar-plan-card .plan-time{font-weight:900}.calendar-create-look{margin-top:9px;border:1px solid var(--line,#eadde3);border-radius:10px;background:#fff;padding:8px 11px;font:inherit;font-weight:800;cursor:pointer}
+.calendar-empty{color:#8c7180;padding:8px 0}
+@media(max-width:600px){.calendar-day{min-height:66px;padding:5px}.calendar-plan-dot{font-size:.56rem}.calendar-shell,.calendar-detail{padding:12px}}
+</style></head><body><header><h1>BriCloset ✨</h1><div class="subtitle">🌸 Toda tu ropa en un solo armario virtual, crea looks diferentes y utiliza todo lo que tienes para explotar tu potencial 🌸</div><div class="top-actions"><div class="auth-panel"><button type="button" class="primary-btn" id="loginBtn" onclick="openLoginModal()">
     Iniciar sesión
-</button><div class="auth-user hidden" id="authUserBox" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false"><img class="auth-photo hidden" id="authPhoto" alt="Foto de usuario"><span class="auth-initials hidden" id="authInitials" aria-hidden="true"></span><span class="auth-menu-arrow" aria-hidden="true">▼</span><div class="user-menu hidden" id="userMenu"><button type="button">👤 Mi perfil</button><button type="button" id="logoutBtn">🚪 Cerrar sesión</button></div></div><div class="mini-badge hidden" id="syncStatus">Esperando sesión</div></div></div><div class="tabs"><button class="tab-btn active" onclick="switchView('inicio',this)">Inicio</button><button class="tab-btn" onclick="switchView('armario',this)">Mi armario</button><button class="tab-btn" onclick="switchView('anadir',this)">Añadir prenda</button><button class="tab-btn" onclick="switchView('looks',this)">Looks</button>
+</button><div class="auth-user hidden" id="authUserBox" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false"><img class="auth-photo hidden" id="authPhoto" alt="Foto de usuario"><span class="auth-initials hidden" id="authInitials" aria-hidden="true"></span><span class="auth-menu-arrow" aria-hidden="true">▼</span><div class="user-menu hidden" id="userMenu"><button type="button">👤 Mi perfil</button><button type="button" id="logoutBtn">🚪 Cerrar sesión</button></div></div><div class="mini-badge hidden" id="syncStatus">Esperando sesión</div></div></div><div class="tabs"><button class="tab-btn active" onclick="switchView('inicio',this)">Inicio</button><button class="tab-btn" onclick="switchView('armario',this)">Mi armario</button><button class="tab-btn" onclick="switchView('anadir',this)">Añadir prenda</button><button class="tab-btn" onclick="switchView('looks',this)">Looks</button><button class="tab-btn" onclick="switchView('calendar',this)">Calendario</button>
 <button class="tab-btn" onclick="switchView('wishlist',this)">Wishlist</button><button class="tab-btn" onclick="switchView('favoritos',this)">Favoritos</button><button class="tab-btn" onclick="switchView('vinted',this)">🛍️ Vinted</button><details class="more-menu"><summary class="tab-btn">Más</summary><div class="more-menu-panel"><button class="tab-btn" onclick="switchView('vinted',this)">En venta</button><button class="tab-btn" onclick="switchView('papelera',this)">Papelera</button><button class="tab-btn" onclick="switchView('ajustes',this)">Ajustes</button></div></details></div></header>
 <main>
 <section id="inicio" class="view active"><div class="card" id="homeWeatherCard">
@@ -2959,4 +2994,77 @@ initLooksFloatingMenu();
 updateHeaderOnScroll();
 updateSubnavVisibility();
 updateLooksFloatingMenuVisibility();
-</script></body></html>
+</script><script>
+let calendarViewDate=new Date(),calendarSelectedDate=new Date();
+let calendarPlans=JSON.parse(storage.get("bricloset_calendar_plans")||"[]");
+function calKey(d){d=new Date(d);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
+function calEsc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function calPlans(k){return calendarPlans.filter(p=>p.date===k)}
+function calendarOpenPlanModal(k){
+ const p=document.getElementById("calendarPage"); if(!p)return;
+ p.insertAdjacentHTML("beforeend",`<div class="calmodal" id="calModal"><div class="calbox"><h3>✨ Nuevo plan</h3>
+ <div class="calfield"><label>¿Qué tienes?</label><input id="calName" placeholder="Oficina, Pilates, boda..."></div>
+ <div class="calfield"><label>Fecha</label><input id="calDate" type="date" value="${k}"></div>
+ <div class="calfield"><label>Hora <span style="font-weight:400">(opcional)</span></label><input id="calTime" type="time"></div>
+ <div class="calfield"><label>Contexto <span style="font-weight:400">(opcional)</span></label><input id="calContext" placeholder="Diario, fiesta, concierto..."></div>
+ <div class="calactions"><button type="button" onclick="calendarClosePlanModal()">Cancelar</button><button type="button" class="primary" onclick="calendarSavePlan()">Añadir plan</button></div></div></div>`)
+}
+function calendarClosePlanModal(){document.getElementById("calModal")?.remove()}
+function calendarSavePlan(){
+ const name=(document.getElementById("calName")?.value||"").trim();
+ const date=document.getElementById("calDate")?.value||"";
+ const time=document.getElementById("calTime")?.value||"";
+ const context=(document.getElementById("calContext")?.value||"").trim();
+ if(!name||!date){toast("Pon qué tienes y la fecha.","warn");return}
+ const plan={id:(typeof uid==="function"?uid():Date.now().toString()),name,date,time,context,lookIds:[]};
+ calendarPlans.push(plan);
+ try{
+   localStorage.setItem("bricloset_calendar_plans",JSON.stringify(calendarPlans));
+ }catch(err){
+   console.error("Error al guardar el plan:",err);
+   toast("No se ha podido guardar el plan. Prueba de nuevo.","warn");
+   return;
+ }
+ calendarSelectedDate=new Date(date+"T12:00:00");
+ calendarViewDate=new Date(date+"T12:00:00");
+ calendarClosePlanModal();
+ renderCalendarPage();
+}
+
+function calendarShiftMonth(n){calendarViewDate=new Date(calendarViewDate.getFullYear(),calendarViewDate.getMonth()+n,1);calendarSelectedDate=new Date(calendarViewDate.getFullYear(),calendarViewDate.getMonth(),1);renderCalendarPage()}
+function calendarSelectDate(k){calendarSelectedDate=new Date(k+"T12:00:00");renderCalendarPage()}
+function calendarOpenLookCreator(id){sessionStorage.setItem("bricloset_pending_plan",JSON.stringify(calendarPlans.find(p=>p.id===id)||null));if(typeof navigateTo==="function")navigateTo("looks");else if(typeof showPage==="function")showPage("looks")}
+function renderCalendarPage(){
+ const grid=document.getElementById("calendarGrid"), title=document.getElementById("calendarMonthTitle"), detail=document.getElementById("calendarDetail");
+ if(!grid||!title||!detail)return;
+ const y=calendarViewDate.getFullYear(),m=calendarViewDate.getMonth();
+ title.textContent=new Intl.DateTimeFormat("es-ES",{month:"long",year:"numeric"}).format(calendarViewDate);
+ const first=new Date(y,m,1),days=new Date(y,m+1,0).getDate(),prevDays=new Date(y,m,0).getDate(),start=(first.getDay()+6)%7,total=Math.ceil((start+days)/7)*7;
+ const today=calKey(new Date()),sel=calKey(calendarSelectedDate); let html="";
+ for(let i=0;i<total;i++){
+   const n=i-start+1,d=new Date(y,m,n),k=calKey(d),outside=n<1||n>days,ps=calPlans(k);
+   html+=`<button type="button" class="calendar-day ${outside?"muted":""} ${k===today?"today":""} ${k===sel?"selected":""}" onclick="calendarSelectDate('${k}')"><div class="calendar-num">${d.getDate()}</div>${ps.slice(0,3).map(p=>`<span class="calendar-plan-dot">${calEsc(p.time?`${p.time} · ${p.name}`:`Todo el día · ${p.name}`)}</span>`).join("")}</button>`;
+ }
+ grid.innerHTML=html;
+ const ps=calPlans(sel).sort((a,b)=>(a.time||"99").localeCompare(b.time||"99"));
+ const dateLabel=new Intl.DateTimeFormat("es-ES",{weekday:"long",day:"numeric",month:"long"}).format(calendarSelectedDate);
+ detail.innerHTML=`<div class="calendar-detail-title">📅 ${dateLabel}</div>${ps.length?ps.map(p=>`<div class="calendar-plan-card"><div>${p.time?`<span class="plan-time">${calEsc(p.time)}</span> · `:`<span class="plan-time">Todo el día</span> · `}<b>${calEsc(p.name)}</b></div>${p.context?`<div class="calendar-empty">${calEsc(p.context)}</div>`:""}<div class="calendar-empty">❓ ¿Qué te vas a poner?</div><button type="button" class="calendar-create-look" onclick="calendarOpenLookCreator('${p.id}')">✨ Crear un look</button></div>`).join(""):`<div class="calendar-empty">No tienes planes para este día. Puedes añadir uno con el botón de arriba ✨</div>`}`;
+}
+
+</script><section id="calendar" class="view">
+  <div id="calendarPage">
+    <div class="section-card calendar-shell">
+      <div class="calendar-header">
+        <button type="button" class="calendar-month-btn" onclick="calendarShiftMonth(-1)">‹</button>
+        <div class="calendar-month-title" id="calendarMonthTitle">Calendario</div>
+        <button type="button" class="calendar-month-btn" onclick="calendarShiftMonth(1)">›</button>
+      </div>
+      <div class="calendar-week">
+        <div>L</div><div>M</div><div>X</div><div>J</div><div>V</div><div>S</div><div>D</div>
+      </div>
+      <div class="calendar-grid" id="calendarGrid"></div>
+      <button type="button" class="calendar-add-main" onclick="calendarOpenPlanModal(calKey(calendarSelectedDate))">＋ Añadir plan</button>
+    </div>
+    <div class="section-card calendar-detail" id="calendarDetail"></div>
+  </div>
+</section></body></html>
