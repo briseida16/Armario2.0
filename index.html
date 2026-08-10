@@ -509,6 +509,101 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
     }
 }
 </style>
+
+<style id="combine-clean-layout-v28">
+#combineLookCard .combine-selectors{
+    display:grid !important;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;
+    gap:14px !important;
+    align-items:end !important;
+    width:100% !important;
+}
+#combineLookCard .combine-select-label{
+    display:flex !important;
+    flex-direction:column !important;
+    gap:6px !important;
+    min-width:0 !important;
+}
+#combineLookCard .combine-select-label select{
+    width:100% !important;
+    min-width:0 !important;
+    height:44px !important;
+    box-sizing:border-box !important;
+}
+#combineLookCard #combineGarments{
+    display:block !important;
+    width:100% !important;
+    min-width:0 !important;
+    margin-top:14px !important;
+}
+#combineLookCard #combineGarments .combine-garments-track{
+    display:grid !important;
+    grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+    gap:14px !important;
+    width:100% !important;
+    min-width:0 !important;
+    max-height:none !important;
+    overflow:visible !important;
+    padding:4px 2px 14px !important;
+    box-sizing:border-box !important;
+}
+#combineLookCard #combineGarments .combine-garment{
+    display:block !important;
+    width:100% !important;
+    min-width:0 !important;
+    max-width:none !important;
+    box-sizing:border-box !important;
+    padding:9px !important;
+}
+#combineLookCard #combineGarments .combine-garment img{
+    display:block !important;
+    width:100% !important;
+    height:auto !important;
+    aspect-ratio:1/1 !important;
+    object-fit:cover !important;
+    border-radius:12px !important;
+}
+#combineLookCard #combineGarments .combine-garment .mini-title{
+    display:block !important;
+    margin-top:7px !important;
+    font-size:.9rem !important;
+    line-height:1.15 !important;
+    white-space:normal !important;
+    overflow:visible !important;
+    word-break:break-word !important;
+}
+#combineLookCard #combineGarments .combine-garment .meta{
+    display:block !important;
+    margin-top:3px !important;
+    font-size:.76rem !important;
+    line-height:1.15 !important;
+}
+@media(max-width:760px){
+    #combineLookCard .combine-selectors{
+        grid-template-columns:1fr 1fr !important;
+    }
+    #combineLookCard #combineGarments .combine-garments-track{
+        grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+        gap:12px !important;
+    }
+}
+@media(max-width:420px){
+    #combineLookCard .combine-selectors{
+        grid-template-columns:1fr !important;
+    }
+}
+</style>
+
+<style id="save-modal-layer-v28">
+.look-save-modal{
+    z-index:99999 !important;
+}
+.look-save-modal:not(.hidden){
+    display:flex !important;
+    visibility:visible !important;
+    opacity:1 !important;
+}
+</style>
 </head><body><header><h1>BriCloset ✨</h1><div class="subtitle">🌸 Toda tu ropa en un solo armario virtual, crea looks diferentes y utiliza todo lo que tienes para explotar tu potencial 🌸</div><div class="top-actions"><div class="auth-panel"><button type="button" class="primary-btn" id="loginBtn" onclick="openLoginModal()">
     Iniciar sesión
 </button><div class="auth-user hidden" id="authUserBox" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false"><img class="auth-photo hidden" id="authPhoto" alt="Foto de usuario"><span class="auth-initials hidden" id="authInitials" aria-hidden="true"></span><span class="auth-menu-arrow" aria-hidden="true">▼</span><div class="user-menu hidden" id="userMenu"><button type="button">👤 Mi perfil</button><button type="button" id="logoutBtn">🚪 Cerrar sesión</button></div></div><div class="mini-badge hidden" id="syncStatus">Esperando sesión</div></div></div><div class="tabs"><button class="tab-btn active" onclick="switchView('inicio',this)">Inicio</button><button class="tab-btn" onclick="switchView('armario',this)">Mi armario</button><button class="tab-btn" onclick="switchView('anadir',this)">Añadir prenda</button><button class="tab-btn" onclick="switchView('looks',this)">Looks</button>
@@ -2320,7 +2415,7 @@ function confirmOwnLookSave(){
             ...(existing||{}),
             id:existing?.id||uid(),
             nombre:name,
-            ocasion,
+            ocasion: occasion,
             source,
             fecha:existing?.fecha||new Date().toISOString(),
             fecha_planificada:saveLookType==="day"?plannedDate:null,
@@ -2641,7 +2736,20 @@ function saveHomeLook(){
         toast("Primero genera un look de casa.","warn");
         return;
     }
-    saveLookObject(homeLook,`Look de casa ${savedLooks.length+1}`,"pijama_estarporcasa","casa");
+    ownLook={
+        abrigo:homeLook.abrigo||null,
+        exterior:homeLook.exterior||null,
+        interior:homeLook.interior||null,
+        inferior:homeLook.inferior||null,
+        vestido:homeLook.vestido||null,
+        calzado:homeLook.calzado||null,
+        bolso:homeLook.bolso||null,
+        accesorios:[...(homeLook.accesorios||[])]
+    };
+    editingSavedLookId=null;
+    pendingSaveSource="casa";
+    pendingSaveOccasion="pijama_estarporcasa";
+    openOwnLookSaveModal(null,"casa","pijama_estarporcasa");
 }
 
 function dismissHomeLook(){
