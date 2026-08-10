@@ -463,6 +463,52 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
     #combineGarments .combine-garments-track{grid-template-columns:repeat(2,minmax(0,1fr));max-height:390px}
 }
 </style>
+
+<style id="combine-card-mobile-fix">
+#combineGarments .combine-garments-track{
+    display:grid !important;
+    grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+    gap:14px !important;
+    width:100% !important;
+    max-height:none !important;
+    overflow:visible !important;
+}
+#combineGarments .combine-garment{
+    width:100% !important;
+    min-width:0 !important;
+    padding:10px !important;
+    box-sizing:border-box !important;
+}
+#combineGarments .combine-garment img{
+    display:block !important;
+    width:100% !important;
+    height:150px !important;
+    aspect-ratio:1/1 !important;
+    object-fit:cover !important;
+    border-radius:12px !important;
+}
+#combineGarments .combine-garment .mini-title{
+    font-size:.92rem !important;
+    line-height:1.15 !important;
+    white-space:normal !important;
+    overflow:visible !important;
+    word-break:break-word !important;
+}
+#combineGarments .combine-garment .meta{
+    font-size:.78rem !important;
+    line-height:1.15 !important;
+}
+@media(max-width:700px){
+    #combineGarments .combine-garments-track{
+        grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+        gap:12px !important;
+    }
+    #combineGarments .combine-garment img{
+        height:auto !important;
+        aspect-ratio:1/1 !important;
+    }
+}
+</style>
 </head><body><header><h1>BriCloset ✨</h1><div class="subtitle">🌸 Toda tu ropa en un solo armario virtual, crea looks diferentes y utiliza todo lo que tienes para explotar tu potencial 🌸</div><div class="top-actions"><div class="auth-panel"><button type="button" class="primary-btn" id="loginBtn" onclick="openLoginModal()">
     Iniciar sesión
 </button><div class="auth-user hidden" id="authUserBox" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false"><img class="auth-photo hidden" id="authPhoto" alt="Foto de usuario"><span class="auth-initials hidden" id="authInitials" aria-hidden="true"></span><span class="auth-menu-arrow" aria-hidden="true">▼</span><div class="user-menu hidden" id="userMenu"><button type="button">👤 Mi perfil</button><button type="button" id="logoutBtn">🚪 Cerrar sesión</button></div></div><div class="mini-badge hidden" id="syncStatus">Esperando sesión</div></div></div><div class="tabs"><button class="tab-btn active" onclick="switchView('inicio',this)">Inicio</button><button class="tab-btn" onclick="switchView('armario',this)">Mi armario</button><button class="tab-btn" onclick="switchView('anadir',this)">Añadir prenda</button><button class="tab-btn" onclick="switchView('looks',this)">Looks</button>
@@ -2249,27 +2295,28 @@ function closeOwnLookSaveModal(){
 }
 
 function confirmOwnLookSave(){
-    const name=document.getElementById("lookSaveName")?.value.trim();
+    const name=(document.getElementById("lookSaveName")?.value||"").trim();
     const occasion=document.getElementById("lookSaveOccasion")?.value||pendingSaveOccasion||"";
     const plannedDate=document.getElementById("lookSaveDate")?.value||"";
 
     if(!name){toast("Pon un nombre para el look.","warn");return}
     if(saveLookType==="day"&&!plannedDate){
-        toast("Elige el día en el que quieres usarlo.","warn");
-        return;
+        toast("Elige el día en el que quieres usarlo.","warn");return;
     }
-    if(!hasLook(ownLook)){toast("Añade alguna prenda al look.","warn");return}
+    if(!hasLook(ownLook)){
+        toast("Añade alguna prenda al look.","warn");return;
+    }
 
     const wasEditing=!!editingSavedLookId;
-    try{
-        const source=saveLookType==="day"?"look_del_dia":(pendingSaveSource||"propio");
-        const existing=wasEditing?savedLooks.find(l=>l.id===editingSavedLookId):null;
-        if(wasEditing&&!existing){
-            toast("No se encontró ese look.","warn");
-            return;
-        }
+    const existing=wasEditing?savedLooks.find(l=>l.id===editingSavedLookId):null;
+    if(wasEditing&&!existing){
+        toast("No se encontró ese look.","warn");return;
+    }
 
-        const data={
+    const source=saveLookType==="day"?"look_del_dia":(pendingSaveSource||"propio");
+    let data;
+    try{
+        data={
             ...(existing||{}),
             id:existing?.id||uid(),
             nombre:name,
@@ -2280,37 +2327,48 @@ function confirmOwnLookSave(){
             favorito:existing?.favorito||false,
             ...mapLookToIds(ownLook)
         };
+        const next=wasEditing
+            ? savedLooks.map(l=>l.id===data.id?data:l)
+            : [data,...savedLooks];
 
-        if(wasEditing){
-            savedLooks=savedLooks.map(l=>l.id===data.id?data:l);
-        }else{
-            savedLooks.unshift(data);
-        }
+        // The ONLY operation that determines whether saving succeeded.
+        storage.set(STORAGE_LOOKS,JSON.stringify(next));
+        savedLooks=next;
+    }catch(error){
+        console.error("Error real al guardar el look:",error);
+        toast("No se ha podido guardar el look. Prueba de nuevo.","warn");
+        return;
+    }
 
-        storage.set(STORAGE_LOOKS,JSON.stringify(savedLooks));
+    // From here on the look is already saved. Never report a save failure because
+    // a visual refresh, scroll or optional Firebase sync failed.
+    const savedType=saveLookType;
+    editingSavedLookId=null;
+    ownLook=emptyLook();
+    pendingSaveSource="propio";
+    pendingSaveOccasion="";
 
-        editingSavedLookId=null;
-        ownLook=emptyLook();
-        closeOwnLookSaveModal();
-        closeOwnLookSelector();
-        renderOwnLook();
-        renderSavedLooksCarousel();
+    try{closeOwnLookSaveModal()}catch(e){console.warn("Cerrar modal:",e)}
+    try{closeOwnLookSelector()}catch(e){console.warn("Cerrar selector:",e)}
+    try{renderOwnLook()}catch(e){console.warn("Actualizar creador:",e)}
+    try{renderSavedLooksCarousel()}catch(e){console.warn("Actualizar guardados:",e)}
+    try{persist()}catch(e){console.warn("Sincronización pendiente:",e)}
 
-        try{persist()}catch(e){console.warn("Sincronización pendiente:",e)}
-
+    try{
         document.getElementById("savedLooksCarouselCard")?.scrollIntoView({
             behavior:"smooth",block:"start"
         });
-        toast(wasEditing?"Look actualizado ✅":
-              saveLookType==="day"?"Look del día guardado 📅":"Look guardado ✅");
-    }catch(error){
-        console.error("Error guardando look:",error);
-        toast("No se ha podido guardar el look. Prueba de nuevo.","warn");
-    }
+    }catch(e){}
+
+    toast(wasEditing?"Look actualizado ✅":
+          savedType==="day"?"Look del día guardado 📅":"Look guardado ✅");
 }
 
 function saveOwnLook(){
-    if(!hasLook(ownLook))return toast("Añade alguna prenda al look.","warn");
+    if(!hasLook(ownLook)){
+        toast("Añade alguna prenda al look.","warn");
+        return;
+    }
     openOwnLookSaveModal(editingSavedLookId,"propio","");
 }
 function cancelOwnLook(){ownLook=emptyLook();editingSavedLookId=null;closeOwnLookSelector();renderOwnLook()}
@@ -2579,6 +2637,10 @@ function generateHomeLook(){
 }
 
 function saveHomeLook(){
+    if(!hasLook(homeLook)){
+        toast("Primero genera un look de casa.","warn");
+        return;
+    }
     saveLookObject(homeLook,`Look de casa ${savedLooks.length+1}`,"pijama_estarporcasa","casa");
 }
 
