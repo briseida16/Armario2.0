@@ -3153,6 +3153,7 @@ updateSubnavVisibility();
 updateLooksFloatingMenuVisibility();
 </script><script>
 var calendarViewDate=new Date(),calendarSelectedDate=new Date();
+
 var calendarPlans=(function(){
   try{
     var raw=localStorage.getItem("bricloset_calendar_plans");
@@ -3163,6 +3164,65 @@ var calendarPlans=(function(){
     return [];
   }
 })();
+
+async function syncCalendarPlansWithFirestore(){
+    if(!currentUser) return;
+
+    try{
+        const ref = userMetaRef();
+        const snap = await getDoc(ref);
+
+        const localPlans = Array.isArray(calendarPlans)
+            ? calendarPlans
+            : [];
+
+        if(snap.exists()){
+            const data = snap.data() || {};
+            const remotePlans = Array.isArray(data.calendarPlans)
+                ? data.calendarPlans
+                : [];
+
+            if(remotePlans.length > 0){
+                calendarPlans = remotePlans;
+                localStorage.setItem(
+                    "bricloset_calendar_plans",
+                    JSON.stringify(calendarPlans)
+                );
+            }else if(localPlans.length > 0){
+                await setDoc(
+                    ref,
+                    {calendarPlans: localPlans},
+                    {merge:true}
+                );
+            }
+        }else if(localPlans.length > 0){
+            await setDoc(
+                ref,
+                {calendarPlans: localPlans},
+                {merge:true}
+            );
+        }
+
+        renderCalendarPage();
+
+    }catch(error){
+        console.error("Error sincronizando calendario:",error);
+    }
+}
+
+async function saveCalendarPlansToFirestore(){
+    if(!currentUser) return;
+
+    try{
+        await setDoc(
+            userMetaRef(),
+            {calendarPlans: calendarPlans},
+            {merge:true}
+        );
+    }catch(error){
+        console.error("Error guardando calendario en Firestore:",error);
+    }
+}
 function calKey(d){d=new Date(d);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
 function calEsc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function calPlans(k){return calendarPlans.filter(p=>p.date===k)}
@@ -3231,7 +3291,8 @@ function calendarSavePlan(){
  calendarPlans.push(plan);
  try{
    window.localStorage.setItem("bricloset_calendar_plans",JSON.stringify(calendarPlans));
- }catch(err){
+saveCalendarPlansToFirestore();
+}catch(err){
    console.error("Error al guardar el plan:",err);
    if(typeof toast==="function")toast("No se ha podido guardar el plan. Prueba de nuevo.","warn");else alert("No se ha podido guardar el plan. Prueba de nuevo.");
    return;
@@ -3281,6 +3342,7 @@ function calendarAssignSavedLook(id){
   calendarPlans[idx].look=item;
   try{
     localStorage.setItem("bricloset_calendar_plans",JSON.stringify(calendarPlans));
+    saveCalendarPlansToFirestore();
     sessionStorage.removeItem("bricloset_pending_plan");
     calendarCloseLookFlow();
     switchView("calendar");
