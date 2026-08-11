@@ -2987,10 +2987,7 @@ async function loadHomeWeather(){
         console.error(e);
     }
 }
-
-
-let homeLook=emptyLook();
-
+let homeLook={abrigo:null,exterior:null,interior:null,inferior:null,vestido:null,calzado:null,bolso:null,accesorios:[]};
 function buildHomeLook(){
     const homeOccasions=["pijama_estarporcasa","comodo","casual"];
     let pool=garments.filter(g =>
