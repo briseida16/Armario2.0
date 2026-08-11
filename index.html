@@ -731,7 +731,26 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
 .calendar-num{font-weight:900;font-size:.78rem}.calendar-plan-dot{display:block;margin-top:4px;padding:3px 5px;border-radius:7px;background:#fbf0f5;font-size:.6rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .calendar-add-main{margin-top:14px;border:1px solid var(--line,#eadde3);border-radius:12px;background:#d88fb1;color:#fff;font:inherit;font-weight:900;padding:10px 14px;cursor:pointer}
 .calendar-detail-title{text-transform:capitalize;font-size:1rem;font-weight:900}.calendar-plan-card{border:1px solid var(--line,#eadde3);border-radius:15px;padding:12px;margin-top:10px}.calendar-plan-card .plan-time{font-weight:900}.calendar-create-look{margin-top:9px;border:1px solid var(--line,#eadde3);border-radius:10px;background:#fff;padding:8px 11px;font:inherit;font-weight:800;cursor:pointer}
-.calendar-empty{color:#8c7180;padding:8px 0}
+.calendar-empty{color:#8c7180;padding:8px 0}.calendar-delete-plan{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  margin-top:8px;
+  padding:9px 14px;
+  border:1px solid #f0c9dc;
+  border-radius:14px;
+  background:#fff;
+  color:#6b5363;
+  font-family:inherit;
+  font-size:13px;
+  font-weight:700;
+  cursor:pointer;
+}
+
+.calendar-delete-plan:hover{
+  background:#fff5f9;
+}
 @media(max-width:600px){.calendar-day{min-height:66px;padding:5px}.calendar-plan-dot{font-size:.56rem}.calendar-shell,.calendar-detail{padding:12px}}
 </style><style id="calendar-v38-css">
 .calendar-day.today{box-shadow:0 0 0 2px #f0b45b inset !important;background:#fffaf1}
@@ -1624,7 +1643,7 @@ async function login() {
         console.error(e);
     }
 }
-    function switchView(id,btn){document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));document.getElementById(id)?.classList.add("active");if(btn)btn.classList.add("active");else[...document.querySelectorAll(".tab-btn")].find(b=>b.getAttribute("onclick")?.includes("'"+id+"'"))?.classList.add("active");if(id==="tiempo"&&document.getElementById("weatherCurrent")?.innerHTML==="")loadWeather();if(id==="calendar")requestAnimationFrame();updateLooksFloatingMenuVisibility();updateSubnavVisibility();scrollTo({top:0,behavior:"smooth"})}
+    function switchView(id,btn){document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));document.getElementById(id)?.classList.add("active");if(btn)btn.classList.add("active");else[...document.querySelectorAll(".tab-btn")].find(b=>b.getAttribute("onclick")?.includes("'"+id+"'"))?.classList.add("active");if(id==="tiempo"&&document.getElementById("weatherCurrent")?.innerHTML==="")loadWeather();if(id==="calendar")requestAnimationFrame(()=>renderCalendarPage());updateLooksFloatingMenuVisibility();updateSubnavVisibility();scrollTo({top:0,behavior:"smooth"})}
 function populateStaticSelects(){document.getElementById("grupo").innerHTML=Object.entries(groupLabels).map(([v,l])=>`<option value="${v}">${l}</option>`).join("");const temporadaSelect = document.getElementById("temporada");
 if (temporadaSelect) {
     temporadaSelect.innerHTML = seasons
