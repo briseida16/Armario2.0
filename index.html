@@ -972,7 +972,98 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
 <label><input id="enVinted" type="checkbox"> En venta</label>
 </div></div><div class="field" style="grid-column:1/-1"><label>Comentarios</label><textarea id="comentarios" placeholder="Ej. combina muy bien con dorado..."></textarea></div><div class="field" style="grid-column:1/-1"><label>Relacionar con prendas existentes</label><div class="related-picker"><div id="relatedSelectedPreview" class="related-selected"></div><div id="relatedOptions" class="related-options"></div></div><p class="muted" style="margin:0">Toca una o varias prendas para relacionarlas.</p></div></div><div class="button-row" style="margin-top:14px"><button class="primary-btn" onclick="saveGarment()">Guardar prenda</button><button class="ghost-btn" onclick="resetForm()">Limpiar formulario</button></div></div></section>
 <section id="wishlist" class="view"><div class="card"><h2 class="section-title">Wishlist</h2><div class="form-grid"><div class="field"><label>Foto</label><input id="wishFoto" type="file" accept="image/*"></div><div class="field"><label>Nombre</label><input id="wishNombre"></div><div class="field"><label>Marca</label><input id="wishMarca"></div><div class="field"><label>Precio</label><input id="wishPrecio" type="number" step="0.01" min="0"></div><div class="field"><label>Enlace de compra</label><input id="wishEnlace" type="url"></div><div class="field"><label>Prioridad</label><select id="wishPrioridad"><option>Alta</option><option>Media</option><option>Baja</option></select></div><div class="field" style="grid-column:1/-1"><label>Comentarios</label><textarea id="wishComentarios"></textarea></div></div><div class="button-row" style="margin-top:14px"><button class="primary-btn" onclick="saveWish()">Añadir a wishlist</button><button class="ghost-btn" onclick="resetWishForm()">Limpiar</button></div></div><div id="wishlistGrid" class="grid"></div></section>
-<section id="crearLook" class="view"><div class="card"><h2 class="section-title">Crear look manual</h2><div class="button-row"><button class="ghost-btn" onclick="openSelector('abrigo')">Elegir abrigo</button><button class="ghost-btn" onclick="openSelector('exterior')">Elegir jersey/sudadera</button><button class="ghost-btn" onclick="openSelector('interior')">Elegir parte superior</button><button class="ghost-btn" onclick="openSelector('inferior')">Elegir parte inferior</button><button class="ghost-btn" onclick="openSelector('vestido')">Elegir vestido/mono</button><button class="ghost-btn" onclick="openSelector('calzado')">Elegir calzado</button><button class="ghost-btn" onclick="openSelector('bolso')">Elegir bolso</button><button class="ghost-btn" onclick="openSelector('accesorios')">Añadir accesorio +</button></div></div><div class="card"><div class="outfit-grid" id="manualOutfit"></div><div class="button-row" style="margin-top:14px"><button class="primary-btn" onclick="saveCurrentLook()">Guardar look</button><button class="ghost-btn" onclick="clearLook()">Limpiar look</button></div></div><div class="card hidden" id="selectorCard"><h2 class="section-title">Selecciona una prenda</h2><div id="selectorGrid" class="grid"></div></div></section>
+
+<script>
+let calendarOwnLook=emptyLook();
+let calendarOwnCurrentSlot=null;
+
+function renderCalendarOwnLook(){
+  Object.keys(calendarOwnLook).forEach(s=>{
+    const el=document.getElementById(`calendarOwn_${s}`);
+    if(!el)return;
+    if(s==="accesorios"){
+      const items=calendarOwnLook.accesorios||[];
+      el.innerHTML=`<div class="slot-title">Accesorios</div>${items.map((g,i)=>`<div class="related-selected-card"><img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}"><div><strong>${esc(g.nombre)}</strong></div><button class="small-btn danger-btn" onclick="removeCalendarOwnAccessory(${i})">Quitar</button></div>`).join("")}<button class="small-btn" onclick="openCalendarOwnLookSelector('accesorios')">+ Añadir</button>`;
+    }else{
+      el.innerHTML=calendarOwnLook[s]?`<div class="slot-title">${slotTitles[s]}</div><img src="${calendarOwnLook[s].foto||placeholderImg}" alt="${esc(calendarOwnLook[s].nombre)}"><strong>${esc(calendarOwnLook[s].nombre)}</strong><div class="muted">${esc(fmtCat(calendarOwnLook[s].categoria))}</div><button class="small-btn danger-btn" onclick="removeCalendarOwnSlot('${s}')">Quitar</button>`:`<div class="slot-title">${slotTitles[s]}</div><div class="muted">Vacío</div><button class="small-btn" onclick="openCalendarOwnLookSelector('${s}')">Elegir</button>`;
+    }
+  });
+}
+function openCalendarOwnLookSelector(slot){
+  calendarOwnCurrentSlot=slot;
+  const selector=document.getElementById("calendarOwnLookSelector");
+  if(!selector)return;
+  selector.classList.remove("hidden");
+  const title=document.getElementById("calendarOwnLookSelectorTitle");
+  if(title)title.textContent=`Elige ${slotTitles[slot]||"prenda"}`;
+  const gs=document.getElementById("calendarOwnSelectorGroup");
+  if(!gs)return;
+  gs.innerHTML=Object.entries(groupLabels).filter(([g])=>slot==="accesorios"?g==="accesorios":true).map(([v,l])=>`<option value="${v}">${l}</option>`).join("");
+  const defaults={abrigo:"abrigos",exterior:"jerseis_sudaderas",interior:"parte_superior",inferior:"parte_inferior",vestido:"vestidos_monos",calzado:"calzado",bolso:"bolsos",accesorios:"accesorios"};
+  gs.value=defaults[slot]||"parte_superior";
+  renderCalendarOwnSelectorCategories();
+  requestAnimationFrame(()=>selector.scrollIntoView({behavior:"smooth",block:"center"}));
+}
+function closeCalendarOwnLookSelector(){document.getElementById("calendarOwnLookSelector")?.classList.add("hidden")}
+function renderCalendarOwnSelectorCategories(){
+  const gs=document.getElementById("calendarOwnSelectorGroup"),cs=document.getElementById("calendarOwnSelectorCategory");
+  if(!gs||!cs)return;
+  cs.innerHTML=(categoryOptions[gs.value]||[]).map(([v,l])=>`<option value="${v}">${l}</option>`).join("");
+  renderCalendarOwnSelectorGarments();
+}
+function renderCalendarOwnSelectorGarments(){
+  const gs=document.getElementById("calendarOwnSelectorGroup"),cs=document.getElementById("calendarOwnSelectorCategory"),box=document.getElementById("calendarOwnSelectorGarments");
+  if(!gs||!cs||!box||!calendarOwnCurrentSlot)return;
+  const list=garments.filter(g=>g.disponible&&!g.vendida&&!g.eliminado_en&&g.grupo===gs.value&&g.categoria===cs.value&&inferSlot(g)===calendarOwnCurrentSlot);
+  box.innerHTML=list.length?list.map(g=>`<div class="item-card"><img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}"><div class="item-body"><p class="item-name">${esc(g.nombre)}</p><p class="meta">${esc(fmtCat(g.categoria))}</p><button class="small-btn" onclick="selectCalendarOwnGarment('${g.id}')">Seleccionar</button></div></div>`).join(""):'<div class="empty">No hay prendas para esta parte del look.</div>';
+}
+function selectCalendarOwnGarment(id){
+  const g=findGarment(id); if(!g)return;
+  if(calendarOwnCurrentSlot==="accesorios"){
+    if(!calendarOwnLook.accesorios.some(a=>a.id===id))calendarOwnLook.accesorios.push(g);
+  }else{
+    if(calendarOwnCurrentSlot==="vestido"){calendarOwnLook.interior=null;calendarOwnLook.inferior=null}
+    if(["interior","inferior"].includes(calendarOwnCurrentSlot))calendarOwnLook.vestido=null;
+    calendarOwnLook[calendarOwnCurrentSlot]=g;
+  }
+  closeCalendarOwnLookSelector();
+  renderCalendarOwnLook();
+  requestAnimationFrame(()=>document.getElementById("calendarCreateOwnLookCard")?.scrollIntoView({behavior:"smooth",block:"start"}));
+}
+function removeCalendarOwnSlot(slot){calendarOwnLook[slot]=null;renderCalendarOwnLook()}
+function removeCalendarOwnAccessory(i){calendarOwnLook.accesorios.splice(i,1);renderCalendarOwnLook()}
+function saveCalendarOwnLook(){
+  if(!hasLook(calendarOwnLook)){toast("Añade alguna prenda al look.","warn");return}
+  // Keep current saving behavior for this step; only isolate the duplicated UI.
+  const previous=ownLook;
+  ownLook=calendarOwnLook;
+  try{saveOwnLook()}finally{ownLook=previous}
+}
+function cancelCalendarOwnLook(){calendarOwnLook=emptyLook();closeCalendarOwnLookSelector();renderCalendarOwnLook()}
+function closeCalendarOwnLookSelector(){document.getElementById("calendarOwnLookSelector")?.classList.add("hidden")}
+</script>
+<section id="crearLook" class="view">
+<div class="card" id="createOwnLookCard">
+    <h2 class="section-title">🎨 Crea tu propio look</h2>
+    <p class="muted">Selecciona las prendas que quieras combinar y guárdalo cuando estés contenta con el resultado.</p>
+    <div class="outfit-grid manual-looks-grid" id="ownLookOutfit"><div class="slot" id="own_abrigo"></div><div class="slot" id="own_exterior"></div><div class="slot" id="own_interior"></div><div class="slot" id="own_inferior"></div><div class="slot" id="own_vestido"></div><div class="slot" id="own_calzado"></div><div class="slot" id="own_bolso"></div><div class="slot" id="own_accesorios"></div></div>
+    <div class="looks-single-selector hidden" id="ownLookSelector">
+        <div class="selector-head">
+            <strong id="ownLookSelectorTitle">Elige una prenda</strong>
+            <button class="small-btn" type="button" onclick="closeOwnLookSelector()">Cerrar</button>
+        </div>
+        <div class="looks-selector-filters">
+            <select id="ownSelectorGroup" onchange="renderOwnSelectorCategories()"></select>
+            <select id="ownSelectorCategory" onchange="renderOwnSelectorGarments()"></select>
+        </div>
+        <div id="ownSelectorGarments" class="grid"></div>
+    </div>
+    <div class="button-row" style="margin-top:14px">
+        <button class="primary-btn" onclick="saveOwnLook()">Guardar</button>
+        <button class="ghost-btn" onclick="cancelOwnLook()">Cancelar</button>
+    </div>
+</div>
+<div id="calendarLegacyCompat" style="display:none"><div id="manualOutfit"></div><div id="selectorCard"><div id="selectorGrid"></div></div></div></section>
 
 <section id="looks" class="view">
 <button id="looksFloatingMenuBtn" class="looks-floating-menu-btn" type="button" aria-label="Abrir menú de Looks" aria-expanded="false">☰</button>
@@ -1123,24 +1214,24 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
     </div>
 </div>
 
-<div class="card" id="createOwnLookCard">
+<div class="card" id="calendarCreateOwnLookCard">
     <h2 class="section-title">🎨 Crea tu propio look</h2>
     <p class="muted">Selecciona las prendas que quieras combinar y guárdalo cuando estés contenta con el resultado.</p>
-    <div class="outfit-grid manual-looks-grid" id="ownLookOutfit"><div class="slot" id="own_abrigo"></div><div class="slot" id="own_exterior"></div><div class="slot" id="own_interior"></div><div class="slot" id="own_inferior"></div><div class="slot" id="own_vestido"></div><div class="slot" id="own_calzado"></div><div class="slot" id="own_bolso"></div><div class="slot" id="own_accesorios"></div></div>
-    <div class="looks-single-selector hidden" id="ownLookSelector">
+    <div class="outfit-grid manual-looks-grid" id="calendarOwnLookOutfit"><div class="slot" id="calendarOwn_abrigo"></div><div class="slot" id="calendarOwn_exterior"></div><div class="slot" id="calendarOwn_interior"></div><div class="slot" id="calendarOwn_inferior"></div><div class="slot" id="calendarOwn_vestido"></div><div class="slot" id="calendarOwn_calzado"></div><div class="slot" id="calendarOwn_bolso"></div><div class="slot" id="calendarOwn_accesorios"></div></div>
+    <div class="looks-single-selector hidden" id="calendarOwnLookSelector">
         <div class="selector-head">
-            <strong id="ownLookSelectorTitle">Elige una prenda</strong>
-            <button class="small-btn" type="button" onclick="closeOwnLookSelector()">Cerrar</button>
+            <strong id="calendarOwnLookSelectorTitle">Elige una prenda</strong>
+            <button class="small-btn" type="button" onclick="closeCalendarOwnLookSelector()">Cerrar</button>
         </div>
         <div class="looks-selector-filters">
-            <select id="ownSelectorGroup" onchange="renderOwnSelectorCategories()"></select>
-            <select id="ownSelectorCategory" onchange="renderOwnSelectorGarments()"></select>
+            <select id="calendarOwnSelectorGroup" onchange="renderCalendarOwnSelectorCategories()"></select>
+            <select id="calendarOwnSelectorCategory" onchange="renderCalendarOwnSelectorGarments()"></select>
         </div>
-        <div id="ownSelectorGarments" class="grid"></div>
+        <div id="calendarOwnSelectorGarments" class="grid"></div>
     </div>
     <div class="button-row" style="margin-top:14px">
-        <button class="primary-btn" onclick="saveOwnLook()">Guardar</button>
-        <button class="ghost-btn" onclick="cancelOwnLook()">Cancelar</button>
+        <button class="primary-btn" onclick="saveCalendarOwnLook()">Guardar</button>
+        <button class="ghost-btn" onclick="cancelCalendarOwnLook()">Cancelar</button>
     </div>
 </div>
 </section>
@@ -1539,7 +1630,7 @@ async function login() {
         console.error(e);
     }
 }
-    function switchView(id,btn){document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));document.getElementById(id)?.classList.add("active");if(btn)btn.classList.add("active");else[...document.querySelectorAll(".tab-btn")].find(b=>b.getAttribute("onclick")?.includes("'"+id+"'"))?.classList.add("active");if(id==="tiempo"&&document.getElementById("weatherCurrent")?.innerHTML==="")loadWeather();updateLooksFloatingMenuVisibility();updateSubnavVisibility();scrollTo({top:0,behavior:"smooth"})}
+    function switchView(id,btn){document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));document.getElementById(id)?.classList.add("active");if(btn)btn.classList.add("active");else[...document.querySelectorAll(".tab-btn")].find(b=>b.getAttribute("onclick")?.includes("'"+id+"'"))?.classList.add("active");if(id==="tiempo"&&document.getElementById("weatherCurrent")?.innerHTML==="")loadWeather();if(id==="calendar")requestAnimationFrame(renderCalendarPage);updateLooksFloatingMenuVisibility();updateSubnavVisibility();scrollTo({top:0,behavior:"smooth"})}
 function populateStaticSelects(){document.getElementById("grupo").innerHTML=Object.entries(groupLabels).map(([v,l])=>`<option value="${v}">${l}</option>`).join("");const temporadaSelect = document.getElementById("temporada");
 if (temporadaSelect) {
     temporadaSelect.innerHTML = seasons
