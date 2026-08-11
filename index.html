@@ -1624,7 +1624,7 @@ async function login() {
         console.error(e);
     }
 }
-    function switchView(id,btn){document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));document.getElementById(id)?.classList.add("active");if(btn)btn.classList.add("active");else[...document.querySelectorAll(".tab-btn")].find(b=>b.getAttribute("onclick")?.includes("'"+id+"'"))?.classList.add("active");if(id==="tiempo"&&document.getElementById("weatherCurrent")?.innerHTML==="")loadWeather();if(id==="calendar")requestAnimationFrame(renderCalendarPage);updateLooksFloatingMenuVisibility();updateSubnavVisibility();scrollTo({top:0,behavior:"smooth"})}
+    function switchView(id,btn){document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));document.getElementById(id)?.classList.add("active");if(btn)btn.classList.add("active");else[...document.querySelectorAll(".tab-btn")].find(b=>b.getAttribute("onclick")?.includes("'"+id+"'"))?.classList.add("active");if(id==="tiempo"&&document.getElementById("weatherCurrent")?.innerHTML==="")loadWeather();if(id==="calendar")requestAnimationFrame();updateLooksFloatingMenuVisibility();updateSubnavVisibility();scrollTo({top:0,behavior:"smooth"})}
 function populateStaticSelects(){document.getElementById("grupo").innerHTML=Object.entries(groupLabels).map(([v,l])=>`<option value="${v}">${l}</option>`).join("");const temporadaSelect = document.getElementById("temporada");
 if (temporadaSelect) {
     temporadaSelect.innerHTML = seasons
@@ -3204,7 +3204,6 @@ async function syncCalendarPlansWithFirestore(){
         }
 
         renderCalendarPage();
-
     }catch(error){
         console.error("Error sincronizando calendario:",error);
     }
@@ -3392,7 +3391,33 @@ function calendarChooseProposedLook(){
 function calendarOpenLookCreator(id){
   calendarOpenLookFlow(id);
 }
-function renderCalendarPage(){
+function calendarDeletePlan(id){
+  const plan=calendarPlans.find(p=>p.id===id);
+  if(!plan)return;
+
+  const ok=window.confirm(
+    `¿Quieres eliminar el plan "${plan.name}"?`
+  );
+  if(!ok)return;
+
+  calendarPlans=calendarPlans.filter(p=>p.id!==id);
+  try{
+    localStorage.setItem(
+      "bricloset_calendar_plans",
+      JSON.stringify(calendarPlans)
+    );
+
+    if(typeof saveCalendarPlansToFirestore==="function"){
+      saveCalendarPlansToFirestore();
+    }
+
+    renderCalendarPage();
+    toast("Plan eliminado 🗑️");
+  }catch(e){
+    console.error("Error eliminando el plan:",e);
+    toast("No se ha podido eliminar el plan.","warn");
+  }
+}function renderCalendarPage(){
  const grid=document.getElementById("calendarGrid"), title=document.getElementById("calendarMonthTitle"), detail=document.getElementById("calendarDetail");
  if(!grid||!title||!detail)return;
  try{
@@ -3411,7 +3436,8 @@ function renderCalendarPage(){
  grid.innerHTML=html;
  const ps=calPlans(sel).sort((a,b)=>(a.time||"99").localeCompare(b.time||"99"));
  const dateLabel=new Intl.DateTimeFormat("es-ES",{weekday:"long",day:"numeric",month:"long"}).format(calendarSelectedDate);
- detail.innerHTML=`<div class="calendar-detail-title">📅 ${dateLabel}</div>${ps.length?ps.map(p=>`<div class="calendar-plan-card"><div>${p.time?`<span class="plan-time">${calEsc(p.time)}</span> · `:`<span class="plan-time">Todo el día</span> · `}<b>${calEsc(p.name)}</b></div>${p.context?`<div class="calendar-empty">${calEsc(p.context)}</div>`:""}${p.look?`<div class="calendar-look-preview"><div class="calendar-empty">👗 ${calEsc(p.look.nombre||"Look del día")}</div>${p.look.image?`<img src="${calEsc(p.look.image)}" alt="" style="width:100%;max-height:180px;object-fit:cover;border-radius:12px">`:""}</div>`:(p.lookIds||[]).length?`<div class="calendar-empty">👗 ${p.lookIds.length} look${p.lookIds.length===1?"":"s"} asignado${p.lookIds.length===1?"":"s"}</div>`:`<div class="calendar-empty">❓ ¿Qué te vas a poner?</div>`}<button type="button" class="calendar-create-look" onclick="calendarOpenLookCreator('${p.id}')">✨ Crear un look</button></div>`).join(""):`<div class="calendar-empty">No tienes planes para este día. Puedes añadir uno con el botón de arriba ✨</div>`}`;
+ detail.innerHTML=`<div class="calendar-detail-title">📅 ${dateLabel}</div>${ps.length?ps.map(p=>`<div class="calendar-plan-card"><div>${p.time?`<span class="plan-time">${calEsc(p.time)}</span> · `:`<span class="plan-time">Todo el día</span> · `}<b>${calEsc(p.name)}</b></div>${p.context?`<div class="calendar-empty">${calEsc(p.context)}</div>`:""}
+<button type="button" class="calendar-delete-plan" onclick="calendarDeletePlan('${p.id}')">🗑️ Eliminar plan</button>${p.look?`<div class="calendar-look-preview"><div class="calendar-empty">👗 ${calEsc(p.look.nombre||"Look del día")}</div>${p.look.image?`<img src="${calEsc(p.look.image)}" alt="" style="width:100%;max-height:180px;object-fit:cover;border-radius:12px">`:""}</div>`:(p.lookIds||[]).length?`<div class="calendar-empty">👗 ${p.lookIds.length} look${p.lookIds.length===1?"":"s"} asignado${p.lookIds.length===1?"":"s"}</div>`:`<div class="calendar-empty">❓ ¿Qué te vas a poner?</div>`}<button type="button" class="calendar-create-look" onclick="calendarOpenLookCreator('${p.id}')">✨ Crear un look</button></div>`).join(""):`<div class="calendar-empty">No tienes planes para este día. Puedes añadir uno con el botón de arriba ✨</div>`}`;
 }
 
 </script><section id="calendar" class="view">
