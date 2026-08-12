@@ -3396,8 +3396,20 @@ function calendarSaveOwnLook(btn){
   try{const ok=calendarEditingLookId?calendarUpdateLookInPlan(calendarEditingPlanId||plan.id,id,data):calendarAssignLookToPlan(data,plan);if(!ok)return;calendarFinishLookFlow(plan);toast("Look asignado al plan ✨")}catch(e){console.error("Error guardando look del calendario:",e);toast("No se ha podido guardar el look.","warn")}finally{if(button){button.disabled=false;button.textContent="Guardar"}}
 }
 function saveCalendarOwnLook(){calendarSaveOwnLook()}
-function calendarCancelCreator(){calendarOwnLook=emptyLook();calendarEditingPlanId=null;calendarEditingLookId=null;closeCalendarOwnLookSelector();calendarRestoreCreatorCard();document.getElementById("calendarCreatorModal")?.remove();renderCalendarOwnLook()}
-function calendarOpenLookCreator(id){calendarOpenLookFlow(id)}
+function calendarCancelCreator(){
+  calendarOwnLook=emptyLook();
+  calendarEditingPlanId=null;
+  calendarEditingLookId=null;
+  closeCalendarOwnLookSelector();
+
+  // Primero cerramos/eliminamos el modal.
+  document.getElementById("calendarCreatorModal")?.remove();
+
+  // Después devolvemos el creador a su posición original.
+  calendarRestoreCreatorCard();
+
+  renderCalendarOwnLook();
+}function calendarOpenLookCreator(id){calendarOpenLookFlow(id)}
 function calendarViewAssignedLook(planId,lookId){
   const plan=calendarPlans.find(p=>p.id===planId), look=calendarResolveLook(plan,lookId);
   if(!plan||!look)return;
