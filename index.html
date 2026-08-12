@@ -1059,15 +1059,7 @@ function selectCalendarOwnGarment(id){
 }
 function removeCalendarOwnSlot(slot){calendarOwnLook[slot]=null;renderCalendarOwnLook()}
 function removeCalendarOwnAccessory(i){calendarOwnLook.accesorios.splice(i,1);renderCalendarOwnLook()}
-function saveCalendarOwnLook(){
-  if(!hasLook(calendarOwnLook)){toast("Añade alguna prenda al look.","warn");return}
-  // Keep current saving behavior for this step; only isolate the duplicated UI.
-  const previous=ownLook;
-  ownLook=calendarOwnLook;
-  try{saveOwnLook()}finally{ownLook=previous}
-}
 function cancelCalendarOwnLook(){calendarOwnLook=emptyLook();closeCalendarOwnLookSelector();renderCalendarOwnLook()}
-function closeCalendarOwnLookSelector(){document.getElementById("calendarOwnLookSelector")?.classList.add("hidden")}
 </script>
 <section id="crearLook" class="view">
 <div class="card" id="createOwnLookCard">
@@ -1250,7 +1242,7 @@ function closeCalendarOwnLookSelector(){document.getElementById("calendarOwnLook
         <div id="calendarOwnSelectorGarments" class="grid"></div>
     </div>
     <div class="button-row" style="margin-top:14px">
-        <button class="primary-btn" onclick="saveCalendarOwnLook()">Guardar</button>
+        <button class="primary-btn" onclick="calendarSaveOwnLook()">Guardar</button>
         <button class="ghost-btn" onclick="cancelCalendarOwnLook()">Cancelar</button>
     </div>
 </div>
@@ -2589,8 +2581,11 @@ let editingSavedLookId=null;
 let saveLookType="look";
 let pendingSaveSource="propio";
 let pendingSaveOccasion="";
-let calendarDirectLookMode=false;
 let calendarPendingPlanId=null;
+let calendarCreatorPlaceholder=null;
+let calendarEditingPlanId=null;
+let calendarEditingLookId=null;
+let calendarProposal=emptyLook();
 
 function fillOwnLookSaveOccasions(selected=""){
     const select=document.getElementById("lookSaveOccasion");
@@ -2758,37 +2753,9 @@ function saveOwnLook(){
         toast("Añade alguna prenda al look.","warn");
         return;
     }
-    if(calendarDirectLookMode && calendarPendingPlan()){
-        const plan=calendarPendingPlan();
-        const name=window.prompt("Ponle un nombre a este look:",`Look para ${plan.name}`);
-        if(name===null)return;
-        const cleanName=name.trim()||`Look para ${plan.name}`;
-        const data={id:uid(),nombre:cleanName,ocasion:plan.context||"",source:"calendar",fecha:new Date().toISOString(),fecha_planificada:plan.date,favorito:false,...mapLookToIds(ownLook)};
-        const idx=calendarPlans.findIndex(p=>p.id===plan.id);
-        if(idx<0){toast("No se encontró el plan.","warn");return}
-        calendarPlans[idx].lookIds=Array.isArray(calendarPlans[idx].lookIds)?calendarPlans[idx].lookIds:[];
-        calendarPlans[idx].lookIds.push(data.id);
-        calendarPlans[idx].look=data;
-        try{
-            localStorage.setItem("bricloset_calendar_plans",JSON.stringify(calendarPlans));
-            calendarDirectLookMode=false;
-            calendarPendingPlanId=null;
-            sessionStorage.removeItem("bricloset_pending_plan");
-            ownLook=emptyLook();
-            renderOwnLook();
-            switchView("calendar");
-            calendarSelectedDate=new Date(plan.date+"T12:00:00");
-            calendarViewDate=new Date(calendarSelectedDate);
-            renderCalendarPage();
-            toast("Look asignado al plan ✨");
-        }catch(e){
-            console.error("Error guardando look del calendario:",e);
-            toast("No se ha podido guardar el look.","warn");
-        }
-        return;
-    }
     openOwnLookSaveModal(editingSavedLookId,"propio","");
 }
+
 function cancelOwnLook(){ownLook=emptyLook();editingSavedLookId=null;closeOwnLookSelector();renderOwnLook()}
 
 function editSavedLook(id){
@@ -3254,50 +3221,101 @@ function calendarOpenPlanModal(k){
  <div class="calactions"><button type="button" onclick="calendarClosePlanModal()">Cancelar</button><button type="button" class="primary" onclick="calendarSavePlan()">Añadir plan</button></div></div></div>`)
 }
 function calendarClosePlanModal(){document.getElementById("calModal")?.remove()}
-function saveLookToCalendar(lookData, plannedDate, occasion){
-  if(!plannedDate || !lookData)return false;
-  try{
-    const raw=localStorage.getItem("bricloset_calendar_plans");
-    const stored=raw?JSON.parse(raw):[];
-    if(Array.isArray(stored))calendarPlans=stored;
-  }catch(e){}
-  const pending=getPendingCalendarPlan();
-  let plan=pending?calendarPlans.find(p=>p.id===pending.id)||null:null;
-  if(!plan){
-    plan=calendarPlans.find(p=>p.date===plannedDate && String(p.name||"").toLowerCase()===String(occasion||"").toLowerCase())||null;
-  }
-  if(!plan){
-    plan={id:(typeof uid==="function"?uid():Date.now().toString()),name:occasion||"Look del día",date:plannedDate,time:"",context:occasion||"",lookIds:[]};
-    calendarPlans.push(plan);
-  }
-  plan.lookIds=Array.isArray(plan.lookIds)?plan.lookIds:[];
-  if(!plan.lookIds.includes(lookData.id))plan.lookIds.push(lookData.id);
-  plan.look=lookData;
-  plan.looks=plan.lookIds;
-  try{
-    localStorage.setItem("bricloset_calendar_plans",JSON.stringify(calendarPlans));
-    sessionStorage.removeItem("bricloset_pending_plan");
-    return true;
-  }catch(e){
-    console.error("Error guardando el look en calendario:",e);
-    return false;
-  }
+function calendarStorePendingPlan(plan){
+  if(!plan)return;
+  calendarPendingPlanId=plan.id;
+  window.__briclosetPendingCalendarPlan=plan;
+  sessionStorage.setItem("bricloset_pending_plan",JSON.stringify(plan));
 }
-function assignLookToCalendarPlan(lookId, plan){
-  if(!plan || !lookId)return false;
+function calendarClearPendingPlan(){
+  calendarPendingPlanId=null;
+  window.__briclosetPendingCalendarPlan=null;
+  sessionStorage.removeItem("bricloset_pending_plan");
+}
+function calendarPendingPlan(){
+  const stored=getPendingCalendarPlan();
+  const id=calendarPendingPlanId||stored?.id||window.__briclosetPendingCalendarPlan?.id;
+  return calendarPlans.find(p=>p.id===id)||stored||window.__briclosetPendingCalendarPlan||null;
+}
+function calendarPersistPlans(){
+  localStorage.setItem("bricloset_calendar_plans",JSON.stringify(calendarPlans));
+  if(typeof saveCalendarPlansToFirestore==="function")saveCalendarPlansToFirestore();
+}
+function calendarResolveLook(plan,lookId){
+  if(!plan||!lookId)return null;
+  return (plan.lookItems||[]).find(l=>l.id===lookId)||savedLooks.find(l=>l.id===lookId)||(plan.look?.id===lookId?plan.look:null)||null;
+}
+function calendarLookToDisplay(look){return look&&(look.abrigo||look.exterior||look.interior||look.inferior||look.vestido||look.calzado||look.bolso||look.accesorios)?look:idsToLook(look||{})}
+function calendarFinishLookFlow(plan){
+  calendarClearPendingPlan();
+  calendarEditingPlanId=null;
+  calendarEditingLookId=null;
+  closeCalendarOwnLookSelector();
+  calendarCloseLookFlow();
+  calendarRestoreCreatorCard();
+  document.getElementById("calendarCreatorModal")?.remove();
+  document.getElementById("calendarAssignedLookModal")?.remove();
+  document.getElementById("calendarReuseModal")?.remove();
+  calendarOwnLook=emptyLook();
+  renderCalendarOwnLook();
+  if(plan?.date){
+    calendarSelectedDate=new Date(plan.date+"T12:00:00");
+    calendarViewDate=new Date(calendarSelectedDate);
+  }
+  renderCalendarPage();
+}
+function calendarPlanHasLook(plan,lookId){return Array.isArray(plan?.lookIds)&&plan.lookIds.includes(lookId)}
+function calendarConfirmAdditionalLook(plan,lookId){
+  const ids=Array.isArray(plan.lookIds)?plan.lookIds:[];
+  if(ids.includes(lookId)){toast("Ese look ya está asignado a este plan.","warn");return false}
+  if(ids.length)return window.confirm("Este plan ya tiene un look. ¿Quieres añadir otro look?");
+  return true;
+}
+function calendarAssignLookToPlan(lookData, plan, options={}){
+  if(!plan||!lookData?.id)return false;
   const idx=calendarPlans.findIndex(p=>p.id===plan.id);
   if(idx<0)return false;
-  const ids=Array.isArray(calendarPlans[idx].lookIds)?calendarPlans[idx].lookIds:[];
-  if(!ids.includes(lookId))ids.push(lookId);
-  calendarPlans[idx].lookIds=ids;
-  try{
-    localStorage.setItem("bricloset_calendar_plans",JSON.stringify(calendarPlans));
-    sessionStorage.removeItem("bricloset_pending_plan");
-    return true;
-  }catch(e){
-    console.error("No se pudo asignar el look al calendario:",e);
-    return false;
+  const target=calendarPlans[idx];
+  if(!options.skipConfirm&&!calendarConfirmAdditionalLook(target,lookData.id))return false;
+  target.lookIds=Array.isArray(target.lookIds)?target.lookIds:[];
+  if(!target.lookIds.includes(lookData.id))target.lookIds.push(lookData.id);
+  if(!options.savedReference){
+    target.lookItems=Array.isArray(target.lookItems)?target.lookItems:[];
+    const itemIdx=target.lookItems.findIndex(l=>l.id===lookData.id);
+    if(itemIdx>=0)target.lookItems[itemIdx]=lookData;
+    else target.lookItems.push(lookData);
   }
+  target.look=calendarResolveLook(target,lookData.id)||lookData;
+  calendarPersistPlans();
+  return true;
+}
+function calendarUpdateLookInPlan(planId,lookId,lookData){
+  const plan=calendarPlans.find(p=>p.id===planId);
+  if(!plan)return false;
+  plan.lookItems=Array.isArray(plan.lookItems)?plan.lookItems:[];
+  const idx=plan.lookItems.findIndex(l=>l.id===lookId);
+  if(idx>=0)plan.lookItems[idx]=lookData;
+  else plan.lookItems.push(lookData);
+  plan.lookIds=Array.isArray(plan.lookIds)?plan.lookIds:[];
+  if(!plan.lookIds.includes(lookId))plan.lookIds.push(lookId);
+  if(plan.look?.id===lookId)plan.look=lookData;
+  calendarPersistPlans();
+  return true;
+}
+function saveLookToCalendar(lookData, plannedDate, occasion){
+  if(!plannedDate || !lookData)return false;
+  const pending=calendarPendingPlan();
+  let plan=pending?calendarPlans.find(p=>p.id===pending.id)||null:null;
+  if(!plan)plan=calendarPlans.find(p=>p.date===plannedDate && String(p.name||"").toLowerCase()===String(occasion||"").toLowerCase())||null;
+  if(!plan){plan={id:(typeof uid==="function"?uid():Date.now().toString()),name:occasion||"Look del día",date:plannedDate,time:"",context:occasion||"",lookIds:[],lookItems:[]};calendarPlans.push(plan)}
+  const ok=calendarAssignLookToPlan(lookData,plan,{skipConfirm:true});
+  if(ok)calendarClearPendingPlan();
+  return ok;
+}
+function assignLookToCalendarPlan(lookId, plan){
+  const item=savedLooks.find(l=>l.id===lookId);
+  if(!item)return false;
+  return calendarAssignLookToPlan(item,plan,{savedReference:true});
 }
 function calendarSavePlan(){
  const name=(document.getElementById("calName")?.value||"").trim();
@@ -3305,110 +3323,133 @@ function calendarSavePlan(){
  const time=document.getElementById("calTime")?.value||"";
  const context=(document.getElementById("calContext")?.value||"").trim();
  if(!name||!date){if(typeof toast==="function")toast("Pon qué tienes y la fecha.","warn");else alert("Pon qué tienes y la fecha.");return}
- const plan={id:(typeof uid==="function"?uid():Date.now().toString()),name,date,time,context,lookIds:[]};
+ const plan={id:(typeof uid==="function"?uid():Date.now().toString()),name,date,time,context,lookIds:[],lookItems:[]};
  calendarPlans.push(plan);
- try{
-   window.localStorage.setItem("bricloset_calendar_plans",JSON.stringify(calendarPlans));
-saveCalendarPlansToFirestore();
-}catch(err){
-   console.error("Error al guardar el plan:",err);
-   if(typeof toast==="function")toast("No se ha podido guardar el plan. Prueba de nuevo.","warn");else alert("No se ha podido guardar el plan. Prueba de nuevo.");
-   return;
- }
+ try{calendarPersistPlans()}catch(err){console.error("Error al guardar el plan:",err);if(typeof toast==="function")toast("No se ha podido guardar el plan. Prueba de nuevo.","warn");else alert("No se ha podido guardar el plan. Prueba de nuevo.");return}
  calendarSelectedDate=new Date(date+"T12:00:00");
  calendarViewDate=new Date(date+"T12:00:00");
  calendarClosePlanModal();
  renderCalendarPage();
 }
-
 function calendarShiftMonth(n){calendarViewDate=new Date(calendarViewDate.getFullYear(),calendarViewDate.getMonth()+n,1);calendarSelectedDate=new Date(calendarViewDate.getFullYear(),calendarViewDate.getMonth(),1);renderCalendarPage()}
 function calendarSelectDate(k){calendarSelectedDate=new Date(k+"T12:00:00");renderCalendarPage()}
 function calendarOpenLookFlow(id){
   const plan=calendarPlans.find(p=>p.id===id);
   if(!plan)return;
-  calendarPendingPlanId=id;
-  sessionStorage.setItem("bricloset_pending_plan",JSON.stringify(plan));
-  const old=document.getElementById("calendarLookChooser");
-  if(old)old.remove();
-  document.body.insertAdjacentHTML("beforeend",`<div class="calendar-look-modal" id="calendarLookChooser" role="dialog" aria-modal="true">
-    <div class="calendar-look-box">
-      <button type="button" class="calendar-look-close" onclick="calendarCloseLookFlow()">×</button>
-      <h2>✨ ¿Cómo quieres preparar este look?</h2>
-      <p class="muted">${calEsc(plan.time?`${plan.name} · ${plan.time}`:plan.name)} · ${calEsc(plan.date)}</p>
-      <div class="calendar-look-options">
-        <button type="button" onclick="calendarChooseSavedLook()"><span>💾</span><strong>Elegir un look guardado</strong><small>Usa uno que ya tienes preparado.</small></button>
-        <button type="button" onclick="calendarChooseCreateLook()"><span>🎨</span><strong>Crear un look</strong><small>Elige las prendas y guárdalo directamente para este plan.</small></button>
-        <button type="button" onclick="calendarChooseProposedLook()"><span>✨</span><strong>Proponerme un look</strong><small>BriCloset te prepara una propuesta para este plan.</small></button>
-      </div>
-    </div>
-  </div>`);
-}
-function calendarCloseLookFlow(){
+  calendarStorePendingPlan(plan);
   document.getElementById("calendarLookChooser")?.remove();
+  document.body.insertAdjacentHTML("beforeend",`<div class="calendar-look-modal" id="calendarLookChooser" role="dialog" aria-modal="true"><div class="calendar-look-box"><button type="button" class="calendar-look-close" onclick="calendarCancelLookFlow()">×</button><h2>✨ ¿Cómo quieres preparar este look?</h2><p class="muted">${calEsc(plan.time?`${plan.name} · ${plan.time}`:plan.name)} · ${calEsc(plan.date)}</p><div class="calendar-look-options"><button type="button" onclick="calendarChooseSavedLook()"><span>💾</span><strong>Elegir un look guardado</strong><small>Usa uno que ya tienes preparado.</small></button><button type="button" onclick="calendarChooseCreateLook()"><span>🎨</span><strong>Crear un look</strong><small>Elige las prendas y guárdalo directamente para este plan.</small></button><button type="button" onclick="calendarChooseProposedLook()"><span>✨</span><strong>Proponerme un look</strong><small>BriCloset te prepara una propuesta para este plan.</small></button></div></div></div>`);
 }
-function calendarPendingPlan(){
-  return calendarPlans.find(p=>p.id===calendarPendingPlanId)||getPendingCalendarPlan();
-}
+function calendarCloseLookFlow(){document.getElementById("calendarLookChooser")?.remove()}
+function calendarCancelLookFlow(){calendarClearPendingPlan();calendarCloseLookFlow()}
 function calendarAssignSavedLook(id){
   const plan=calendarPendingPlan(), item=savedLooks.find(l=>l.id===id);
   if(!plan||!item)return;
-  const idx=calendarPlans.findIndex(p=>p.id===plan.id);
-  if(idx<0)return;
-  const look=idsToLook(item);
-  calendarPlans[idx].lookIds=Array.isArray(calendarPlans[idx].lookIds)?calendarPlans[idx].lookIds:[];
-  if(!calendarPlans[idx].lookIds.includes(item.id))calendarPlans[idx].lookIds.push(item.id);
-  calendarPlans[idx].look=item;
-  try{
-    localStorage.setItem("bricloset_calendar_plans",JSON.stringify(calendarPlans));
-    saveCalendarPlansToFirestore();
-    sessionStorage.removeItem("bricloset_pending_plan");
-    calendarCloseLookFlow();
-    switchView("calendar");
-    calendarSelectedDate=new Date(calendarPlans[idx].date+"T12:00:00");
-    calendarViewDate=new Date(calendarSelectedDate);
-    renderCalendarPage();
-    toast("Look asignado al plan ✨");
-  }catch(e){
-    console.error("Error asignando look guardado:",e);
-    toast("No se ha podido asignar el look.","warn");
-  }
+  try{if(!calendarAssignLookToPlan(item,plan,{savedReference:true}))return;calendarFinishLookFlow(plan);toast("Look asignado al plan ✨")}catch(e){console.error("Error asignando look guardado:",e);toast("No se ha podido asignar el look.","warn")}
 }
 function calendarChooseSavedLook(){
   const modal=document.getElementById("calendarLookChooser"),plan=calendarPendingPlan();
   if(!modal||!plan)return;
   const list=savedLooks||[];
-  modal.querySelector(".calendar-look-box").innerHTML=`<button type="button" class="calendar-look-close" onclick="calendarCloseLookFlow()">×</button>
-    <h2>💾 Elige un look guardado</h2><p class="muted">${calEsc(plan.name)}</p>
-    <div class="calendar-saved-looks">${list.length?list.map(l=>{const look=idsToLook(l),first=look.abrigo||look.exterior||look.interior||look.inferior||look.vestido||look.calzado||look.bolso||look.accesorios?.[0];return `<button type="button" class="calendar-saved-look" onclick="calendarAssignSavedLook('${l.id}')"><img src="${first?.foto||placeholderImg}" alt=""><span><strong>${esc(l.nombre||"Look sin nombre")}</strong><small>${esc(fmtOcc(l.ocasion||"Sin ocasión"))}</small></span></button>`}).join(""):'<div class="calendar-empty">Todavía no tienes looks guardados.</div>'}</div>`;
+  modal.querySelector(".calendar-look-box").innerHTML=`<button type="button" class="calendar-look-close" onclick="calendarCancelLookFlow()">×</button><h2>💾 Elige un look guardado</h2><p class="muted">${calEsc(plan.name)}</p><div class="calendar-saved-looks">${list.length?list.map(l=>{const look=idsToLook(l),first=look.abrigo||look.exterior||look.interior||look.inferior||look.vestido||look.calzado||look.bolso||look.accesorios?.[0];return `<button type="button" class="calendar-saved-look" onclick="calendarAssignSavedLook('${l.id}')"><img src="${first?.foto||placeholderImg}" alt=""><span><strong>${esc(l.nombre||"Look sin nombre")}</strong><small>${esc(fmtOcc(l.ocasion||"Sin ocasión"))}</small></span></button>`}).join(""):'<div class="calendar-empty">Todavía no tienes looks guardados.</div>'}</div>`;
 }
-function calendarChooseCreateLook(){
-  const plan=calendarPendingPlan();
+function calendarRestoreCreatorCard(){
+  const card=document.getElementById("calendarCreateOwnLookCard");
+  if(card&&calendarCreatorPlaceholder){calendarCreatorPlaceholder.replaceWith(card);calendarCreatorPlaceholder=null}
+}
+function calendarOpenCreatorModal(seedLook=null,editPlanId=null,editLookId=null){
+  const plan=editPlanId?calendarPlans.find(p=>p.id===editPlanId):calendarPendingPlan();
   if(!plan)return;
-  calendarDirectLookMode=true;
+  calendarStorePendingPlan(plan);
   calendarCloseLookFlow();
-  switchView("crearLook");
-  window.scrollTo({top:0,behavior:"smooth"});
-  setTimeout(()=>document.getElementById("createOwnLookCard")?.scrollIntoView({behavior:"smooth",block:"start"}),120);
+  document.getElementById("calendarCreatorModal")?.remove();
+  calendarOwnLook=seedLook?{abrigo:seedLook.abrigo||null,exterior:seedLook.exterior||null,interior:seedLook.interior||null,inferior:seedLook.inferior||null,vestido:seedLook.vestido||null,calzado:seedLook.calzado||null,bolso:seedLook.bolso||null,accesorios:[...(seedLook.accesorios||[])]}:emptyLook();
+  calendarEditingPlanId=editPlanId||null;
+  calendarEditingLookId=editLookId||null;
+  const card=document.getElementById("calendarCreateOwnLookCard");
+  if(!card)return;
+  calendarCreatorPlaceholder=document.createComment("calendarCreateOwnLookCard");
+  card.parentNode.insertBefore(calendarCreatorPlaceholder,card);
+  document.body.insertAdjacentHTML("beforeend",`<div class="calendar-look-modal" id="calendarCreatorModal" role="dialog" aria-modal="true"><div class="calendar-look-box" id="calendarCreatorBox" style="width:min(980px,100%);max-height:92vh;overflow:auto"><button type="button" class="calendar-look-close" onclick="calendarCancelCreator()">×</button></div></div>`);
+  document.getElementById("calendarCreatorBox")?.appendChild(card);
+  renderCalendarOwnLook();
+}
+function calendarChooseCreateLook(){calendarOpenCreatorModal()}
+function calendarLookPreviewHtml(look){
+  const display=calendarLookToDisplay(look);
+  const entries=[[slotTitles.abrigo,display.abrigo],[slotTitles.exterior,display.exterior],[slotTitles.interior,display.interior],[slotTitles.inferior,display.inferior],[slotTitles.vestido,display.vestido],[slotTitles.calzado,display.calzado],[slotTitles.bolso,display.bolso],...((display.accesorios||[]).map(a=>[slotTitles.accesorios,a]))].filter(([,g])=>g);
+  return `<div class="grid" style="margin-top:14px">${entries.map(([label,g])=>`<div class="item-card"><img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}"><div class="item-body"><p class="item-name">${esc(label)}</p><p class="meta">${esc(g.nombre)}</p></div></div>`).join("")}</div>`;
 }
 function calendarChooseProposedLook(){
   const plan=calendarPendingPlan();
   if(!plan)return;
-  calendarDirectLookMode=false;
-  calendarCloseLookFlow();
-  switchView("looks");
-  const known=occasions.find(([v,l])=>{
-    const s=(plan.context||plan.name||"").toLowerCase();
-    return s.includes(String(l).toLowerCase())||s.includes(String(v).toLowerCase());
-  })?.[0]||"casual";
-  generateLook(known,false);
-  setTimeout(()=>{
-    const title=document.getElementById("randomLookTitle");
-    if(title)title.textContent=`Look propuesto para: ${plan.name}`;
-    document.getElementById("randomLookCard")?.scrollIntoView({behavior:"smooth",block:"start"});
-  },120);
+  const known=occasions.find(([v,l])=>{const s=(plan.context||plan.name||"").toLowerCase();return s.includes(String(l).toLowerCase())||s.includes(String(v).toLowerCase())})?.[0]||"casual";
+  calendarProposal=buildLook(known,document.getElementById("randomNoCoat")?.checked||false,false);
+  if(!hasLook(calendarProposal)){toast("No hay prendas suficientes para proponer un look.","warn");return}
+  const modal=document.getElementById("calendarLookChooser");
+  if(!modal)return;
+  modal.querySelector(".calendar-look-box").innerHTML=`<button type="button" class="calendar-look-close" onclick="calendarCancelLookFlow()">×</button><h2>✨ Look propuesto</h2><p class="muted">${calEsc(fmtOcc(known))} · ${calEsc(plan.name)}</p>${calendarLookPreviewHtml(calendarProposal)}<div class="button-row" style="margin-top:14px"><button type="button" class="ghost-btn" onclick="calendarChooseProposedLook()">🔄 Generar otra</button><button type="button" class="small-btn" onclick="calendarEditProposal()">✏️ Editar</button><button type="button" class="primary-btn" onclick="calendarSaveProposal(this)">💾 Guardar en este plan</button></div>`;
 }
-function calendarOpenLookCreator(id){
-  calendarOpenLookFlow(id);
+function calendarEditProposal(){if(hasLook(calendarProposal))calendarOpenCreatorModal(calendarProposal)}
+function calendarSaveProposal(btn){
+  const plan=calendarPendingPlan();
+  if(!plan||!hasLook(calendarProposal))return;
+  if(btn){btn.disabled=true;btn.textContent="💾 Guardando…"}
+  const data={id:uid(),nombre:`Look para ${plan.name}`,ocasion:plan.context||"",source:"calendar",fecha:new Date().toISOString(),fecha_planificada:plan.date,favorito:false,...mapLookToIds(calendarProposal)};
+  try{if(!calendarAssignLookToPlan(data,plan))return;calendarFinishLookFlow(plan);toast("Look asignado al plan ✨")}catch(e){console.error("Error guardando propuesta:",e);toast("No se ha podido guardar el look.","warn")}finally{if(btn){btn.disabled=false;btn.textContent="💾 Guardar en este plan"}}
+}
+function calendarSaveOwnLook(btn){
+  const plan=calendarPendingPlan();
+  if(!plan){toast("No se encontró el plan.","warn");return}
+  if(!hasLook(calendarOwnLook)){toast("Añade alguna prenda al look.","warn");return}
+  const button=btn||document.querySelector('#calendarCreateOwnLookCard .primary-btn');
+  if(button){button.disabled=true;button.textContent="💾 Guardando…"}
+  const id=calendarEditingLookId||uid();
+  const data={id,nombre:`Look para ${plan.name}`,ocasion:plan.context||"",source:"calendar",fecha:new Date().toISOString(),fecha_planificada:plan.date,favorito:false,...mapLookToIds(calendarOwnLook)};
+  try{const ok=calendarEditingLookId?calendarUpdateLookInPlan(calendarEditingPlanId||plan.id,id,data):calendarAssignLookToPlan(data,plan);if(!ok)return;calendarFinishLookFlow(plan);toast("Look asignado al plan ✨")}catch(e){console.error("Error guardando look del calendario:",e);toast("No se ha podido guardar el look.","warn")}finally{if(button){button.disabled=false;button.textContent="Guardar"}}
+}
+function saveCalendarOwnLook(){calendarSaveOwnLook()}
+function calendarCancelCreator(){calendarOwnLook=emptyLook();calendarEditingPlanId=null;calendarEditingLookId=null;closeCalendarOwnLookSelector();calendarRestoreCreatorCard();document.getElementById("calendarCreatorModal")?.remove();renderCalendarOwnLook()}
+function calendarOpenLookCreator(id){calendarOpenLookFlow(id)}
+function calendarViewAssignedLook(planId,lookId){
+  const plan=calendarPlans.find(p=>p.id===planId), look=calendarResolveLook(plan,lookId);
+  if(!plan||!look)return;
+  document.getElementById("calendarAssignedLookModal")?.remove();
+  document.body.insertAdjacentHTML("beforeend",`<div class="calendar-look-modal" id="calendarAssignedLookModal" role="dialog" aria-modal="true"><div class="calendar-look-box" style="width:min(760px,100%);max-height:92vh;overflow:auto"><button type="button" class="calendar-look-close" onclick="document.getElementById('calendarAssignedLookModal')?.remove()">×</button><h2>${calEsc(look.nombre||"Look del calendario")}</h2><p class="muted">${calEsc(fmtOcc(look.ocasion||plan.context||"Sin ocasión"))}</p>${calendarLookPreviewHtml(look)}</div></div>`)
+}
+function calendarEditAssignedLook(planId,lookId){
+  const plan=calendarPlans.find(p=>p.id===planId), look=calendarResolveLook(plan,lookId);
+  if(!plan||!look)return;
+  calendarOpenCreatorModal(calendarLookToDisplay(look),planId,lookId);
+}
+function calendarReuseAssignedLook(planId,lookId){
+  const src=calendarPlans.find(p=>p.id===planId), look=calendarResolveLook(src,lookId);
+  if(!src||!look)return;
+  document.getElementById("calendarReuseModal")?.remove();
+  document.body.insertAdjacentHTML("beforeend",`<div class="calendar-look-modal" id="calendarReuseModal" role="dialog" aria-modal="true"><div class="calendar-look-box"><button type="button" class="calendar-look-close" onclick="document.getElementById('calendarReuseModal')?.remove()">×</button><h2>📅 ¿En qué día quieres reutilizar este look?</h2><input id="calendarReuseDate" type="date" value="${calEsc(src.date||calKey(new Date()))}"><div id="calendarReuseChoices" style="margin-top:14px"></div><div class="button-row" style="margin-top:14px"><button type="button" class="primary-btn" onclick="calendarPrepareReuse('${planId}','${lookId}')">Continuar</button><button type="button" class="ghost-btn" onclick="document.getElementById('calendarReuseModal')?.remove()">Cancelar</button></div></div></div>`)
+}
+function calendarPrepareReuse(planId,lookId){
+  const date=document.getElementById("calendarReuseDate")?.value;
+  const box=document.getElementById("calendarReuseChoices");
+  if(!date||!box)return;
+  const plans=calendarPlans.filter(p=>p.date===date);
+  if(!plans.length){box.innerHTML=`<div class="calendar-empty">No tienes ningún plan ese día. ¿Quieres crear uno?</div><div class="button-row"><button class="ghost-btn" onclick="document.getElementById('calendarReuseModal')?.remove()">Cancelar</button><button class="primary-btn" onclick="calendarCreateReusePlan('${planId}','${lookId}','${date}')">Crear plan</button></div>`;return}
+  if(plans.length===1){const p=plans[0];box.innerHTML=`<div class="calendar-empty">¿Quieres asignarlo a "${calEsc(p.name)}${p.time?` · ${calEsc(p.time)}`:""}"?</div><button class="primary-btn" onclick="calendarConfirmReuse('${planId}','${lookId}','${p.id}')">Asignar</button>`;return}
+  box.innerHTML=`<div class="calendar-empty">¿Para qué plan quieres reutilizar este look?</div>${plans.map(p=>`<button type="button" class="calendar-saved-look" onclick="calendarConfirmReuse('${planId}','${lookId}','${p.id}')"><span><strong>${calEsc(p.name)}</strong><small>${calEsc(p.time||"Sin hora")}</small></span></button>`).join("")}`;
+}
+function calendarCreateReusePlan(planId,lookId,date){
+  const name=window.prompt("Nombre del plan:","Plan reutilizado");
+  if(name===null)return;
+  const plan={id:uid(),name:name.trim()||"Plan reutilizado",date,time:"",context:"",lookIds:[],lookItems:[]};
+  calendarPlans.push(plan);
+  calendarConfirmReuse(planId,lookId,plan.id);
+}
+function calendarConfirmReuse(sourcePlanId,lookId,targetPlanId){
+  const source=calendarPlans.find(p=>p.id===sourcePlanId), target=calendarPlans.find(p=>p.id===targetPlanId), look=calendarResolveLook(source,lookId);
+  if(!source||!target||!look)return;
+  if(calendarPlanHasLook(target,lookId)){toast("Ese look ya está asignado a este plan.","warn");return}
+  if((target.lookIds||[]).length&&!window.confirm("Este plan ya tiene un look asignado. ¿Quieres añadir este look también?"))return;
+  try{calendarAssignLookToPlan(look,target,{skipConfirm:true,savedReference:!!savedLooks.find(l=>l.id===lookId)});addUsageFromLook(calendarLookToDisplay(look));document.getElementById("calendarReuseModal")?.remove();calendarFinishLookFlow(target);toast("Look reutilizado ✨")}catch(e){console.error("Error reutilizando look:",e);toast("No se ha podido reutilizar el look.","warn")}
 }
 function calendarDeletePlan(id){
   const plan=calendarPlans.find(p=>p.id===id);
@@ -3436,7 +3477,18 @@ function calendarDeletePlan(id){
     console.error("Error eliminando el plan:",e);
     toast("No se ha podido eliminar el plan.","warn");
   }
-}function renderCalendarPage(){
+}function calendarCompactLookHtml(plan){
+  const ids=Array.isArray(plan.lookIds)?plan.lookIds:[];
+  if(!ids.length)return `<div class="calendar-empty">❓ ¿Qué te vas a poner?</div>`;
+  return ids.map(id=>{
+    const look=calendarResolveLook(plan,id);
+    if(!look)return "";
+    const display=calendarLookToDisplay(look);
+    const garments=[display.abrigo,display.exterior,display.interior,display.inferior,display.vestido,display.calzado,display.bolso,...(display.accesorios||[])].filter(Boolean).slice(0,4);
+    return `<div class="calendar-look-preview"><div class="calendar-empty">👗 ${calEsc(look.nombre||"Look del calendario")}</div><div class="calendar-saved-looks" style="grid-template-columns:repeat(4,minmax(0,1fr));margin-top:8px">${garments.map(g=>`<img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}" style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:12px">`).join("")}</div><div class="button-row" style="margin-top:8px"><button type="button" class="small-btn" onclick="calendarViewAssignedLook('${plan.id}','${id}')">👀 Ver</button><button type="button" class="small-btn" onclick="calendarEditAssignedLook('${plan.id}','${id}')">✏️ Editar</button><button type="button" class="small-btn" onclick="calendarReuseAssignedLook('${plan.id}','${id}')">🔄 Reutilizar</button></div></div>`;
+  }).join("");
+}
+function renderCalendarPage(){
  const grid=document.getElementById("calendarGrid"), title=document.getElementById("calendarMonthTitle"), detail=document.getElementById("calendarDetail");
  if(!grid||!title||!detail)return;
  try{
@@ -3456,7 +3508,7 @@ function calendarDeletePlan(id){
  const ps=calPlans(sel).sort((a,b)=>(a.time||"99").localeCompare(b.time||"99"));
  const dateLabel=new Intl.DateTimeFormat("es-ES",{weekday:"long",day:"numeric",month:"long"}).format(calendarSelectedDate);
  detail.innerHTML=`<div class="calendar-detail-title">📅 ${dateLabel}</div>${ps.length?ps.map(p=>`<div class="calendar-plan-card"><div>${p.time?`<span class="plan-time">${calEsc(p.time)}</span> · `:`<span class="plan-time">Todo el día</span> · `}<b>${calEsc(p.name)}</b></div>${p.context?`<div class="calendar-empty">${calEsc(p.context)}</div>`:""}
-<button type="button" class="calendar-delete-plan" onclick="calendarDeletePlan('${p.id}')">🗑️ Eliminar plan</button>${p.look?`<div class="calendar-look-preview"><div class="calendar-empty">👗 ${calEsc(p.look.nombre||"Look del día")}</div>${p.look.image?`<img src="${calEsc(p.look.image)}" alt="" style="width:100%;max-height:180px;object-fit:cover;border-radius:12px">`:""}</div>`:(p.lookIds||[]).length?`<div class="calendar-empty">👗 ${p.lookIds.length} look${p.lookIds.length===1?"":"s"} asignado${p.lookIds.length===1?"":"s"}</div>`:`<div class="calendar-empty">❓ ¿Qué te vas a poner?</div>`}<button type="button" class="calendar-create-look" onclick="calendarOpenLookCreator('${p.id}')">✨ Crear un look</button></div>`).join(""):`<div class="calendar-empty">No tienes planes para este día. Puedes añadir uno con el botón de arriba ✨</div>`}`;
+<button type="button" class="calendar-delete-plan" onclick="calendarDeletePlan('${p.id}')">🗑️ Eliminar plan</button>${calendarCompactLookHtml(p)}<button type="button" class="calendar-create-look" onclick="calendarOpenLookCreator('${p.id}')">✨ Crear un look</button></div>`).join(""):`<div class="calendar-empty">No tienes planes para este día. Puedes añadir uno con el botón de arriba ✨</div>`}`;
 }
 
 </script><section id="calendar" class="view">
