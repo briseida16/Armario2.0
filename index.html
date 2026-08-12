@@ -698,28 +698,7 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
 }
 #combineLookCard .combine-clear-btn:hover{background:#fbf1f5 !important}
 </style>
-<style id="calendar-v30-css">
-#calendarPage .calbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
-#calendarPage .calgrid,.calweek{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
-#calendarPage .calweek div{text-align:center;font-size:.75rem;font-weight:800;padding:4px}
-#calendarPage .calday{min-height:82px;border:1px solid var(--line);border-radius:12px;background:#fff;padding:6px;text-align:left;overflow:hidden;cursor:pointer}
-#calendarPage .calday.today{box-shadow:0 0 0 2px #d99bb5 inset}.calday.sel{box-shadow:0 0 0 2px #b86f91 inset}
-#calendarPage .calnum{font-weight:900;font-size:.8rem}.caldot{display:block;font-size:.62rem;background:#fbf1f5;border-radius:6px;padding:2px 4px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#calendarPage .caldetail{margin-top:14px;padding:15px;border:1px solid var(--line);border-radius:17px;background:#fff}
-#calendarPage .calplan{border:1px solid var(--line);border-radius:14px;padding:11px;margin-top:9px}
-#calendarPage .calmodal{position:fixed;inset:0;background:#0003;display:flex;align-items:center;justify-content:center;padding:15px;z-index:100000}
-#calendarPage .calbox{background:#fff;border-radius:21px;padding:19px;width:min(420px,100%);box-shadow:0 20px 60px #0002}
-#calendarPage .calfield{margin-top:10px}.calfield label{display:block;font-size:.78rem;font-weight:800;margin-bottom:5px}.calfield input{width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--line);border-radius:10px}
-#calendarPage .calactions{display:flex;justify-content:flex-end;gap:8px;margin-top:15px}.calactions button{padding:9px 13px;border:1px solid var(--line);border-radius:10px;background:#fff}.calactions .primary{background:#222;color:#fff}
-@media(max-width:680px){#calendarPage .calday{min-height:66px;padding:5px}.caldot{font-size:.58rem}}
-</style><style id="calendar-nav-v31">
-#calendarNavButton{
- position:fixed;right:18px;bottom:18px;z-index:5000;
- border:1px solid var(--line,#eadde3);border-radius:15px;
- background:#fff;padding:10px 14px;font:inherit;font-weight:900;
- box-shadow:0 8px 25px rgba(70,40,55,.16);cursor:pointer
-}
-</style><style id="calendar-v33-css">
+<style id="calendar-css">
 .calendar-shell,.calendar-detail{background:#fff;border-radius:22px;padding:18px;margin-bottom:16px}
 .calendar-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .calendar-month-title{text-transform:capitalize;font-size:1.25rem;font-weight:900}
@@ -727,48 +706,20 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
 .calendar-week,.calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
 .calendar-week div{text-align:center;font-size:.75rem;font-weight:900;padding:5px}
 .calendar-day{min-height:82px;border:1px solid var(--line,#eadde3);border-radius:12px;background:#fff;padding:6px;text-align:left;cursor:pointer;overflow:hidden}
-.calendar-day.muted{opacity:.38}.calendar-day.today{box-shadow:0 0 0 2px #d88fb1 inset}.calendar-day.selected{box-shadow:0 0 0 2px #a96887 inset}
+.calendar-day.muted{opacity:.38}
+.calendar-day.today{box-shadow:0 0 0 2px #f0b45b inset;background:#fffaf1}
+.calendar-day.selected{box-shadow:0 0 0 3px #c66f99 inset;background:#fff7fb}
+.calendar-day.today.selected{box-shadow:0 0 0 3px #c66f99 inset,0 0 0 5px #f0b45b inset;background:#fff7fb}
 .calendar-num{font-weight:900;font-size:.78rem}.calendar-plan-dot{display:block;margin-top:4px;padding:3px 5px;border-radius:7px;background:#fbf0f5;font-size:.6rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .calendar-add-main{margin-top:14px;border:1px solid var(--line,#eadde3);border-radius:12px;background:#d88fb1;color:#fff;font:inherit;font-weight:900;padding:10px 14px;cursor:pointer}
 .calendar-detail-title{text-transform:capitalize;font-size:1rem;font-weight:900}.calendar-plan-card{border:1px solid var(--line,#eadde3);border-radius:15px;padding:12px;margin-top:10px}.calendar-plan-card .plan-time{font-weight:900}.calendar-create-look{margin-top:9px;border:1px solid var(--line,#eadde3);border-radius:10px;background:#fff;padding:8px 11px;font:inherit;font-weight:800;cursor:pointer}
-.calendar-empty{color:#8c7180;padding:8px 0}.calendar-delete-plan{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  gap:6px;
-  margin-top:8px;
-  padding:9px 14px;
-  border:1px solid #f0c9dc;
-  border-radius:14px;
-  background:#fff;
-  color:#6b5363;
-  font-family:inherit;
-  font-size:13px;
-  font-weight:700;
-  cursor:pointer;
-}
-
-.calendar-delete-plan:hover{
-  background:#fff5f9;
-}
-@media(max-width:600px){.calendar-day{min-height:66px;padding:5px}.calendar-plan-dot{font-size:.56rem}.calendar-shell,.calendar-detail{padding:12px}}
-</style><style id="calendar-v38-css">
-.calendar-day.today{box-shadow:0 0 0 2px #f0b45b inset !important;background:#fffaf1}
-.calendar-day.selected{box-shadow:0 0 0 3px #c66f99 inset !important;background:#fff7fb}
-.calendar-day.today.selected{box-shadow:0 0 0 3px #c66f99 inset,0 0 0 5px #f0b45b inset !important;background:#fff7fb}
+.calendar-empty{color:#8c7180;padding:8px 0}.calendar-delete-plan{display:inline-flex;align-items:center;justify-content:center;gap:6px;margin-top:8px;padding:9px 14px;border:1px solid #f0c9dc;border-radius:14px;background:#fff;color:#6b5363;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer}.calendar-delete-plan:hover{background:#fff5f9}
 .calendar-look-modal{position:fixed;inset:0;background:rgba(45,30,40,.35);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:16px;z-index:100001}
 .calendar-look-box{position:relative;background:#fff;border:1px solid var(--line,#eadde3);border-radius:24px;padding:24px;width:min(470px,100%);box-shadow:0 20px 60px rgba(60,35,50,.2)}
 .calendar-look-box h2{margin:0 0 6px}.calendar-look-close{position:absolute;right:14px;top:12px;border:0;background:#fbf1f5;border-radius:50%;width:34px;height:34px;font-size:22px;cursor:pointer}
-.calendar-look-options{display:grid;gap:10px;margin-top:18px}
-.calendar-look-options button{display:grid;grid-template-columns:40px 1fr;column-gap:10px;text-align:left;border:1px solid var(--line,#eadde3);border-radius:16px;background:#fff;padding:13px;cursor:pointer;font:inherit}
-.calendar-look-options button:hover{background:#fff7fb}
-.calendar-look-options span{grid-row:1/3;font-size:1.5rem;align-self:center;text-align:center}
-.calendar-look-options strong{font-weight:900}.calendar-look-options small{color:#8c7180;margin-top:3px}
-.calendar-saved-looks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:16px;max-height:55vh;overflow:auto}
-.calendar-saved-look{border:1px solid var(--line,#eadde3);border-radius:14px;background:#fff;padding:7px;text-align:left;cursor:pointer;font:inherit}
-.calendar-saved-look img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:10px}
-.calendar-saved-look span{display:block;padding:6px 3px 2px}.calendar-saved-look strong,.calendar-saved-look small{display:block}.calendar-saved-look small{color:#8c7180;margin-top:2px}
-@media(max-width:600px){.calendar-look-box{padding:20px}.calendar-saved-looks{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.calendar-look-options{display:grid;gap:10px;margin-top:18px}.calendar-look-options button{display:grid;grid-template-columns:40px 1fr;column-gap:10px;text-align:left;border:1px solid var(--line,#eadde3);border-radius:16px;background:#fff;padding:13px;cursor:pointer;font:inherit}.calendar-look-options button:hover{background:#fff7fb}.calendar-look-options span{grid-row:1/3;font-size:1.5rem;align-self:center;text-align:center}.calendar-look-options strong{font-weight:900}.calendar-look-options small{color:#8c7180;margin-top:3px}
+.calendar-saved-looks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:16px;max-height:55vh;overflow:auto}.calendar-saved-look{border:1px solid var(--line,#eadde3);border-radius:14px;background:#fff;padding:7px;text-align:left;cursor:pointer;font:inherit}.calendar-saved-look img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:10px}.calendar-saved-look span{display:block;padding:6px 3px 2px}.calendar-saved-look strong,.calendar-saved-look small{display:block}.calendar-saved-look small{color:#8c7180;margin-top:2px}
+@media(max-width:600px){.calendar-day{min-height:66px;padding:5px}.calendar-plan-dot{font-size:.56rem}.calendar-shell,.calendar-detail{padding:12px}.calendar-look-box{padding:20px}.calendar-saved-looks{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style></head><body><header><h1>BriCloset ✨</h1><div class="subtitle">🌸 Toda tu ropa en un solo armario virtual, crea looks diferentes y utiliza todo lo que tienes para explotar tu potencial 🌸</div><div class="top-actions"><div class="auth-panel"><button type="button" class="primary-btn" id="loginBtn" onclick="openLoginModal()">
     Iniciar sesión
 </button><div class="auth-user hidden" id="authUserBox" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false"><img class="auth-photo hidden" id="authPhoto" alt="Foto de usuario"><span class="auth-initials hidden" id="authInitials" aria-hidden="true"></span><span class="auth-menu-arrow" aria-hidden="true">▼</span><div class="user-menu hidden" id="userMenu"><button type="button">👤 Mi perfil</button><button type="button" id="logoutBtn">🚪 Cerrar sesión</button></div></div><div class="mini-badge hidden" id="syncStatus">Esperando sesión</div></div></div><div class="tabs"><button class="tab-btn active" onclick="switchView('inicio',this)">Inicio</button><button class="tab-btn" onclick="switchView('armario',this)">Mi armario</button><button class="tab-btn" onclick="switchView('anadir',this)">Añadir prenda</button><button class="tab-btn" onclick="switchView('looks',this)">Looks</button><button class="tab-btn" onclick="switchView('calendar',this)">Calendario</button>
@@ -3129,7 +3080,7 @@ window.addEventListener("scroll",updateHeaderOnScroll,{passive:true});
 function refreshAll(){updateSummary();ensureDailyQuickLook();fillFilterOptions();renderRelatedSelect();renderWardrobe();renderTrash();renderCurrentLook();renderRandomLook();renderQuickLook();renderWishlist();renderFavorites();renderVinted();renderSavedLooksCarousel();renderOccasionButtons();renderCombineGroups();renderLooksManualOutfit();renderOwnLook()}function toast(msg,type="ok"){const box=document.getElementById("toastBox");if(!box)return alert(msg);const t=document.createElement("div");t.className=`toast toast-${type}`;t.textContent=msg;box.appendChild(t);requestAnimationFrame(()=>t.classList.add("show"));setTimeout(()=>{t.classList.remove("show");setTimeout(()=>t.remove(),300)},3200)}
 const IDB_NAME="bricloset_mirror_db",IDB_STORE="backups";function idbOpen(){return new Promise((resolve,reject)=>{const req=indexedDB.open(IDB_NAME,1);req.onupgradeneeded=()=>req.result.createObjectStore(IDB_STORE);req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}async function mirrorToIndexedDB(){try{const db=await idbOpen(),tx=db.transaction(IDB_STORE,"readwrite");tx.objectStore(IDB_STORE).put({version:APP_DATA_VERSION,savedLooks,recentLooks,wishlist,guardado_en:new Date().toISOString()},"latest")}catch(e){console.warn("No se pudo espejar en IndexedDB",e)}}async function recoverFromIndexedDB(){try{const db=await idbOpen(),tx=db.transaction(IDB_STORE,"readonly"),req=tx.objectStore(IDB_STORE).get("latest");return new Promise(res=>{req.onsuccess=()=>res(req.result||null);req.onerror=()=>res(null)})}catch(e){return null}}
 Object.assign(window,{login,register,openLoginModal,closeLoginModal,logout,toggleRelated,switchView,populateCategoryOptions,saveGarment,resetForm,renderWardrobe,applySummaryFilter,clearWardrobeFilters,clearWardrobeSpecialFilters,applyWardrobeSpecialFilter,exportData,importData,editGarment,toggleFavorite,toggleVinted,deleteGarment,restoreGarment,deleteGarmentForever,markUsed,openSelector,selectGarmentForSlot,removeFromLook,removeAccessory,clearLook,saveCurrentLook,generateQuickLook,saveQuickLook,copyQuickToManual,generateLook,repeatLastLook,saveRandomLook,copyRandomToManual,loadSavedLook,toggleLookFavorite,deleteSavedLook,saveWish,resetWishForm,wishToWardrobe,deleteWish,generateHomeLook,saveHomeLook,dismissHomeLook,renderSavedLooksCarousel,renderOccasionButtons,renderCombineGroups,chooseCombineGroup,backToCombineGroups,chooseCombineCategory,renderCombineGarments,selectCombineGarment,generateCombineLook,saveCombineLook,openLooksManualEditor,renderLooksManualOutfit,populateLooksSelector,renderLooksSelectorCategories,renderLooksSelectorGarments,openLooksManualSelector,selectLooksManualGarment,closeLooksManualSelector,removeLooksManualSlot,removeLooksManualAccessory,cancelLooksManualEditor,saveLooksManualEditor,renderOwnLook,renderOwnSelectorCategories,renderOwnSelectorGarments,openOwnLookSelector,selectOwnGarment,closeOwnLookSelector,removeOwnSlot,removeOwnAccessory,saveOwnLook,cancelOwnLook,openOwnLookSaveModal,closeOwnLookSaveModal,confirmOwnLookSave,editSavedLook,useSavedLook,chooseSaveLookType,toggleAllGarmentDetails});
-try{loadData();populateStaticSelects();resetForm();resetWishForm();refreshAll();loadHomeWeather();document.getElementById("authUserBox")?.addEventListener("click",e=>{if(e.target.closest(".user-menu"))return;toggleUserMenu()});document.getElementById("authUserBox")?.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();toggleUserMenu()}else if(e.key==="Escape")closeUserMenu()});document.addEventListener("click",e=>{const box=document.getElementById("authUserBox");if(box&&!box.contains(e.target))closeUserMenu()});document.getElementById("logoutBtn")?.addEventListener("click",e=>{e.stopPropagation();closeUserMenu();logout()});onAuthStateChanged(auth,user=>{updateAuthUi(user);if(user)loadWardrobeFromFirestore(user);else{currentUser=null;wardrobeLoaded=false;pendingWardrobeSave=false;garments=[];savedLooks = [];
+try{loadData();populateStaticSelects();resetForm();resetWishForm();refreshAll();loadHomeWeather();document.getElementById("authUserBox")?.addEventListener("click",e=>{if(e.target.closest(".user-menu"))return;toggleUserMenu()});document.getElementById("authUserBox")?.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();toggleUserMenu()}else if(e.key==="Escape")closeUserMenu()});document.addEventListener("click",e=>{const box=document.getElementById("authUserBox");if(box&&!box.contains(e.target))closeUserMenu()});document.getElementById("logoutBtn")?.addEventListener("click",e=>{e.stopPropagation();closeUserMenu();logout()});onAuthStateChanged(auth,user=>{updateAuthUi(user);if(user){loadWardrobeFromFirestore(user);setTimeout(()=>syncCalendarPlansWithFirestore(),0)}else{currentUser=null;wardrobeLoaded=false;pendingWardrobeSave=false;garments=[];savedLooks = [];
 recentLooks = [];
 wishlist = [];refreshAll();setSyncStatus("Inicia sesión")}})}catch(e){alert("Había un error cargando la app: "+e.message);console.error(e)}
 initSubnav();
@@ -3211,14 +3162,22 @@ async function saveCalendarPlansToFirestore(){
 function calKey(d){d=new Date(d);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
 function calEsc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function calPlans(k){return calendarPlans.filter(p=>p.date===k)}
-function calendarOpenPlanModal(k){
+function calendarOpenPlanModal(k,editId=null){
  const p=document.getElementById("calendarPage"); if(!p)return;
- p.insertAdjacentHTML("beforeend",`<div class="calmodal" id="calModal"><div class="calbox"><h3>✨ Nuevo plan</h3>
- <div class="calfield"><label>¿Qué tienes?</label><input id="calName" placeholder="Oficina, Pilates, boda..."></div>
- <div class="calfield"><label>Fecha</label><input id="calDate" type="date" value="${k}"></div>
- <div class="calfield"><label>Hora <span style="font-weight:400">(opcional)</span></label><input id="calTime" type="time"></div>
- <div class="calfield"><label>Contexto <span style="font-weight:400">(opcional)</span></label><input id="calContext" placeholder="Diario, fiesta, concierto..."></div>
- <div class="calactions"><button type="button" onclick="calendarClosePlanModal()">Cancelar</button><button type="button" class="primary" onclick="calendarSavePlan()">Añadir plan</button></div></div></div>`)
+ const existing=editId?calendarPlans.find(plan=>plan.id===editId):null;
+ const date=existing?.date||k;
+ document.getElementById("calModal")?.remove();
+ p.insertAdjacentHTML("beforeend",`<div class="calmodal" id="calModal"><div class="calbox"><h3>${existing?"✏️ Editar plan":"✨ Nuevo plan"}</h3>
+ <input id="calEditId" type="hidden" value="${calEsc(existing?.id||"")}">
+ <div class="calfield"><label>¿Qué tienes?</label><input id="calName" placeholder="Oficina, Pilates, boda..." value="${calEsc(existing?.name||"")}"></div>
+ <div class="calfield"><label>Fecha</label><input id="calDate" type="date" value="${calEsc(date)}"></div>
+ <div class="calfield"><label>Hora <span style="font-weight:400">(opcional)</span></label><input id="calTime" type="time" value="${calEsc(existing?.time||"")}"></div>
+ <div class="calfield"><label>Contexto <span style="font-weight:400">(opcional)</span></label><input id="calContext" placeholder="Diario, fiesta, concierto..." value="${calEsc(existing?.context||"")}"></div>
+ <div class="calactions"><button type="button" onclick="calendarClosePlanModal()">Cancelar</button><button type="button" class="primary" onclick="calendarSavePlan()">${existing?"Guardar cambios":"Añadir plan"}</button></div></div></div>`)
+}
+function calendarEditPlan(id){
+ const plan=calendarPlans.find(p=>p.id===id);
+ if(plan)calendarOpenPlanModal(plan.date,id);
 }
 function calendarClosePlanModal(){document.getElementById("calModal")?.remove()}
 function calendarStorePendingPlan(plan){
@@ -3318,13 +3277,19 @@ function assignLookToCalendarPlan(lookId, plan){
   return calendarAssignLookToPlan(item,plan,{savedReference:true});
 }
 function calendarSavePlan(){
+ const editId=document.getElementById("calEditId")?.value||"";
  const name=(document.getElementById("calName")?.value||"").trim();
  const date=document.getElementById("calDate")?.value||"";
  const time=document.getElementById("calTime")?.value||"";
  const context=(document.getElementById("calContext")?.value||"").trim();
  if(!name||!date){if(typeof toast==="function")toast("Pon qué tienes y la fecha.","warn");else alert("Pon qué tienes y la fecha.");return}
- const plan={id:(typeof uid==="function"?uid():Date.now().toString()),name,date,time,context,lookIds:[],lookItems:[]};
- calendarPlans.push(plan);
+ if(editId){
+   const idx=calendarPlans.findIndex(p=>p.id===editId);
+   if(idx<0){toast("No se encontró el plan.","warn");return}
+   calendarPlans[idx]={...calendarPlans[idx],name,date,time,context};
+ }else{
+   calendarPlans.push({id:(typeof uid==="function"?uid():Date.now().toString()),name,date,time,context,lookIds:[],lookItems:[]});
+ }
  try{calendarPersistPlans()}catch(err){console.error("Error al guardar el plan:",err);if(typeof toast==="function")toast("No se ha podido guardar el plan. Prueba de nuevo.","warn");else alert("No se ha podido guardar el plan. Prueba de nuevo.");return}
  calendarSelectedDate=new Date(date+"T12:00:00");
  calendarViewDate=new Date(date+"T12:00:00");
@@ -3451,6 +3416,8 @@ function calendarConfirmReuse(sourcePlanId,lookId,targetPlanId){
   if((target.lookIds||[]).length&&!window.confirm("Este plan ya tiene un look asignado. ¿Quieres añadir este look también?"))return;
   try{calendarAssignLookToPlan(look,target,{skipConfirm:true,savedReference:!!savedLooks.find(l=>l.id===lookId)});addUsageFromLook(calendarLookToDisplay(look));document.getElementById("calendarReuseModal")?.remove();calendarFinishLookFlow(target);toast("Look reutilizado ✨")}catch(e){console.error("Error reutilizando look:",e);toast("No se ha podido reutilizar el look.","warn")}
 }
+function calendarCancelCreator(){calendarOwnLook=emptyLook();closeCalendarOwnLookSelector();calendarRestoreCreatorCard();document.getElementById("calendarCreatorModal")?.remove();renderCalendarOwnLook()}
+function calendarOpenLookCreator(id){calendarOpenLookFlow(id)}
 function calendarDeletePlan(id){
   const plan=calendarPlans.find(p=>p.id===id);
   if(!plan)return;
@@ -3508,7 +3475,7 @@ function renderCalendarPage(){
  const ps=calPlans(sel).sort((a,b)=>(a.time||"99").localeCompare(b.time||"99"));
  const dateLabel=new Intl.DateTimeFormat("es-ES",{weekday:"long",day:"numeric",month:"long"}).format(calendarSelectedDate);
  detail.innerHTML=`<div class="calendar-detail-title">📅 ${dateLabel}</div>${ps.length?ps.map(p=>`<div class="calendar-plan-card"><div>${p.time?`<span class="plan-time">${calEsc(p.time)}</span> · `:`<span class="plan-time">Todo el día</span> · `}<b>${calEsc(p.name)}</b></div>${p.context?`<div class="calendar-empty">${calEsc(p.context)}</div>`:""}
-<button type="button" class="calendar-delete-plan" onclick="calendarDeletePlan('${p.id}')">🗑️ Eliminar plan</button>${calendarCompactLookHtml(p)}<button type="button" class="calendar-create-look" onclick="calendarOpenLookCreator('${p.id}')">✨ Crear un look</button></div>`).join(""):`<div class="calendar-empty">No tienes planes para este día. Puedes añadir uno con el botón de arriba ✨</div>`}`;
+<button type="button" class="calendar-delete-plan" onclick="calendarEditPlan('${p.id}')">✏️ Editar plan</button><button type="button" class="calendar-delete-plan" onclick="calendarDeletePlan('${p.id}')">🗑️ Eliminar plan</button>${calendarCompactLookHtml(p)}<button type="button" class="calendar-create-look" onclick="calendarOpenLookCreator('${p.id}')">✨ Crear un look</button></div>`).join(""):`<div class="calendar-empty">No tienes planes para este día. Puedes añadir uno con el botón de arriba ✨</div>`}`;
 }
 
 </script><section id="calendar" class="view">
