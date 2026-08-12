@@ -1026,7 +1026,12 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
 </div></div><div class="field" style="grid-column:1/-1"><label>Comentarios</label><textarea id="comentarios" placeholder="Ej. combina muy bien con dorado..."></textarea></div><div class="field" style="grid-column:1/-1"><label>Relacionar con prendas existentes</label><div class="related-picker"><div id="relatedSelectedPreview" class="related-selected"></div><div id="relatedOptions" class="related-options"></div></div><p class="muted" style="margin:0">Toca una o varias prendas para relacionarlas.</p></div></div><div class="button-row" style="margin-top:14px"><button class="primary-btn" onclick="saveGarment()">Guardar prenda</button><button class="ghost-btn" onclick="resetForm()">Limpiar formulario</button></div></div></section>
 <section id="wishlist" class="view"><div class="card"><h2 class="section-title">Wishlist</h2><div class="form-grid"><div class="field"><label>Foto</label><input id="wishFoto" type="file" accept="image/*"></div><div class="field"><label>Nombre</label><input id="wishNombre"></div><div class="field"><label>Marca</label><input id="wishMarca"></div><div class="field"><label>Precio</label><input id="wishPrecio" type="number" step="0.01" min="0"></div><div class="field"><label>Enlace de compra</label><input id="wishEnlace" type="url"></div><div class="field"><label>Prioridad</label><select id="wishPrioridad"><option>Alta</option><option>Media</option><option>Baja</option></select></div><div class="field" style="grid-column:1/-1"><label>Comentarios</label><textarea id="wishComentarios"></textarea></div></div><div class="button-row" style="margin-top:14px"><button class="primary-btn" onclick="saveWish()">Añadir a wishlist</button><button class="ghost-btn" onclick="resetWishForm()">Limpiar</button></div></div><div id="wishlistGrid" class="grid"></div></section>
 
-<section id="crearLook" class="view">
+<style>
+#crearLook{
+    display:none !important;
+}
+</style>
+  <section id="crearLook" class="view">
 <div class="card" id="createOwnLookCard">
     <h2 class="section-title">🎨 Crea tu propio look</h2>
     <p class="muted">Selecciona las prendas que quieras combinar y guárdalo cuando estés contenta con el resultado.</p>
@@ -2706,7 +2711,34 @@ function closeLooksOwnLookSelector(){
         .getElementById("looksOwnLookSelector")
         ?.classList.add("hidden");
 }
-function closeOwnLookSelector(){document.getElementById("ownLookSelector")?.classList.add("hidden")}
+let looksOwnSaveActive=false;
+
+function saveLooksOwnLook(){
+    if(!hasLook(looksOwnLook)){
+        toast("Añade alguna prenda al look.","warn");
+        return;
+    }
+
+    looksOwnSaveActive=true;
+    ownLook=looksOwnLook;
+
+    openOwnLookSaveModal(null,"propio","");
+}
+
+function cancelLooksOwnLook(){
+    looksOwnLook=emptyLook();
+    looksOwnCurrentSlot=null;
+    closeLooksOwnLookSelector();
+    renderLooksOwnLook();
+}function removeLooksOwnSlot(slot){
+    looksOwnLook[slot]=null;
+    renderLooksOwnLook();
+}
+
+function removeLooksOwnAccessory(i){
+    looksOwnLook.accesorios.splice(i,1);
+    renderLooksOwnLook();
+}function closeOwnLookSelector(){document.getElementById("ownLookSelector")?.classList.add("hidden")}
 function removeOwnSlot(slot){ownLook[slot]=null;renderOwnLook()}
 function removeOwnAccessory(i){ownLook.accesorios.splice(i,1);renderOwnLook()}
 let editingSavedLookId=null;
@@ -2798,11 +2830,9 @@ function closeOwnLookSaveModal(){
 window.__briclosetPendingCalendarPlan = getPendingCalendarPlan();
 function confirmOwnLookSave(){
   const pendingCalendarPlan=getPendingCalendarPlan();
-
     const name=(document.getElementById("lookSaveName")?.value||"").trim();
     const occasion=document.getElementById("lookSaveOccasion")?.value||pendingSaveOccasion||"";
     const plannedDate=document.getElementById("lookSaveDate")?.value||"";
-
     if(!name){toast("Pon un nombre para el look.","warn");return}
     if(saveLookType==="day"&&!plannedDate){
         toast("Elige el día en el que quieres usarlo.","warn");return;
@@ -2858,7 +2888,12 @@ function confirmOwnLookSave(){
     // a visual refresh, scroll or optional Firebase sync failed.
     const savedType=saveLookType;
     editingSavedLookId=null;
-    ownLook=emptyLook();
+    ownLook=emptyLook();if(looksOwnSaveActive){
+    looksOwnLook=emptyLook();
+    looksOwnCurrentSlot=null;
+    looksOwnSaveActive=false;
+    renderLooksOwnLook();
+}
     pendingSaveSource="propio";
     pendingSaveOccasion="";
 
@@ -3261,7 +3296,7 @@ window.addEventListener("scroll",updateHeaderOnScroll,{passive:true});
 
 function refreshAll(){updateSummary();ensureDailyQuickLook();fillFilterOptions();renderRelatedSelect();renderWardrobe();renderTrash();renderCurrentLook();renderRandomLook();renderQuickLook();renderWishlist();renderFavorites();renderVinted();renderSavedLooksCarousel();renderOccasionButtons();renderCombineGroups();renderLooksManualOutfit();renderOwnLook();renderLooksOwnLook()}function toast(msg,type="ok"){const box=document.getElementById("toastBox");if(!box)return alert(msg);const t=document.createElement("div");t.className=`toast toast-${type}`;t.textContent=msg;box.appendChild(t);requestAnimationFrame(()=>t.classList.add("show"));setTimeout(()=>{t.classList.remove("show");setTimeout(()=>t.remove(),300)},3200)}
 const IDB_NAME="bricloset_mirror_db",IDB_STORE="backups";function idbOpen(){return new Promise((resolve,reject)=>{const req=indexedDB.open(IDB_NAME,1);req.onupgradeneeded=()=>req.result.createObjectStore(IDB_STORE);req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}async function mirrorToIndexedDB(){try{const db=await idbOpen(),tx=db.transaction(IDB_STORE,"readwrite");tx.objectStore(IDB_STORE).put({version:APP_DATA_VERSION,savedLooks,recentLooks,wishlist,guardado_en:new Date().toISOString()},"latest")}catch(e){console.warn("No se pudo espejar en IndexedDB",e)}}async function recoverFromIndexedDB(){try{const db=await idbOpen(),tx=db.transaction(IDB_STORE,"readonly"),req=tx.objectStore(IDB_STORE).get("latest");return new Promise(res=>{req.onsuccess=()=>res(req.result||null);req.onerror=()=>res(null)})}catch(e){return null}}
-Object.assign(window,{login,register,openLoginModal,closeLoginModal,logout,toggleRelated,switchView,populateCategoryOptions,saveGarment,resetForm,renderWardrobe,applySummaryFilter,clearWardrobeFilters,clearWardrobeSpecialFilters,applyWardrobeSpecialFilter,exportData,importData,editGarment,toggleFavorite,toggleVinted,deleteGarment,restoreGarment,deleteGarmentForever,markUsed,openSelector,selectGarmentForSlot,removeFromLook,removeAccessory,clearLook,saveCurrentLook,generateQuickLook,saveQuickLook,copyQuickToManual,generateLook,repeatLastLook,saveRandomLook,copyRandomToManual,loadSavedLook,toggleLookFavorite,deleteSavedLook,saveWish,resetWishForm,wishToWardrobe,deleteWish,generateHomeLook,saveHomeLook,dismissHomeLook,renderSavedLooksCarousel,renderOccasionButtons,renderCombineGroups,chooseCombineGroup,backToCombineGroups,chooseCombineCategory,renderCombineGarments,selectCombineGarment,generateCombineLook,saveCombineLook,openLooksManualEditor,renderLooksManualOutfit,populateLooksSelector,renderLooksSelectorCategories,renderLooksSelectorGarments,openLooksManualSelector,selectLooksManualGarment,closeLooksManualSelector,removeLooksManualSlot,removeLooksManualAccessory,cancelLooksManualEditor,saveLooksManualEditor,renderOwnLook,renderOwnSelectorCategories,renderLooksOwnLook,renderLooksOwnSelectorCategories,renderLooksOwnSelectorGarments,openLooksOwnLookSelector,selectLooksOwnGarment,closeLooksOwnLookSelector,renderOwnSelectorGarments,openOwnLookSelector,selectOwnGarment,closeOwnLookSelector,removeOwnSlot,removeOwnAccessory,saveOwnLook,cancelOwnLook,openOwnLookSaveModal,closeOwnLookSaveModal,confirmOwnLookSave,editSavedLook,useSavedLook,chooseSaveLookType,toggleAllGarmentDetails});
+Object.assign(window,{login,register,openLoginModal,closeLoginModal,logout,toggleRelated,switchView,populateCategoryOptions,saveGarment,resetForm,renderWardrobe,applySummaryFilter,clearWardrobeFilters,clearWardrobeSpecialFilters,applyWardrobeSpecialFilter,exportData,importData,editGarment,toggleFavorite,toggleVinted,deleteGarment,restoreGarment,deleteGarmentForever,markUsed,openSelector,selectGarmentForSlot,removeFromLook,removeAccessory,clearLook,saveCurrentLook,generateQuickLook,saveQuickLook,copyQuickToManual,generateLook,repeatLastLook,saveRandomLook,copyRandomToManual,loadSavedLook,toggleLookFavorite,deleteSavedLook,saveWish,resetWishForm,wishToWardrobe,deleteWish,generateHomeLook,saveHomeLook,dismissHomeLook,renderSavedLooksCarousel,renderOccasionButtons,renderCombineGroups,chooseCombineGroup,backToCombineGroups,chooseCombineCategory,renderCombineGarments,selectCombineGarment,generateCombineLook,saveCombineLook,openLooksManualEditor,renderLooksManualOutfit,populateLooksSelector,renderLooksSelectorCategories,renderLooksSelectorGarments,openLooksManualSelector,selectLooksManualGarment,closeLooksManualSelector,removeLooksManualSlot,removeLooksManualAccessory,cancelLooksManualEditor,saveLooksManualEditor,renderOwnLook,renderOwnSelectorCategories,renderLooksOwnLook,renderLooksOwnSelectorCategories,renderLooksOwnSelectorGarments,openLooksOwnLookSelector,selectLooksOwnGarment,closeLooksOwnLookSelector,saveLooksOwnLook,cancelLooksOwnLook,removeLooksOwnSlot,removeLooksOwnAccessory,renderOwnSelectorGarments,openOwnLookSelector,selectOwnGarment,closeOwnLookSelector,removeOwnSlot,removeOwnAccessory,saveOwnLook,cancelOwnLook,openOwnLookSaveModal,closeOwnLookSaveModal,confirmOwnLookSave,editSavedLook,useSavedLook,chooseSaveLookType,toggleAllGarmentDetails});
 try{loadData();populateStaticSelects();resetForm();resetWishForm();refreshAll();loadHomeWeather();document.getElementById("authUserBox")?.addEventListener("click",e=>{if(e.target.closest(".user-menu"))return;toggleUserMenu()});document.getElementById("authUserBox")?.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();toggleUserMenu()}else if(e.key==="Escape")closeUserMenu()});document.addEventListener("click",e=>{const box=document.getElementById("authUserBox");if(box&&!box.contains(e.target))closeUserMenu()});document.getElementById("logoutBtn")?.addEventListener("click",e=>{e.stopPropagation();closeUserMenu();logout()});onAuthStateChanged(auth,user=>{updateAuthUi(user);if(user){loadWardrobeFromFirestore(user);setTimeout(()=>syncCalendarPlansWithFirestore(),0)}else{currentUser=null;wardrobeLoaded=false;pendingWardrobeSave=false;garments=[];savedLooks = [];
 recentLooks = [];
 wishlist = [];refreshAll();setSyncStatus("Inicia sesión")}})}catch(e){alert("Había un error cargando la app: "+e.message);console.error(e)}
