@@ -3206,8 +3206,28 @@ function calendarResolveLook(plan,lookId){
   if(!plan||!lookId)return null;
   return (plan.lookItems||[]).find(l=>l.id===lookId)||savedLooks.find(l=>l.id===lookId)||(plan.look?.id===lookId?plan.look:null)||null;
 }
-function calendarLookToDisplay(look){return look&&(look.abrigo||look.exterior||look.interior||look.inferior||look.vestido||look.calzado||look.bolso||look.accesorios)?look:idsToLook(look||{})}
-function calendarFinishLookFlow(plan){
+function calendarLookToDisplay(look){
+  if(!look)return emptyLook();
+
+  const resolveGarment=value=>{
+    if(!value)return null;
+    if(typeof value==="object")return value;
+    return findGarment(value);
+  };
+
+  return {
+    abrigo:resolveGarment(look.abrigo),
+    exterior:resolveGarment(look.exterior),
+    interior:resolveGarment(look.interior),
+    inferior:resolveGarment(look.inferior),
+    vestido:resolveGarment(look.vestido),
+    calzado:resolveGarment(look.calzado),
+    bolso:resolveGarment(look.bolso),
+    accesorios:(Array.isArray(look.accesorios)?look.accesorios:[])
+      .map(resolveGarment)
+      .filter(Boolean)
+  };
+}function calendarFinishLookFlow(plan){
   calendarClearPendingPlan();
   calendarEditingPlanId=null;
   calendarEditingLookId=null;
