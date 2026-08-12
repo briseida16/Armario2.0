@@ -3424,7 +3424,29 @@ function calendarCancelCreator(){
   calendarRestoreCreatorCard();
 
   renderCalendarOwnLook();
-}function calendarOpenLookCreator(id){calendarOpenLookFlow(id)}
+}function calendarOpenLookCreator(id){calendarOpenLookFlow(id)}function calendarRemoveAssignedLook(planId,lookId){
+  const plan=calendarPlans.find(p=>p.id===planId);
+  if(!plan)return;
+
+  const ids=Array.isArray(plan.lookIds)?plan.lookIds:[];
+  if(!ids.includes(lookId))return;
+
+  if(!window.confirm("¿Quieres quitar este look de este plan?"))return;
+
+  plan.lookIds=ids.filter(id=>id!==lookId);
+
+  if(Array.isArray(plan.lookItems)){
+    plan.lookItems=plan.lookItems.filter(l=>l?.id!==lookId);
+  }
+
+  if(plan.look?.id===lookId){
+    plan.look=null;
+  }
+
+  calendarPersistPlans();
+  renderCalendarPage();
+  toast("Look quitado del plan 🗑️");
+}
 function calendarViewAssignedLook(planId,lookId){
   const plan=calendarPlans.find(p=>p.id===planId), look=calendarResolveLook(plan,lookId);
   if(!plan||!look)return;
@@ -3499,7 +3521,7 @@ function calendarDeletePlan(id){
     if(!look)return "";
     const display=calendarLookToDisplay(look);
     const garments=[display.abrigo,display.exterior,display.interior,display.inferior,display.vestido,display.calzado,display.bolso,...(display.accesorios||[])].filter(Boolean).slice(0,4);
-    return `<div class="calendar-look-preview"><div class="calendar-empty">👗 ${calEsc(look.nombre||"Look del calendario")}</div><div class="calendar-saved-looks" style="grid-template-columns:repeat(4,minmax(0,1fr));margin-top:8px">${garments.map(g=>`<img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}" style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:12px">`).join("")}</div><div class="button-row" style="margin-top:8px"><button type="button" class="small-btn" onclick="calendarViewAssignedLook('${plan.id}','${id}')">👀 Ver</button><button type="button" class="small-btn" onclick="calendarEditAssignedLook('${plan.id}','${id}')">✏️ Editar</button><button type="button" class="small-btn" onclick="calendarReuseAssignedLook('${plan.id}','${id}')">🔄 Reutilizar</button></div></div>`;
+    return `<div class="calendar-look-preview"><div class="calendar-empty">👗 ${calEsc(look.nombre||"Look del calendario")}</div><div class="calendar-saved-looks" style="grid-template-columns:repeat(4,minmax(0,1fr));margin-top:8px">${garments.map(g=>`<img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}" style="width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:12px">`).join("")}</div><div class="button-row" style="margin-top:8px"><button type="button" class="small-btn" onclick="calendarViewAssignedLook('${plan.id}','${id}')">👀 Ver</button><button type="button" class="small-btn" onclick="calendarEditAssignedLook('${plan.id}','${id}')">✏️ Editar</button><button type="button" class="small-btn" onclick="calendarReuseAssignedLook('${plan.id}','${id}')">🔄 Reutilizar</button><button type="button" class="small-btn" onclick="calendarRemoveAssignedLook('${plan.id}','${id}')">🗑️ Quitar</button></div></div>`;
   }).join("");
 }
 function renderCalendarPage(){
@@ -3526,7 +3548,7 @@ function renderCalendarPage(){
 }
 
 
-Object.assign(window,{renderCalendarOwnLook,openCalendarOwnLookSelector,closeCalendarOwnLookSelector,renderCalendarOwnSelectorCategories,renderCalendarOwnSelectorGarments,selectCalendarOwnGarment,removeCalendarOwnSlot,removeCalendarOwnAccessory,cancelCalendarOwnLook,calendarShiftMonth,calendarSelectDate,calendarOpenPlanModal,calendarOpenNewPlanModal,calendarEditPlan,calendarClosePlanModal,calendarSavePlan,calendarDeletePlan,calendarOpenLookFlow,calendarCloseLookFlow,calendarCancelLookFlow,calendarAssignSavedLook,calendarChooseSavedLook,calendarOpenCreatorModal,calendarChooseCreateLook,calendarChooseProposedLook,calendarEditProposal,calendarSaveProposal,calendarSaveOwnLook,calendarCancelCreator,calendarOpenLookCreator,calendarViewAssignedLook,calendarEditAssignedLook,calendarReuseAssignedLook,calendarPrepareReuse,calendarCreateReusePlan,calendarConfirmReuse,assignLookToCalendarPlan,saveLookToCalendar,renderCalendarPage});
+Object.assign(window,{renderCalendarOwnLook,openCalendarOwnLookSelector,closeCalendarOwnLookSelector,renderCalendarOwnSelectorCategories,renderCalendarOwnSelectorGarments,selectCalendarOwnGarment,removeCalendarOwnSlot,removeCalendarOwnAccessory,cancelCalendarOwnLook,calendarShiftMonth,calendarSelectDate,calendarOpenPlanModal,calendarOpenNewPlanModal,calendarEditPlan,calendarClosePlanModal,calendarSavePlan,calendarDeletePlan,calendarOpenLookFlow,calendarCloseLookFlow,calendarCancelLookFlow,calendarAssignSavedLook,calendarChooseSavedLook,calendarOpenCreatorModal,calendarChooseCreateLook,calendarChooseProposedLook,calendarEditProposal,calendarSaveProposal,calendarSaveOwnLook,calendarCancelCreator,calendarOpenLookCreator,calendarViewAssignedLook,calendarEditAssignedLook,calendarReuseAssignedLook,calendarRemoveAssignedLook,calendarPrepareReuse,calendarCreateReusePlan,calendarConfirmReuse,assignLookToCalendarPlan,saveLookToCalendar,renderCalendarPage});
 
 </script>
 <section id="calendar" class="view">
