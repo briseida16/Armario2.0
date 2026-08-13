@@ -1062,40 +1062,6 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
     <button type="button" data-look-action="combine">👗 ¿Qué me combina con esto?</button>
     <button type="button" data-look-action="create">🎨 Crear mi propio look</button>
 </div>
-<div class="card" id="looksOwnLookCard">
-    <h2 class="section-title">🎨 Diseña tu propio look</h2>
-    <p class="muted">Selecciona las prendas que quieras combinar y guárdalo cuando estés contenta con el resultado.</p>
-
-    <div class="outfit-grid manual-looks-grid" id="looksOwnLookOutfit">
-        <div class="slot" id="looksOwn_abrigo"></div>
-        <div class="slot" id="looksOwn_exterior"></div>
-        <div class="slot" id="looksOwn_interior"></div>
-        <div class="slot" id="looksOwn_inferior"></div>
-        <div class="slot" id="looksOwn_vestido"></div>
-        <div class="slot" id="looksOwn_calzado"></div>
-        <div class="slot" id="looksOwn_bolso"></div>
-        <div class="slot" id="looksOwn_accesorios"></div>
-    </div>
-
-    <div class="looks-single-selector hidden" id="looksOwnLookSelector">
-        <div class="selector-head">
-            <strong id="looksOwnLookSelectorTitle">Elige una prenda</strong>
-            <button class="small-btn" type="button" onclick="closeLooksOwnLookSelector()">Cerrar</button>
-        </div>
-
-        <div class="looks-selector-filters">
-            <select id="looksOwnSelectorGroup" onchange="renderLooksOwnSelectorCategories()"></select>
-            <select id="looksOwnSelectorCategory" onchange="renderLooksOwnSelectorGarments()"></select>
-        </div>
-
-        <div id="looksOwnSelectorGarments" class="grid"></div>
-    </div>
-
-    <div class="button-row" style="margin-top:14px">
-        <button class="primary-btn" onclick="saveLooksOwnLook()">Guardar</button>
-        <button class="ghost-btn" onclick="cancelLooksOwnLook()">Cancelar</button>
-    </div>
-</div>
 <div class="card" id="savedLooksCarouselCard">
     <h2 class="section-title">💾 Looks guardados</h2>
     <div id="savedLooksCarousel" class="looks-carousel"></div>
@@ -1228,7 +1194,40 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
         </div>
     </div>
 </div>
+<div class="card" id="looksOwnLookCard">
+    <h2 class="section-title">🎨 Diseña tu propio look</h2>
+    <p class="muted">Selecciona las prendas que quieras combinar y guárdalo cuando estés contenta con el resultado.</p>
 
+    <div class="outfit-grid manual-looks-grid" id="looksOwnLookOutfit">
+        <div class="slot" id="looksOwn_abrigo"></div>
+        <div class="slot" id="looksOwn_exterior"></div>
+        <div class="slot" id="looksOwn_interior"></div>
+        <div class="slot" id="looksOwn_inferior"></div>
+        <div class="slot" id="looksOwn_vestido"></div>
+        <div class="slot" id="looksOwn_calzado"></div>
+        <div class="slot" id="looksOwn_bolso"></div>
+        <div class="slot" id="looksOwn_accesorios"></div>
+    </div>
+
+    <div class="looks-single-selector hidden" id="looksOwnLookSelector">
+        <div class="selector-head">
+            <strong id="looksOwnLookSelectorTitle">Elige una prenda</strong>
+            <button class="small-btn" type="button" onclick="closeLooksOwnLookSelector()">Cerrar</button>
+        </div>
+
+        <div class="looks-selector-filters">
+            <select id="looksOwnSelectorGroup" onchange="renderLooksOwnSelectorCategories()"></select>
+            <select id="looksOwnSelectorCategory" onchange="renderLooksOwnSelectorGarments()"></select>
+        </div>
+
+        <div id="looksOwnSelectorGarments" class="grid"></div>
+    </div>
+
+    <div class="button-row" style="margin-top:14px">
+        <button class="primary-btn" onclick="saveLooksOwnLook()">Guardar</button>
+        <button class="ghost-btn" onclick="cancelLooksOwnLook()">Cancelar</button>
+    </div>
+</div>
 <div class="card" id="calendarCreateOwnLookCard">
     <h2 class="section-title">🎨 Crea tu propio look</h2>
     <p class="muted">Selecciona las prendas que quieras combinar y guárdalo cuando estés contenta con el resultado.</p>
