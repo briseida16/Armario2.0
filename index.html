@@ -1228,7 +1228,7 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
         <button class="ghost-btn" onclick="cancelLooksOwnLook()">Cancelar</button>
     </div>
 </div>
-<div class="card" id="calendarCreateOwnLookCard">
+<div class="card hidden" id="calendarCreateOwnLookCard">
     <h2 class="section-title">🎨 Crea tu propio look</h2>
     <p class="muted">Selecciona las prendas que quieras combinar y guárdalo cuando estés contenta con el resultado.</p>
     <div class="outfit-grid manual-looks-grid" id="calendarOwnLookOutfit"><div class="slot" id="calendarOwn_abrigo"></div><div class="slot" id="calendarOwn_exterior"></div><div class="slot" id="calendarOwn_interior"></div><div class="slot" id="calendarOwn_inferior"></div><div class="slot" id="calendarOwn_vestido"></div><div class="slot" id="calendarOwn_calzado"></div><div class="slot" id="calendarOwn_bolso"></div><div class="slot" id="calendarOwn_accesorios"></div></div>
@@ -3627,7 +3627,11 @@ function calendarChooseSavedLook(){
 }
 function calendarRestoreCreatorCard(){
   const card=document.getElementById("calendarCreateOwnLookCard");
-  if(card&&calendarCreatorPlaceholder){calendarCreatorPlaceholder.replaceWith(card);calendarCreatorPlaceholder=null}
+  if(card&&calendarCreatorPlaceholder){
+    calendarCreatorPlaceholder.replaceWith(card);
+    card.classList.add("hidden");
+    calendarCreatorPlaceholder=null;
+  }
 }
 function calendarOpenCreatorModal(seedLook=null,editPlanId=null,editLookId=null){
   const plan=editPlanId?calendarPlans.find(p=>p.id===editPlanId):calendarPendingPlan();
@@ -3644,7 +3648,8 @@ function calendarOpenCreatorModal(seedLook=null,editPlanId=null,editLookId=null)
   card.parentNode.insertBefore(calendarCreatorPlaceholder,card);
   document.body.insertAdjacentHTML("beforeend",`<div class="calendar-look-modal" id="calendarCreatorModal" role="dialog" aria-modal="true"><div class="calendar-look-box" id="calendarCreatorBox" style="width:min(980px,100%);max-height:92vh;overflow:auto"><button type="button" class="calendar-look-close" onclick="calendarCancelCreator()">×</button></div></div>`);
   document.getElementById("calendarCreatorBox")?.appendChild(card);
-  renderCalendarOwnLook();
+card.classList.remove("hidden");
+renderCalendarOwnLook();
 }
 function calendarChooseCreateLook(){calendarOpenCreatorModal()}
 function calendarLookPreviewHtml(look){
