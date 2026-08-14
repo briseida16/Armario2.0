@@ -2344,7 +2344,9 @@ function clearCombineFilters(){
     const groupSelect=document.getElementById("combineGroupSelect");
     const categorySelect=document.getElementById("combineCategorySelect");
 
-    if(groupSelect) groupSelect.value="";
+    if(groupSelect){
+        groupSelect.value="";
+    }
 
     if(categorySelect){
         categorySelect.value="";
@@ -2352,15 +2354,30 @@ function clearCombineFilters(){
         categorySelect.innerHTML='<option value="">Todas las categorías</option>';
     }
 
-    // Volver a mostrar selectores
-    document.getElementById("combineGroups")?.classList.remove("hidden");
+    // Restaurar selectores
+    const groupsBox=document.getElementById("combineGroups");
+    if(groupsBox){
+        groupsBox.classList.remove("hidden");
+        groupsBox.style.removeProperty("display");
+    }
 
-    // Ocultar resultado y selección
-    document.getElementById("combineSelected")?.classList.add("hidden");
+    // Ocultar y limpiar listado hasta elegir grupo
+    const garmentsBox=document.getElementById("combineGarments");
+    if(garmentsBox){
+        garmentsBox.innerHTML="";
+        garmentsBox.classList.add("hidden");
+        garmentsBox.style.setProperty("display","none","important");
+    }
+
+    // Ocultar selección y resultado
+    const selectedBox=document.getElementById("combineSelected");
+    if(selectedBox){
+        selectedBox.classList.add("hidden");
+        selectedBox.style.removeProperty("display");
+        selectedBox.innerHTML="";
+    }
+
     document.getElementById("combineResult")?.classList.add("hidden");
-
-    // El listado vuelve a aparecer solo cuando se vuelva a elegir grupo
-    document.getElementById("combineGarments")?.classList.add("hidden");
 }
 function backToCombineGroups(){
     combineState.group=null;
@@ -2429,14 +2446,27 @@ function selectCombineGarment(id){
 
     combineState.selected=g;
 
-    // Ocultar selectores y listado de prendas
-    document.getElementById("combineGroups")?.classList.add("hidden");
-    document.getElementById("combineGarments")?.classList.add("hidden");
+    // Ocultar los selectores
+    const groupsBox=document.getElementById("combineGroups");
+    if(groupsBox){
+        groupsBox.classList.add("hidden");
+        groupsBox.style.setProperty("display","none","important");
+    }
+
+    // Ocultar Y vaciar el listado de prendas
+    const garmentsBox=document.getElementById("combineGarments");
+    if(garmentsBox){
+        garmentsBox.innerHTML="";
+        garmentsBox.classList.add("hidden");
+        garmentsBox.style.setProperty("display","none","important");
+    }
 
     // Mostrar la prenda seleccionada
     const selectedBox=document.getElementById("combineSelected");
     if(selectedBox){
         selectedBox.classList.remove("hidden");
+        selectedBox.style.setProperty("display","block","important");
+
         selectedBox.innerHTML=`
             <div class="combine-selected-item">
                 <img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}">
