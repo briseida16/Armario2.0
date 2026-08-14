@@ -271,7 +271,57 @@ header.compact ~ #subnavFloatingMenu{top:58px}
 .combine-garments-track .combine-garment{flex:0 0 132px;scroll-snap-align:start}
 .combine-garment{border:1px solid var(--line);border-radius:18px;background:#fff;padding:8px;cursor:pointer}
 .combine-garment img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:13px}
+/* Prenda seleccionada */
+.combine-selected{
+    margin-top:14px;
+    padding:10px 14px;
+    border-radius:18px;
+    background:#fff6fa;
+    border:1px solid #eed9e3;
+}
 
+.combine-selected-item{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    min-height:72px;
+}
+
+.combine-selected-item img{
+    width:72px !important;
+    height:72px !important;
+    min-width:72px !important;
+    max-width:72px !important;
+    min-height:72px !important;
+    max-height:72px !important;
+    object-fit:cover !important;
+    display:block !important;
+    border-radius:14px !important;
+    border:3px solid #f3b6cf !important;
+    box-shadow:0 0 0 3px #f9dce9 !important;
+}
+
+.combine-selected-info{
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:5px;
+}
+
+.combine-selected-info strong{
+    font-size:.95rem;
+}
+
+.combine-selected-badge{
+    display:inline-flex;
+    align-items:center;
+    padding:4px 9px;
+    border-radius:999px;
+    background:#fff1f7;
+    color:#7b5368;
+    font-size:.72rem;
+    font-weight:900;
+}
 /* Prenda seleccionada en "¿Qué me combina con esto?" */
 .combine-base-slot{
     position:relative;
@@ -2378,8 +2428,15 @@ function selectCombineGarment(id){
     const selectedBox=document.getElementById("combineSelected");
     if(selectedBox){
         selectedBox.classList.remove("hidden");
-        selectedBox.innerHTML=`<img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}"><strong>${esc(g.nombre)}</strong><span class="muted"> · ${esc(fmtGroup(g.grupo))}</span>`;
-    }
+        selectedBox.innerHTML=`
+    <div class="combine-selected-item">
+        <img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}">
+        <div class="combine-selected-info">
+            <strong>${esc(g.nombre)}</strong>
+            <span class="muted"> · ${esc(fmtGroup(g.grupo))}</span>
+            <span class="combine-selected-badge">💕 Prenda seleccionada</span>
+        </div>
+    </div>`; }
 
     generateCombineLook();
 }
