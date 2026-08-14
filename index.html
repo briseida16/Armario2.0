@@ -2351,9 +2351,20 @@ function clearCombineFilters(){
         categorySelect.innerHTML='<option value="">Todas las categorías</option>';
     }
 
-    document.getElementById("combineGarments")?.classList.add("hidden");
-    document.getElementById("combineSelected")?.classList.add("hidden");
-    document.getElementById("combineResult")?.classList.add("hidden");
+const garmentsBox=document.getElementById("combineGarments");
+if(garmentsBox){
+    garmentsBox.classList.add("hidden");
+    garmentsBox.style.display="";
+}
+
+const groupsBox=document.getElementById("combineGroups");
+if(groupsBox){
+    groupsBox.classList.remove("hidden");
+    groupsBox.style.display="";
+}
+
+document.getElementById("combineSelected")?.classList.add("hidden");
+document.getElementById("combineResult")?.classList.add("hidden");
 }
 function backToCombineGroups(){
     combineState.group=null;
@@ -2423,12 +2434,17 @@ function selectCombineGarment(id){
     combineState.selected=g;
 
     document.getElementById("combineGroups")?.classList.add("hidden");
-    document.getElementById("combineGarments")?.classList.add("hidden");
+   const garmentsBox=document.getElementById("combineGarments");
+if(garmentsBox){
+    garmentsBox.classList.add("hidden");
+    garmentsBox.style.display="none";
+}
 
-    const selectedBox=document.getElementById("combineSelected");
-    if(selectedBox){
-        selectedBox.classList.remove("hidden");
-        selectedBox.innerHTML=`
+const groupsBox=document.getElementById("combineGroups");
+if(groupsBox){
+    groupsBox.classList.add("hidden");
+    groupsBox.style.display="none";
+}
     <div class="combine-selected-item">
         <img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}">
         <div class="combine-selected-info">
