@@ -1878,7 +1878,6 @@ function renderWardrobeStats(){
         const quantity=Number(g.cantidad)||1;
         return sum+(price*quantity);
     },0);
-
     const averageCost=active.length>0
         ? totalCost/active.length
         : 0;
@@ -1913,7 +1912,7 @@ function renderWardrobeStats(){
         </button>
     `;
 }
-}function renderWardrobe(){
+function renderWardrobe(){
     renderWardrobeSummary();
     renderWardrobeStats();
 
