@@ -1871,7 +1871,7 @@ function applyWardrobeSpecialFilter(type){
 }
 
 function renderWardrobeStats(){
-    const active=garments.filter(g=>!g.eliminado_en);
+    const active=filteredGarments();
 
     const totalCost=active.reduce((sum,g)=>{
         const price=Number(g.precio)||0;
@@ -1879,16 +1879,13 @@ function renderWardrobeStats(){
         return sum+(price*quantity);
     },0);
 
-    const totalUses=active.reduce((sum,g)=>{
-        return sum+(Number(g.usos)||0);
-    },0);
-
-    const averageCostUse=totalUses>0
-        ? totalCost/totalUses
+    const averageCost=active.length>0
+        ? totalCost/active.length
         : 0;
 
-    const unused=active.filter(g=>(g.usos||0)===0);
-    const amortized=active.filter(g=>(g.usos||0)>=AMORTIZED_USES);
+    const unused=active.filter(g=>
+        g.estado==="nuevo_etiqueta"
+    );
 
     const box=document.getElementById("wardrobeStats");
     if(!box)return;
@@ -1896,14 +1893,14 @@ function renderWardrobeStats(){
     box.innerHTML=`
         <div class="summary-box">
             <div class="summary-number">${totalCost.toFixed(2)} €</div>
-            <div class="muted">💰 Coste total del armario</div>
+            <div class="muted">💰 Coste total</div>
         </div>
 
         <div class="summary-box">
             <div class="summary-number">
-                ${totalUses>0 ? averageCostUse.toFixed(2)+" €" : "—"}
+                ${active.length>0 ? averageCost.toFixed(2)+" €" : "—"}
             </div>
-            <div class="muted">📉 Coste medio por uso</div>
+            <div class="muted">💶 Coste medio por prenda</div>
         </div>
 
         <button
@@ -1912,18 +1909,10 @@ function renderWardrobeStats(){
             onclick="applyWardrobeSpecialFilter('unused')"
             style="text-align:left;cursor:pointer;border:1px solid var(--line)">
             <div class="summary-number">${unused.length}</div>
-            <div class="muted">✨ Sin estrenar</div>
-        </button>
-
-        <button
-            type="button"
-            class="summary-box"
-            onclick="applyWardrobeSpecialFilter('amortized')"
-            style="text-align:left;cursor:pointer;border:1px solid var(--line)">
-            <div class="summary-number">${amortized.length}</div>
-            <div class="muted">🔥 Muy usadas / amortizadas</div>
+            <div class="muted">🏷️ A estrenar</div>
         </button>
     `;
+}
 }function renderWardrobe(){
     renderWardrobeSummary();
     renderWardrobeStats();
