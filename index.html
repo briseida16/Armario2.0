@@ -933,11 +933,11 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
             </select>
 
             <select id="sortWardrobe" onchange="renderWardrobe()">
-                <option value="reciente">Más recientes primero</option>
-                <option value="usos_desc">Más usadas primero</option>
-                <option value="usos_asc">Menos usadas primero</option>
-                <option value="az">Nombre A-Z</option>
-            </select>
+    <option value="az">Nombre A-Z</option>
+    <option value="reciente">Más recientes primero</option>
+    <option value="usos_desc">Más usadas primero</option>
+    <option value="usos_asc">Menos usadas primero</option>
+</select>
         </div>
 
         <div id="wardrobeSummary" class="summary-row"></div>
@@ -1952,6 +1952,13 @@ function renderWardrobe(){
     renderWardrobeStats();
 
     const data=filteredGarments();
+  const orderedData=[...data].sort((a,b)=>
+    String(a.nombre||"").localeCompare(
+        String(b.nombre||""),
+        "es",
+        {sensitivity:"base"}
+    )
+);
     const box=document.getElementById("wardrobeGrid");
 
     if(!data.length){
@@ -1969,7 +1976,7 @@ function renderWardrobe(){
         box.className="category-layout";
 
         box.innerHTML=Object.entries(groupLabels).map(([gr,label])=>{
-            const items=data.filter(g=>g.grupo===gr);
+            const items=orderedData.filter(g=>g.grupo===gr);
 
             return `
             <details class="category-panel" open>
@@ -1983,7 +1990,7 @@ function renderWardrobe(){
         }).join("");
     }else{
         box.className="grid";
-        box.innerHTML=data.map(garmentCard).join("");
+       box.innerHTML=orderedData.map(garmentCard).join("");
     }
 }function applySummaryFilter(group){
     activeSummaryFilter = group;
