@@ -1806,9 +1806,9 @@ function filteredGarments(){
     let data=garments.filter(g=>{
         if(g.eliminado_en)return false;
 
-        if(activeSummaryFilter==="unused" && (g.usos||0)!==0)return false;
-        if(activeSummaryFilter==="amortized" && (g.usos||0)<AMORTIZED_USES)return false;
-
+        if(activeSummaryFilter==="new_tag" && g.estado!=="nuevo_etiqueta")return false;
+if(activeSummaryFilter==="unused" && (g.usos||0)!==0)return false;
+if(activeSummaryFilter==="amortized" && (g.usos||0)<AMORTIZED_USES)return false;
         const hay=`${g.nombre} ${g.color} ${g.categoria} ${g.marca||""} ${g.comentarios} ${(g.ocasiones||[]).join(" ")}`.toLowerCase();
 
         return (!q||hay.includes(q))
@@ -1879,9 +1879,13 @@ function clearWardrobeSpecialFilters(){
 }
 
 function applyWardrobeSpecialFilter(type){
-    clearWardrobeSpecialFilters();
-    activeSummaryFilter=type;
+    activeSummaryFilter=
+        activeSummaryFilter===type
+            ? ""
+            : type;
+
     renderWardrobe();
+
     document.getElementById("wardrobeGrid")?.scrollIntoView({
         behavior:"smooth",
         block:"start"
@@ -1923,7 +1927,7 @@ function renderWardrobeStats(){
         <button
             type="button"
             class="summary-box"
-            onclick="applyWardrobeSpecialFilter('unused')"
+            onclick="applyWardrobeSpecialFilter('new_tag')"
             style="text-align:left;cursor:pointer;border:1px solid var(--line)">
             <div class="summary-number">${unused.length}</div>
             <div class="muted">🏷️ A estrenar</div>
@@ -3252,14 +3256,13 @@ function updateLooksFloatingMenuVisibility(){
 }
 
 const subnavConfig={
-    inicio:[["top","🏠 Inicio"],["homeWeatherCard","🌤️ Tiempo"],["quickLookCard","✨ Look de hoy"],["homeStayCard","🏠 ¿Nos quedamos en casa?"]],
+    inicio:[["top","🏠 Inicio"],["homeWeatherCard","🌤️ Tiempo"],["quickLookCard","✨ Look de hoy"],["homeStayCard","🏠 ¿Nos quedamos en casa?"],  ["homeWardrobeSummary","📊 Resumen de mi armario"],
+    ["homeVirtualMoveCard","📦 Mudanza virtual"],["homeFutureVersionsCard","🚀 Futuras versiones"]],
     armario:[["armario","👗 Mi armario"],["wardrobeSummary","📊 Resumen"],["wardrobeStats","📈 Estadísticas"],["wardrobeGrid","🧥 Prendas"]],
-    anadir:[["anadir","➕ Nueva prenda"],["temporadaChecks","🌤️ Temporada"],["occasionChecks","🎯 Ocasiones"],["relatedOptions","🔗 Relacionadas"]],
     wishlist:[["wishlist","💖 Wishlist"],["wishlistGrid","🛍️ Mi wishlist"]],
     favoritos:[["favoritos","❤️ Favoritos"],["favoritesGrid","👗 Prendas favoritas"],["favoriteLooksGrid","✨ Looks favoritos"],["recentLooksGrid","🕘 Últimos looks"],["savedLooksGrid","💾 Looks guardados"]],
     looks:[["savedLooksCarouselCard","💾 Looks guardados"],["looksOccasionCard","✨ ¿Qué buscamos hoy?"],["combineLookCard","👗 ¿Qué me combina con esto?"],["createOwnLookCard","🎨 Crear mi propio look"]],
     vinted:[["vinted","🛍️ Vinted"],["vintedGrid","🛒 En venta"],["vintedSoldGrid","✅ Vendidas"]],
-    papelera:[["papelera","🗑️ Papelera"],["trashGrid","🧹 Prendas eliminadas"]]
 };
 function closeSubnav(){
     const btn=document.getElementById("subnavFloatingBtn"),menu=document.getElementById("subnavFloatingMenu");
