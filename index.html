@@ -352,11 +352,16 @@ header.compact ~ #subnavFloatingMenu{top:58px}
     border:1px solid #eed9e3;
 }
 .combine-selected img{
-    width:80px;height:80px;object-fit:cover;
-    border-radius:2px;
-    vertical-align:middle;margin-right:10px;
-    border:4px solid #3a2d32;
-    box-shadow:0 0 0 3px #f4eddf;
+    width:80px;
+    height:80px;
+    object-fit:cover;
+    border-radius:14px;
+    vertical-align:middle;
+    margin-right:10px;
+    border:4px solid #f3b6cf;
+    box-shadow:
+        0 0 0 2px #fff,
+        0 0 0 5px #f9dce9;
 }
 .looks-single-selector{margin-top:14px;padding:14px;border:1px solid var(--line);border-radius:20px;background:#fff9fb}
 .looks-single-selector.open{display:block}
@@ -2330,6 +2335,7 @@ function clearCombineFilters(){
 
     const groupSelect=document.getElementById("combineGroupSelect");
     const categorySelect=document.getElementById("combineCategorySelect");
+    document.getElementById("combineGroups")?.classList.remove("hidden");
     if(groupSelect)groupSelect.value="";
     if(categorySelect){
         categorySelect.value="";
@@ -2405,11 +2411,18 @@ function renderCombineGarments(){
 function selectCombineGarment(id){
     const g=findGarment(id);
     if(!g)return;
+
     combineState.selected=g;
+
+    document.getElementById("combineGroups")?.classList.add("hidden");
     document.getElementById("combineGarments")?.classList.add("hidden");
+
     const selectedBox=document.getElementById("combineSelected");
-    selectedBox.classList.remove("hidden");
-    selectedBox.innerHTML=`<img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}"><strong>${esc(g.nombre)}</strong><span class="muted"> · ${esc(fmtGroup(g.grupo))}</span>`;
+    if(selectedBox){
+        selectedBox.classList.remove("hidden");
+        selectedBox.innerHTML=`<img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}"><strong>${esc(g.nombre)}</strong><span class="muted"> · ${esc(fmtGroup(g.grupo))}</span>`;
+    }
+
     generateCombineLook();
 }
 function generateCombineLook(){
@@ -3256,7 +3269,7 @@ function updateLooksFloatingMenuVisibility(){
 }
 
 const subnavConfig={
-    inicio:[["top","🏠 Inicio"],["homeWeatherCard","🌤️ Tiempo"],["quickLookCard","✨ Look de hoy"],["homeStayCard","🏠 ¿Nos quedamos en casa?"],["homeWardrobeSummary","Resumen de mi armario"],
+    inicio:[["homeWeatherCard","🌤️ Tiempo"],["quickLookCard","✨ Look de hoy"],["homeStayCard","🏠 ¿Nos quedamos en casa?"],["homeWardrobeSummary","Resumen de mi armario"],
     ["homeVirtualMoveCard","📦 Mudanza virtual"],["homeFutureVersionsCard","🚀 Futuras versiones"]],
     wishlist:[["wishlist","💖 Wishlist"],["wishlistGrid","🛍️ Mi wishlist"]],
     favoritos:[["favoritos","❤️ Favoritos"],["favoritesGrid","👗 Prendas favoritas"],["favoriteLooksGrid","✨ Looks favoritos"],["recentLooksGrid","🕘 Últimos looks"],["savedLooksGrid","💾 Looks guardados"]],
