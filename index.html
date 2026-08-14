@@ -1831,21 +1831,39 @@ function filteredGarments(){
         data.sort((a,b)=>(a.nombre||"").localeCompare(b.nombre||"","es"));
 
     return data;
-}function renderWardrobeSummary(){const active=garments.filter(g=>!g.eliminado_en),box=document.getElementById("wardrobeSummary");const counts={};Object.keys(groupLabels).forEach(g=>counts[g]=0);active.forEach(g=>counts[g.grupo]=(counts[g.grupo]||0)+1);box.innerHTML =
-`<div
-    class="summary-box ${activeSummaryFilter===""?"active-summary":""}"
-    onclick="applySummaryFilter('')"
->
-    <div class="summary-number">${active.length}</div>
-    <div class="muted">Total prendas</div>
-</div>`+Object.entries(counts).map(([k,v])=>`
-<div
-    class="summary-box ${activeSummaryFilter===k?"active-summary":""}"
-    onclick="applySummaryFilter('${k}')"
->
-<div class="summary-number">${v}</div>
-<div class="muted">${esc(fmtGroup(k))}</div>
-</div>`).join("")}
+}function renderWardrobeSummary(){
+    const active=filteredGarments();
+    const box=document.getElementById("wardrobeSummary");
+    if(!box)return;
+
+    const counts={};
+    Object.keys(groupLabels).forEach(g=>counts[g]=0);
+
+    active.forEach(g=>{
+        if(g.grupo){
+            counts[g.grupo]=(counts[g.grupo]||0)+1;
+        }
+    });
+
+    box.innerHTML=`
+        <div
+            class="summary-box ${activeSummaryFilter===""?"active-summary":""}"
+            onclick="applySummaryFilter('')"
+        >
+            <div class="summary-number">${active.length}</div>
+            <div class="muted">Total prendas</div>
+        </div>
+    `+
+    Object.entries(counts).map(([k,v])=>`
+        <div
+            class="summary-box ${activeSummaryFilter===k?"active-summary":""}"
+            onclick="applySummaryFilter('${k}')"
+        >
+            <div class="summary-number">${v}</div>
+            <div class="muted">${esc(fmtGroup(k))}</div>
+        </div>
+    `).join("");
+}
 const AMORTIZED_USES = 10;
 
 function clearWardrobeSpecialFilters(){
