@@ -832,7 +832,7 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
         <button class="ghost-btn" onclick="generateHomeLook()">Otro look</button>
     </div>
 </div>
-<div class="card"><h2 class="section-title">Resumen de mi armario</h2>
+<div class="card" id="homeWardrobeSummary"><h2 class="section-title">Resumen de mi armario</h2>
 <div class="summary-row">
    <div class="summary-box" onclick="switchView('armario')">
     <div class="summary-number" id="sumGarments">0</div>
@@ -862,7 +862,7 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
     </div>
 </div>
 </div>
-<div class="card">
+<div class="card" id="virtualMoveCard">
     <h2 class="section-title">📦 Mudanza virtual</h2>
     <div class="button-row">
         <button class="primary-btn" onclick="exportData()">Exportar armario</button>
@@ -871,7 +871,7 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
     </div>
     <p class="muted" style="margin-bottom:0">Exporta o importa un JSON manual. Las prendas del armario se sincronizan con Firestore al iniciar sesión.</p>
 </div>
-<div class="card">
+<div class="card" id="futureVersionsCard">
     <h2 class="section-title">🚀 Futuras versiones</h2>
     <div id="futureGrid" class="future-grid"></div>
 </div></section>
@@ -3256,9 +3256,8 @@ function updateLooksFloatingMenuVisibility(){
 }
 
 const subnavConfig={
-    inicio:[["top","🏠 Inicio"],["homeWeatherCard","🌤️ Tiempo"],["quickLookCard","✨ Look de hoy"],["homeStayCard","🏠 ¿Nos quedamos en casa?"],  ["homeWardrobeSummary","Resumen de mi armario"],
+    inicio:[["top","🏠 Inicio"],["homeWeatherCard","🌤️ Tiempo"],["quickLookCard","✨ Look de hoy"],["homeStayCard","🏠 ¿Nos quedamos en casa?"],["homeWardrobeSummary","Resumen de mi armario"],
     ["homeVirtualMoveCard","📦 Mudanza virtual"],["homeFutureVersionsCard","🚀 Futuras versiones"]],
-    armario:[["armario","👗 Mi armario"],["wardrobeSummary","📊 Resumen"],["wardrobeStats","📈 Estadísticas"],["wardrobeGrid","🧥 Prendas"]],
     wishlist:[["wishlist","💖 Wishlist"],["wishlistGrid","🛍️ Mi wishlist"]],
     favoritos:[["favoritos","❤️ Favoritos"],["favoritesGrid","👗 Prendas favoritas"],["favoriteLooksGrid","✨ Looks favoritos"],["recentLooksGrid","🕘 Últimos looks"],["savedLooksGrid","💾 Looks guardados"]],
     looks:[["savedLooksCarouselCard","💾 Looks guardados"],["looksOccasionCard","✨ ¿Qué buscamos hoy?"],["combineLookCard","👗 ¿Qué me combina con esto?"],["createOwnLookCard","🎨 Crear mi propio look"]],
