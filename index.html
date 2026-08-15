@@ -4196,6 +4196,7 @@ let jewelry = safeParse(
 );
 let activeJewelrySummaryFilter = "";
 let editingJewelId = null;
+let jewelRelatedIds = [];
 function openJewelForm(editId = null) {
     const form = document.getElementById("jewelFormCard");
     if (!form) {
@@ -4209,38 +4210,24 @@ function openJewelForm(editId = null) {
          * De momento la edición se completará cuando
          * implementemos el sistema de guardado.
          */
-
     } else {
-
         title.textContent = "💎 Añadir joya";
-
         resetJewelForm();
-
     }
-
     form.style.display = "block";
-
     form.scrollIntoView({
         behavior: "smooth",
         block: "start"
     });
 }
-
-
 function closeJewelForm() {
-
     const form = document.getElementById("jewelFormCard");
-
     if (!form) return;
-
     form.style.display = "none";
-
     editingJewelId = null;
 }
-
-
 function resetJewelForm() {
-
+   jewelRelatedIds = [];
     const fields = [
         "jewelName",
         "jewelBrand",
@@ -4275,51 +4262,215 @@ function resetJewelForm() {
 
     const favorite = document.getElementById("jewelFavorite");
     if (favorite) favorite.checked = false;
-
-
     const available = document.getElementById("jewelAvailable");
     if (available) available.checked = true;
-
-
     const gift = document.getElementById("jewelGift");
     if (gift) gift.checked = false;
-
-
     const handmade = document.getElementById("jewelHandmade");
     if (handmade) handmade.checked = false;
-
-
     const giftWrap = document.getElementById("jewelGiftFromWrap");
-
     if (giftWrap) {
         giftWrap.style.display = "none";
     }
-
-
     const photo = document.getElementById("jewelPhoto");
-
     if (photo) {
         photo.value = "";
     }
-
-
     const preview = document.getElementById("jewelPhotoPreview");
-
     if (preview) {
         preview.innerHTML = "";
     }
-
-
     const related = document.getElementById("jewelRelatedList");
 
     if (related) {
-        related.innerHTML = `
-            <span class="muted">
-                Guarda primero la joya para poder relacionarla con otras.
-            </span>
-        `;
+    renderJewelRelatedList();
+}
+}
+  /* ---------------------------------------------------------
+   💎 JOYAS RELACIONADAS / CONJUNTOS
+--------------------------------------------------------- */
+
+function renderJewelRelatedList() {
+
+    const box =
+        document.getElementById("jewelRelatedList");
+
+    if (!box) {
+        return;
     }
-}function updateJewelGiftField() {
+
+    const availableJewels =
+        jewelry.filter(j =>
+            j.id !== editingJewelId
+        );
+
+    if (!availableJewels.length) {
+
+        box.innerHTML =
+            '<span class="muted">' +
+            'Cuando tengas más joyas podrás relacionarlas aquí.' +
+            '</span>';
+
+        return;
+    }
+
+    box.innerHTML =
+        '<div style="display:grid;gap:8px;">' +
+
+        availableJewels.map(j => {
+
+            const checked =
+                jewelRelatedIds.includes(j.id);
+
+            const type =
+                jewelryTypeLabels[j.tipo] ||
+                "✨ Otros";
+
+            return `
+                <label
+                    style="
+                        display:flex;
+                        align-items:center;
+                        gap:10px;
+                        padding:10px 12px;
+                        border:1px solid var(--line);
+                        border-radius:14px;
+                        background:#fff;
+                        cursor:pointer;
+                    "
+                >
+
+                    <input
+                        type="checkbox"
+                        ${checked ? "checked" : ""}
+                        onchange="toggleJewelRelated('${j.id}')"
+                        style="
+                            width:auto;
+                            box-shadow:none;
+                        "
+                    >
+
+                    <img
+                        src="${j.foto || placeholderImg}"
+                        alt="${esc(j.nombre || "Joya")}"
+                        style="
+                            width:42px;
+                            height:42px;
+                            object-fit:cover;
+                            border-radius:10px;
+                            border:1px solid var(--line);
+                            flex:0 0 42px;
+                        "
+                    >
+
+                    <div style="min-width:0;">
+                        <strong>
+                            ${esc(j.nombre || "Joya")}
+                        </strong>
+
+                        <div class="muted">
+                            ${esc(type)}
+                        </div>
+                    </div>
+
+                </label>
+            `;
+
+        }).join("") +
+
+        '</div>';
+}
+
+
+function toggleJewelRelated(id) {
+
+    if (jewelRelatedIds.includes(id)) {
+
+        jewelRelatedIds =
+            jewelRelatedIds.filter(
+                relatedId => relatedId !== id
+            );
+
+    } else {
+
+        jewelRelatedIds.push(id);
+
+    }
+
+    renderJewelRelatedList();
+}
+
+
+function syncJewelRelations(id, relatedIds) {
+
+    const cleanIds =
+        [...new Set(
+            relatedIds.filter(
+                relatedId =>
+                    relatedId &&
+                    relatedId !== id &&
+                    jewelry.some(
+                        j => j.id === relatedId
+                    )
+            )
+        )];
+
+    const current =
+        jewelry.find(
+            j => j.id === id
+        );
+
+    if (!current) {
+        return;
+    }
+
+    current.relacionadas =
+        [...cleanIds];
+
+    current.actualizado_en =
+        new Date().toISOString();
+
+
+    jewelry.forEach(jewel => {
+
+        if (jewel.id === id) {
+            return;
+        }
+
+        const currentRelations =
+            Array.isArray(jewel.relacionadas)
+                ? jewel.relacionadas
+                : [];
+
+        const shouldBeRelated =
+            cleanIds.includes(jewel.id);
+
+        const wasRelated =
+            currentRelations.includes(id);
+
+        if (shouldBeRelated && !wasRelated) {
+
+            jewel.relacionadas = [
+                ...currentRelations,
+                id
+            ];
+
+            jewel.actualizado_en =
+                new Date().toISOString();
+
+        }
+        if (!shouldBeRelated && wasRelated) {
+            jewel.relacionadas =
+                currentRelations.filter(
+                    relatedId =>
+                        relatedId !== id
+                );
+            jewel.actualizado_en =
+                new Date().toISOString();
+        }
+    });
+}
+  function updateJewelGiftField() {
 
     const gift = document.getElementById("jewelGift");
     const wrap = document.getElementById("jewelGiftFromWrap");
@@ -4480,29 +4631,20 @@ function readJewelForm(old = {}) {
         hecha_a_mano:
             !!document.getElementById("jewelHandmade")
                 ?.checked,
-
         notas:
             document.getElementById("jewelNotes")
                 ?.value
                 .trim() || "",
-
         foto:
             old.foto || "",
-
-        relacionadas:
-            Array.isArray(old.relacionadas)
-                ? [...old.relacionadas]
-                : [],
-
+   relacionadas:
+    [...jewelRelatedIds],
         usos:
             Number(old.usos || 0),
-
         ultimo_uso:
             old.ultimo_uso || null,
-
         creado_en:
             old.creado_en || new Date().toISOString(),
-
         actualizado_en:
             new Date().toISOString(),
 
@@ -4512,8 +4654,6 @@ function readJewelForm(old = {}) {
     };
 
 }
-
-
 /* ---------------------------------------------------------
    GUARDAR JOYA
 --------------------------------------------------------- */
@@ -4549,57 +4689,80 @@ async function saveJewel() {
         return;
     }
 
+    const wasEditing =
+        !!editingJewelId;
+
+    const currentId =
+        editingJewelId || uid();
+
     const file =
         document.getElementById("jewelPhoto")
             ?.files?.[0];
 
     const old =
         jewelry.find(
-            j => j.id === editingJewelId
+            j => j.id === currentId
         ) || {};
 
     const data =
         readJewelForm(old);
 
+    data.id = currentId;
 
-    const finish = finalData => {
+    const finish =
+        finalData => {
 
-        if (editingJewelId) {
+            finalData.relacionadas =
+                [...jewelRelatedIds];
 
-            const index =
-                jewelry.findIndex(
-                    j => j.id === editingJewelId
+            if (wasEditing) {
+
+                const index =
+                    jewelry.findIndex(
+                        j => j.id === currentId
+                    );
+
+                if (index !== -1) {
+
+                    jewelry[index] =
+                        finalData;
+
+                }
+
+            } else {
+
+                jewelry.unshift(
+                    finalData
                 );
-
-            if (index !== -1) {
-
-                jewelry[index] = finalData;
 
             }
 
-        } else {
+            /*
+             * Actualiza las relaciones en ambos sentidos.
+             */
+            syncJewelRelations(
+                currentId,
+                jewelRelatedIds
+            );
 
-            jewelry.unshift(finalData);
+            persistJewelryLocally();
 
-        }
+            jewelRelatedIds = [];
 
-        persistJewelryLocally();
+            resetJewelForm();
 
-        resetJewelForm();
+            closeJewelForm();
 
-        closeJewelForm();
+            refreshAll();
 
-        refreshAll();
+            toast(
+                wasEditing
+                    ? "Joya actualizada ✅"
+                    : "Joya guardada 💎"
+            );
 
-        toast(
-            editingJewelId
-                ? "Joya actualizada ✅"
-                : "Joya guardada 💎"
-        );
-
-        editingJewelId = null;
-
-    };
+            editingJewelId = null;
+        };
 
 
     if (file) {
@@ -4632,24 +4795,18 @@ async function saveJewel() {
 
     } else {
 
-        if (!editingJewelId) {
+        if (!wasEditing) {
 
             toast(
                 "Añade una foto de la joya.",
                 "warn"
             );
-
             return;
-
         }
 
         finish(data);
-
     }
-
 }
-
-
 /* ---------------------------------------------------------
    FILTROS
 --------------------------------------------------------- */
@@ -5336,11 +5493,8 @@ function editJewel(id) {
 
     const preview =
         document.getElementById("jewelPhotoPreview");
-
     if (preview) {
-
         if (jewel.foto) {
-
             preview.innerHTML =
                 '<img src="' +
                 jewel.foto +
@@ -5354,8 +5508,8 @@ function editJewel(id) {
 
         }
     }
-
     openJewelForm(id);
+  renderJewelRelatedList();
 }
 /* ---------------------------------------------------------
    FAVORITA
@@ -5368,8 +5522,10 @@ function toggleJewelryFavorite(id) {
         );
 
     if (!jewel) return;
-
-
+jewelRelatedIds =
+    Array.isArray(jewel.relacionadas)
+        ? [...jewel.relacionadas]
+        : [];
     jewel.favorita =
         !jewel.favorita;
 
@@ -5419,7 +5575,7 @@ document
         "change",
         previewJewelPhoto
     );
-  Object.assign(window,{login,register,openLoginModal,closeLoginModal,openJewelForm,closeJewelForm,resetJewelForm,updateJewelGiftField,saveJewel,renderJewelry,filteredJewelry,clearJewelryFilters,editJewel,toggleJewelryFavorite,deleteJewel,logout,toggleRelated,switchView,populateCategoryOptions,saveGarment,resetForm,renderWardrobe,applySummaryFilter,clearWardrobeFilters,clearWardrobeSpecialFilters,applyWardrobeSpecialFilter,exportData,importData,editGarment,toggleFavorite,toggleVinted,deleteGarment,restoreGarment,deleteGarmentForever,markUsed,openSelector,selectGarmentForSlot,removeFromLook,removeAccessory,clearLook,saveCurrentLook,generateQuickLook,saveQuickLook,copyQuickToManual,generateLook,repeatLastLook,saveRandomLook,copyRandomToManual,loadSavedLook,toggleLookFavorite,deleteSavedLook,saveWish,resetWishForm,wishToWardrobe,deleteWish,generateHomeLook,saveHomeLook,dismissHomeLook,renderSavedLooksCarousel,renderOccasionButtons,renderCombineGroups,clearCombineFilters,chooseCombineGroup,backToCombineGroups,chooseCombineCategory,renderCombineGarments,selectCombineGarment,generateCombineLook,saveCombineLook,openLooksManualEditor,renderLooksManualOutfit,populateLooksSelector,renderLooksSelectorCategories,renderLooksSelectorGarments,openLooksManualSelector,selectLooksManualGarment,closeLooksManualSelector,removeLooksManualSlot,removeLooksManualAccessory,cancelLooksManualEditor,saveLooksManualEditor,renderOwnLook,renderOwnSelectorCategories,renderLooksOwnLook,renderLooksOwnSelectorCategories,renderLooksOwnSelectorGarments,openLooksOwnLookSelector,selectLooksOwnGarment,closeLooksOwnLookSelector,saveLooksOwnLook,cancelLooksOwnLook,removeLooksOwnSlot,removeLooksOwnAccessory,renderOwnSelectorGarments,openOwnLookSelector,selectOwnGarment,closeOwnLookSelector,removeOwnSlot,removeOwnAccessory,saveOwnLook,cancelOwnLook,openOwnLookSaveModal,closeOwnLookSaveModal,confirmOwnLookSave,editSavedLook,useSavedLook,chooseSaveLookType,toggleAllGarmentDetails});
+  Object.assign(window,{login,register,openLoginModal,closeLoginModal,openJewelForm,closeJewelForm,resetJewelForm,updateJewelGiftField,saveJewel,renderJewelry,filteredJewelry,clearJewelryFilters,editJewel,renderJewelRelatedList,toggleJewelRelated,toggleJewelryFavorite,deleteJewel,logout,toggleRelated,switchView,populateCategoryOptions,saveGarment,resetForm,renderWardrobe,applySummaryFilter,clearWardrobeFilters,clearWardrobeSpecialFilters,applyWardrobeSpecialFilter,exportData,importData,editGarment,toggleFavorite,toggleVinted,deleteGarment,restoreGarment,deleteGarmentForever,markUsed,openSelector,selectGarmentForSlot,removeFromLook,removeAccessory,clearLook,saveCurrentLook,generateQuickLook,saveQuickLook,copyQuickToManual,generateLook,repeatLastLook,saveRandomLook,copyRandomToManual,loadSavedLook,toggleLookFavorite,deleteSavedLook,saveWish,resetWishForm,wishToWardrobe,deleteWish,generateHomeLook,saveHomeLook,dismissHomeLook,renderSavedLooksCarousel,renderOccasionButtons,renderCombineGroups,clearCombineFilters,chooseCombineGroup,backToCombineGroups,chooseCombineCategory,renderCombineGarments,selectCombineGarment,generateCombineLook,saveCombineLook,openLooksManualEditor,renderLooksManualOutfit,populateLooksSelector,renderLooksSelectorCategories,renderLooksSelectorGarments,openLooksManualSelector,selectLooksManualGarment,closeLooksManualSelector,removeLooksManualSlot,removeLooksManualAccessory,cancelLooksManualEditor,saveLooksManualEditor,renderOwnLook,renderOwnSelectorCategories,renderLooksOwnLook,renderLooksOwnSelectorCategories,renderLooksOwnSelectorGarments,openLooksOwnLookSelector,selectLooksOwnGarment,closeLooksOwnLookSelector,saveLooksOwnLook,cancelLooksOwnLook,removeLooksOwnSlot,removeLooksOwnAccessory,renderOwnSelectorGarments,openOwnLookSelector,selectOwnGarment,closeOwnLookSelector,removeOwnSlot,removeOwnAccessory,saveOwnLook,cancelOwnLook,openOwnLookSaveModal,closeOwnLookSaveModal,confirmOwnLookSave,editSavedLook,useSavedLook,chooseSaveLookType,toggleAllGarmentDetails});
 try{loadData();populateStaticSelects();resetForm();resetWishForm();refreshAll();loadHomeWeather();document.getElementById("authUserBox")?.addEventListener("click",e=>{if(e.target.closest(".user-menu"))return;toggleUserMenu()});document.getElementById("authUserBox")?.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();toggleUserMenu()}else if(e.key==="Escape")closeUserMenu()});document.addEventListener("click",e=>{const box=document.getElementById("authUserBox");if(box&&!box.contains(e.target))closeUserMenu()});document.getElementById("logoutBtn")?.addEventListener("click",e=>{e.stopPropagation();closeUserMenu();logout()});onAuthStateChanged(auth,user=>{updateAuthUi(user);if(user){loadWardrobeFromFirestore(user);setTimeout(()=>syncCalendarPlansWithFirestore(),0)}else{currentUser=null;wardrobeLoaded=false;pendingWardrobeSave=false;garments=[];savedLooks = [];
 recentLooks = [];
 wishlist = [];refreshAll();setSyncStatus("Inicia sesión")}})}catch(e){alert("Había un error cargando la app: "+e.message);console.error(e)}
