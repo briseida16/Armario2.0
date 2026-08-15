@@ -4238,14 +4238,11 @@ function loadJewelryLocally() {
 --------------------------------------------------------- */
 
 function persistJewelryLocally() {
-
     try {
-
         storage.set(
             jewelryLocalKey(),
             JSON.stringify(jewelry)
         );
-
     } catch (e) {
         console.warn(
             "No se pudo guardar el joyero localmente",
@@ -4256,7 +4253,6 @@ function persistJewelryLocally() {
 /* ---------------------------------------------------------
    FORMULARIO JOYERO
 --------------------------------------------------------- */
-function openJewelForm(editId = null) {
 function openJewelForm(editId = null) {
     const form = document.getElementById("jewelFormCard");
     if (!form) {
