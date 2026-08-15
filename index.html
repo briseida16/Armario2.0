@@ -5466,32 +5466,33 @@ function toggleJewelryFavorite(id) {
 --------------------------------------------------------- */
 
 function deleteJewel(id) {
-    const jewel =
-        jewelry.find(
-            j => j.id === id
-        );
 
-    if (!jewel) return;
-    if (
-        !confirm(
-            `¿Quieres eliminar "${jewel.nombre}" del joyero?`
-        )
-    ) {
+    const jewel = jewelry.find(function(j) {
+        return j.id === id;
+    });
+
+    if (!jewel) {
         return;
     }
-    jewelry =
-        jewelry.filter(
-            j => j.id !== id
-        );
 
+    const message =
+        "¿Quieres eliminar \"" +
+        (jewel.nombre || "esta joya") +
+        "\" del joyero?";
+
+    if (!confirm(message)) {
+        return;
+    }
+
+    jewelry = jewelry.filter(function(j) {
+        return j.id !== id;
+    });
 
     persistJewelryLocally();
 
     renderJewelry();
 
-    toast(
-        "Joya eliminada 🗑️"
-    );
+    toast("Joya eliminada 🗑️");
 }
 /* ---------------------------------------------------------
    FOTO — PREVIEW EN TIEMPO REAL
