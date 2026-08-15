@@ -1205,6 +1205,464 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
     display:none !important;
 }
 </style>
+<section id="joyero" class="view">
+
+    <!-- CABECERA -->
+    <div class="card hero">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;">
+
+            <div>
+                <h2 class="section-title" style="margin-bottom:4px;">
+                    💎 Mi joyero
+                </h2>
+
+                <p class="muted" style="margin:0;">
+                    Todas tus joyas, juntas y fáciles de encontrar.
+                </p>
+            </div>
+
+            <button
+                class="primary-btn"
+                type="button"
+                onclick="openJewelForm()"
+            >
+                ＋ Añadir joya
+            </button>
+
+        </div>
+    </div>
+<!-- FORMULARIO AÑADIR / EDITAR JOYA -->
+<div id="jewelFormCard" class="card" style="display:none;">
+
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;">
+        <div>
+            <h2 id="jewelFormTitle" class="section-title" style="margin-bottom:4px;">
+                💎 Añadir joya
+            </h2>
+
+            <p class="muted" style="margin:0;">
+                Guarda todos los detalles de tu joya.
+            </p>
+        </div>
+
+        <button
+            type="button"
+            class="small-btn"
+            onclick="closeJewelForm()"
+        >
+            ✕ Cerrar
+        </button>
+    </div>
+
+
+    <!-- FOTO -->
+    <div class="card" style="margin-bottom:16px;background:rgba(255,255,255,.65);">
+
+        <h3 class="section-title">
+            📷 Foto
+        </h3>
+
+        <input
+            type="file"
+            id="jewelPhoto"
+            accept="image/*"
+        >
+
+        <div
+            id="jewelPhotoPreview"
+            style="margin-top:12px;"
+        ></div>
+
+    </div>
+
+
+    <!-- INFORMACIÓN BÁSICA -->
+    <div class="card" style="margin-bottom:16px;background:rgba(255,255,255,.65);">
+
+        <h3 class="section-title">
+            ✨ Información básica
+        </h3>
+
+        <div class="filter-row">
+
+            <div style="flex:1;min-width:220px;">
+                <label for="jewelName" class="muted">
+                    Nombre *
+                </label>
+
+                <input
+                    id="jewelName"
+                    type="text"
+                    placeholder="Ej. Pendientes dorados de aro"
+                    style="width:100%;margin-top:6px;"
+                >
+            </div>
+
+
+            <div style="flex:1;min-width:220px;">
+                <label for="jewelType" class="muted">
+                    Tipo de joya *
+                </label>
+
+                <select
+                    id="jewelType"
+                    style="width:100%;margin-top:6px;"
+                >
+                    <option value="">Selecciona un tipo</option>
+                    <option value="anillo">💍 Anillo</option>
+                    <option value="pendientes">👂 Pendientes</option>
+                    <option value="collar">📿 Collar</option>
+                    <option value="pulsera">✨ Pulsera</option>
+                    <option value="tobillera">⛓️ Tobillera</option>
+                    <option value="reloj">⌚ Reloj</option>
+                    <option value="broche">🎀 Broche</option>
+                    <option value="otros">✨ Otros</option>
+                </select>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- CARACTERÍSTICAS -->
+    <div class="card" style="margin-bottom:16px;background:rgba(255,255,255,.65);">
+
+        <h3 class="section-title">
+            🎨 Características
+        </h3>
+
+        <div class="filter-row">
+
+            <div style="flex:1;min-width:180px;">
+                <label for="jewelBrand" class="muted">
+                    Marca
+                </label>
+
+                <input
+                    id="jewelBrand"
+                    type="text"
+                    placeholder="Marca"
+                    style="width:100%;margin-top:6px;"
+                >
+            </div>
+
+
+            <div style="flex:1;min-width:180px;">
+                <label for="jewelMaterial" class="muted">
+                    Material
+                </label>
+
+                <select
+                    id="jewelMaterial"
+                    style="width:100%;margin-top:6px;"
+                >
+                    <option value="">Selecciona material</option>
+                    <option value="oro">Oro</option>
+                    <option value="plata">Plata</option>
+                    <option value="arcilla">Arcilla polimérica</option>
+                    <option value="acero">Acero</option>
+                    <option value="oro_plata">Oro / plata</option>
+                    <option value="bisuteria">Bisutería</option>
+                    <option value="resina">Resina</option>
+                    <option value="otro">Otro</option>
+                </select>
+            </div>
+
+
+            <div style="flex:1;min-width:180px;">
+                <label for="jewelColor" class="muted">
+                    Color
+                </label>
+
+                <input
+                    id="jewelColor"
+                    type="text"
+                    placeholder="Color"
+                    style="width:100%;margin-top:6px;"
+                >
+            </div>
+
+
+            <div style="flex:1;min-width:180px;">
+                <label for="jewelPrice" class="muted">
+                    Precio
+                </label>
+
+                <input
+                    id="jewelPrice"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="€"
+                    style="width:100%;margin-top:6px;"
+                >
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ORIGEN -->
+    <div class="card" style="margin-bottom:16px;background:rgba(255,255,255,.65);">
+
+        <h3 class="section-title">
+            🎁 Origen
+        </h3>
+
+        <div class="button-row">
+
+            <label class="ghost-btn" style="cursor:pointer;">
+                <input
+                    type="checkbox"
+                    id="jewelGift"
+                    style="width:auto;box-shadow:none;margin-right:8px;"
+                >
+                🎁 Es un regalo
+            </label>
+
+            <label class="ghost-btn" style="cursor:pointer;">
+                <input
+                    type="checkbox"
+                    id="jewelHandmade"
+                    style="width:auto;box-shadow:none;margin-right:8px;"
+                >
+                🧵 Hecha a mano
+            </label>
+
+        </div>
+
+
+        <div
+            id="jewelGiftFromWrap"
+            style="display:none;margin-top:14px;"
+        >
+
+            <label for="jewelGiftFrom" class="muted">
+                ¿Quién te lo regaló?
+            </label>
+
+            <input
+                id="jewelGiftFrom"
+                type="text"
+                placeholder="Ej. Mamá, una amiga..."
+                style="width:100%;margin-top:6px;"
+            >
+
+        </div>
+
+    </div>
+
+
+    <!-- ESTADO -->
+    <div class="card" style="margin-bottom:16px;background:rgba(255,255,255,.65);">
+
+        <h3 class="section-title">
+            ⭐ Estado
+        </h3>
+
+        <div class="button-row">
+
+            <label class="ghost-btn" style="cursor:pointer;">
+                <input
+                    type="checkbox"
+                    id="jewelFavorite"
+                    style="width:auto;box-shadow:none;margin-right:8px;"
+                >
+                ⭐ Favorita
+            </label>
+
+            <label class="ghost-btn" style="cursor:pointer;">
+                <input
+                    type="checkbox"
+                    id="jewelAvailable"
+                    checked
+                    style="width:auto;box-shadow:none;margin-right:8px;"
+                >
+                ✓ Disponible
+            </label>
+
+        </div>
+
+    </div>
+
+
+    <!-- CONJUNTO -->
+    <div class="card" style="margin-bottom:16px;background:rgba(255,255,255,.65);">
+
+        <h3 class="section-title">
+            🔗 Conjunto / joyas relacionadas
+        </h3>
+
+        <p class="muted">
+            Si esta joya forma parte de un conjunto, podrás relacionarla con otras joyas de tu joyero.
+        </p>
+
+        <div
+            id="jewelRelatedList"
+            style="margin-top:12px;"
+        >
+            <span class="muted">
+                Guarda primero la joya para poder relacionarla con otras.
+            </span>
+        </div>
+
+    </div>
+
+
+    <!-- NOTAS -->
+    <div class="card" style="margin-bottom:16px;background:rgba(255,255,255,.65);">
+
+        <h3 class="section-title">
+            📝 Notas
+        </h3>
+
+        <textarea
+            id="jewelNotes"
+            rows="3"
+            placeholder="Añade cualquier detalle que quieras recordar..."
+            style="width:100%;border:1px solid var(--line);border-radius:12px;padding:12px;resize:vertical;"
+        ></textarea>
+
+    </div>
+
+
+    <!-- ACCIONES -->
+    <div class="button-row" style="justify-content:flex-end;">
+
+        <button
+            type="button"
+            class="ghost-btn"
+            onclick="closeJewelForm()"
+        >
+            Cancelar
+        </button>
+
+        <button
+            type="button"
+            class="primary-btn"
+            onclick="saveJewel()"
+        >
+            💎 Guardar joya
+        </button>
+    </div>
+</div>
+    <!-- RESUMEN -->
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));" >
+        <div class="card" style="margin-bottom:0;">
+            <div class="muted">Joyas</div>
+            <div
+                id="jewelryTotal"
+                style="font-size:1.7rem;font-weight:900;margin-top:4px;"
+            >
+                0
+            </div>
+        </div>
+
+        <div class="card" style="margin-bottom:0;">
+            <div class="muted">Favoritas</div>
+
+            <div
+                id="jewelryFavorites"
+                style="font-size:1.7rem;font-weight:900;margin-top:4px;"
+            >
+                0
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- FILTROS -->
+    <div class="card" style="margin-top:16px;">
+
+        <div class="filter-row">
+
+            <input
+                id="jewelrySearch"
+                type="search"
+                placeholder="Buscar joya..."
+            >
+
+            <select id="jewelryTypeFilter">
+                <option value="">Todos los tipos</option>
+                <option value="anillo">💍 Anillos</option>
+                <option value="pendientes">👂 Pendientes</option>
+                <option value="collar">📿 Collares/Cadenas</option>
+                <option value="pulsera">✨ Pulseras</option>
+                <option value="reloj">⌚ Relojes</option>
+                <option value="broche">🎀 Broches</option>
+                <option value="otros">✨ Otros</option>
+            </select>
+
+            <select id="jewelryMaterialFilter">
+                <option value="">Todos los materiales</option>
+                <option value="oro">Oro</option>
+                <option value="plata">Plata</option>
+                <option value="arcilla">Arcilla polimérica</option>
+                <option value="acero">Acero</option>
+                <option value="oro_plata">Oro / plata</option>
+                <option value="bisuteria">Bisutería</option>
+              <option value="resina">Resina</option>
+                <option value="otro">Otro</option>
+            </select>
+
+            <select id="jewelrySort">
+                <option value="recent">Más recientes</option>
+                <option value="name">Nombre A-Z</option>
+                <option value="uses">Más usadas</option>
+            </select>
+
+            <button
+                type="button"
+                class="ghost-btn"
+            >
+                ⭐ Favoritas
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- LISTADO -->
+    <div class="card">
+
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+
+            <div>
+                <h3 class="section-title" style="margin-bottom:4px;">
+                    Mis joyas
+                </h3>
+
+                <p class="muted" style="margin:0;">
+                    Organizadas para encontrarlas rápidamente.
+                </p>
+            </div>
+
+        </div>
+
+        <div
+            id="jewelryGrid"
+            class="grid"
+            style="margin-top:16px;"
+        >
+        </div>
+
+        <div
+            id="jewelryEmpty"
+            class="muted"
+            style="text-align:center;padding:36px 16px;"
+        >
+            💎 Todavía no tienes joyas en tu joyero.
+            <br>
+            <span style="font-size:.9rem;">
+                Añade tu primera joya para empezar.
+            </span>
+        </div>
+    </div>
+</section>  
   <section id="crearLook" class="view hidden" style="display:none !important;">
 <div class="card" id="createOwnLookCard">
     <h2 class="section-title">🎨 Crea tu propio look</h2>
