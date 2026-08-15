@@ -1300,7 +1300,6 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
                     <option value="pendientes">👂 Pendientes</option>
                     <option value="collar">📿 Collar</option>
                     <option value="pulsera">✨ Pulsera</option>
-                    <option value="tobillera">⛓️ Tobillera</option>
                     <option value="reloj">⌚ Reloj</option>
                     <option value="broche">🎀 Broche</option>
                     <option value="otros">✨ Otros</option>
@@ -1501,6 +1500,90 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
         </button>
     </div>
 </div>
+  <!-- FILTROS DEL JOYERO -->
+<div class="card" style="margin-top:16px;">
+
+    <div class="filter-row">
+
+        <input
+            id="jewelrySearch"
+            placeholder="Buscar por nombre, marca, color..."
+            oninput="renderJewelry()"
+        >
+
+        <button
+            class="ghost-btn"
+            type="button"
+            onclick="clearJewelryFilters()"
+        >
+            ✕ Limpiar filtros
+        </button>
+
+        <select
+            id="jewelryTypeFilter"
+            onchange="renderJewelry()"
+        >
+            <option value="">Todos los tipos</option>
+            <option value="anillo">💍 Anillos</option>
+            <option value="pendientes">👂 Pendientes</option>
+            <option value="collar">📿 Collares</option>
+            <option value="pulsera">✨ Pulseras</option>
+            <option value="reloj">⌚ Relojes</option>
+            <option value="broche">🎀 Broches</option>
+            <option value="otros">✨ Otros</option>
+        </select>
+
+        <select
+            id="jewelryMaterialFilter"
+            onchange="renderJewelry()"
+        >
+            <option value="">Todos los materiales</option>
+            <option value="oro">Oro</option>
+            <option value="plata">Plata</option>
+            <option value="arcilla">Arcilla polimérica</option>
+            <option value="acero">Acero</option>
+            <option value="oro_plata">Oro / plata</option>
+            <option value="bisuteria">Bisutería</option>
+            <option value="resina">Resina</option>
+            <option value="otro">Otro</option>
+        </select>
+
+        <select
+            id="jewelryBrandFilter"
+            onchange="renderJewelry()"
+        >
+            <option value="">Todas las marcas</option>
+        </select>
+
+        <select
+            id="jewelryGiftFilter"
+            onchange="renderJewelry()"
+        >
+            <option value="">Regalos y no regalos</option>
+            <option value="true">🎁 Solo regalos</option>
+            <option value="false">No regaladas</option>
+        </select>
+
+        <select
+            id="jewelryHandmadeFilter"
+            onchange="renderJewelry()"
+        >
+            <option value="">Hechas a mano y no</option>
+            <option value="true">🧵 Solo hechas a mano</option>
+            <option value="false">No hechas a mano</option>
+        </select>
+
+        <select
+            id="jewelrySort"
+            onchange="renderJewelry()"
+        >
+            <option value="az">Nombre A-Z</option>
+            <option value="recent">Más recientes primero</option>
+            <option value="uses_desc">Más usadas primero</option>
+            <option value="uses_asc">Menos usadas primero</option>
+        </select>
+    </div>
+</div>
     <!-- RESUMEN DEL JOYERO -->
 <div
     id="jewelryStats"
@@ -1637,93 +1720,6 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
     </div>
 
 </div>
-<!-- FILTROS DEL JOYERO -->
-<div class="card" style="margin-top:16px;">
-
-    <div class="filter-row">
-
-        <input
-            id="jewelrySearch"
-            placeholder="Buscar por nombre, marca, color..."
-            oninput="renderJewelry()"
-        >
-
-        <button
-            class="ghost-btn"
-            type="button"
-            onclick="clearJewelryFilters()"
-        >
-            ✕ Limpiar filtros
-        </button>
-
-        <select
-            id="jewelryTypeFilter"
-            onchange="renderJewelry()"
-        >
-            <option value="">Todos los tipos</option>
-            <option value="anillo">💍 Anillos</option>
-            <option value="pendientes">👂 Pendientes</option>
-            <option value="collar">📿 Collares</option>
-            <option value="pulsera">✨ Pulseras</option>
-            <option value="reloj">⌚ Relojes</option>
-            <option value="broche">🎀 Broches</option>
-            <option value="otros">✨ Otros</option>
-        </select>
-
-        <select
-            id="jewelryMaterialFilter"
-            onchange="renderJewelry()"
-        >
-            <option value="">Todos los materiales</option>
-            <option value="oro">Oro</option>
-            <option value="plata">Plata</option>
-            <option value="arcilla">Arcilla polimérica</option>
-            <option value="acero">Acero</option>
-            <option value="oro_plata">Oro / plata</option>
-            <option value="bisuteria">Bisutería</option>
-            <option value="resina">Resina</option>
-            <option value="otro">Otro</option>
-        </select>
-
-        <select
-            id="jewelryBrandFilter"
-            onchange="renderJewelry()"
-        >
-            <option value="">Todas las marcas</option>
-        </select>
-
-        <select
-            id="jewelryGiftFilter"
-            onchange="renderJewelry()"
-        >
-            <option value="">Regalos y no regalos</option>
-            <option value="true">🎁 Solo regalos</option>
-            <option value="false">No regaladas</option>
-        </select>
-
-        <select
-            id="jewelryHandmadeFilter"
-            onchange="renderJewelry()"
-        >
-            <option value="">Hechas a mano y no</option>
-            <option value="true">🧵 Solo hechas a mano</option>
-            <option value="false">No hechas a mano</option>
-        </select>
-
-        <select
-            id="jewelrySort"
-            onchange="renderJewelry()"
-        >
-            <option value="az">Nombre A-Z</option>
-            <option value="recent">Más recientes primero</option>
-            <option value="uses_desc">Más usadas primero</option>
-            <option value="uses_asc">Menos usadas primero</option>
-        </select>
-
-    </div>
-
-</div>
-
     <!-- LISTADO -->
     <div class="card">
 
@@ -4094,7 +4090,7 @@ document.addEventListener("click",e=>{
 function updateHeaderOnScroll(){document.querySelector("header")?.classList.toggle("compact",window.scrollY>20);}
 window.addEventListener("scroll",updateHeaderOnScroll,{passive:true});
 
-function refreshAll(){updateSummary();ensureDailyQuickLook();fillFilterOptions();renderRelatedSelect();renderWardrobe();renderTrash();renderCurrentLook();renderRandomLook();renderQuickLook();renderWishlist();renderFavorites();renderVinted();renderSavedLooksCarousel();renderOccasionButtons();renderCombineGroups();renderLooksManualOutfit();renderOwnLook();renderLooksOwnLook()}function toast(msg,type="ok"){const box=document.getElementById("toastBox");if(!box)return alert(msg);const t=document.createElement("div");t.className=`toast toast-${type}`;t.textContent=msg;box.appendChild(t);requestAnimationFrame(()=>t.classList.add("show"));setTimeout(()=>{t.classList.remove("show");setTimeout(()=>t.remove(),300)},3200)}
+function refreshAll(){updateSummary();ensureDailyQuickLook();fillFilterOptions();renderRelatedSelect();renderWardrobe();renderJewelry();renderTrash();renderCurrentLook();renderRandomLook();renderQuickLook();renderWishlist();renderFavorites();renderVinted();renderSavedLooksCarousel();renderOccasionButtons();renderCombineGroups();renderLooksManualOutfit();renderOwnLook();renderLooksOwnLook()}function toast(msg,type="ok"){const box=document.getElementById("toastBox");if(!box)return alert(msg);const t=document.createElement("div");t.className=`toast toast-${type}`;t.textContent=msg;box.appendChild(t);requestAnimationFrame(()=>t.classList.add("show"));setTimeout(()=>{t.classList.remove("show");setTimeout(()=>t.remove(),300)},3200)}
 const IDB_NAME="bricloset_mirror_db",IDB_STORE="backups";function idbOpen(){return new Promise((resolve,reject)=>{const req=indexedDB.open(IDB_NAME,1);req.onupgradeneeded=()=>req.result.createObjectStore(IDB_STORE);req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}async function mirrorToIndexedDB(){try{const db=await idbOpen(),tx=db.transaction(IDB_STORE,"readwrite");tx.objectStore(IDB_STORE).put({version:APP_DATA_VERSION,savedLooks,recentLooks,wishlist,guardado_en:new Date().toISOString()},"latest")}catch(e){console.warn("No se pudo espejar en IndexedDB",e)}}async function recoverFromIndexedDB(){try{const db=await idbOpen(),tx=db.transaction(IDB_STORE,"readonly"),req=tx.objectStore(IDB_STORE).get("latest");return new Promise(res=>{req.onsuccess=()=>res(req.result||null);req.onerror=()=>res(null)})}catch(e){return null}}
 window.toggleMoreMenu = function(event){
     if(event){
@@ -4190,26 +4186,25 @@ document.addEventListener("click",function(event){
 });/* =========================================================
    💎 JOYERO — APERTURA Y CIERRE DEL FORMULARIO
    ========================================================= */
-
+/* =========================================================
+   💎 DATOS LOCALES DEL JOYERO
+   ========================================================= */
+const STORAGE_JEWELRY = "bricloset_jewelry";
+let jewelry = safeParse(
+    storage.get(STORAGE_JEWELRY),
+    []
+);
+let activeJewelrySummaryFilter = "";
 let editingJewelId = null;
-
 function openJewelForm(editId = null) {
-
     const form = document.getElementById("jewelFormCard");
-
     if (!form) {
         console.error("No se encuentra #jewelFormCard");
-        return;
-    }
-
+        return;}
     editingJewelId = editId || null;
-
     const title = document.getElementById("jewelFormTitle");
-
     if (editId) {
-
         title.textContent = "💎 Editar joya";
-
         /*
          * De momento la edición se completará cuando
          * implementemos el sistema de guardado.
@@ -4328,26 +4323,1186 @@ function resetJewelForm() {
 
     const gift = document.getElementById("jewelGift");
     const wrap = document.getElementById("jewelGiftFromWrap");
-
     if (!gift || !wrap) return;
-
     wrap.style.display = gift.checked ? "block" : "none";
-
     if (!gift.checked) {
-
         const input = document.getElementById("jewelGiftFrom");
-
         if (input) {
             input.value = "";
         }
-
     }
 }
   document.getElementById("jewelGift")?.addEventListener(
     "change",
     updateJewelGiftField
 );
-  Object.assign(window,{login,register,openLoginModal,closeLoginModal,openJewelForm,closeJewelForm,resetJewelForm,updateJewelGiftField,logout,toggleRelated,switchView,populateCategoryOptions,saveGarment,resetForm,renderWardrobe,applySummaryFilter,clearWardrobeFilters,clearWardrobeSpecialFilters,applyWardrobeSpecialFilter,exportData,importData,editGarment,toggleFavorite,toggleVinted,deleteGarment,restoreGarment,deleteGarmentForever,markUsed,openSelector,selectGarmentForSlot,removeFromLook,removeAccessory,clearLook,saveCurrentLook,generateQuickLook,saveQuickLook,copyQuickToManual,generateLook,repeatLastLook,saveRandomLook,copyRandomToManual,loadSavedLook,toggleLookFavorite,deleteSavedLook,saveWish,resetWishForm,wishToWardrobe,deleteWish,generateHomeLook,saveHomeLook,dismissHomeLook,renderSavedLooksCarousel,renderOccasionButtons,renderCombineGroups,clearCombineFilters,chooseCombineGroup,backToCombineGroups,chooseCombineCategory,renderCombineGarments,selectCombineGarment,generateCombineLook,saveCombineLook,openLooksManualEditor,renderLooksManualOutfit,populateLooksSelector,renderLooksSelectorCategories,renderLooksSelectorGarments,openLooksManualSelector,selectLooksManualGarment,closeLooksManualSelector,removeLooksManualSlot,removeLooksManualAccessory,cancelLooksManualEditor,saveLooksManualEditor,renderOwnLook,renderOwnSelectorCategories,renderLooksOwnLook,renderLooksOwnSelectorCategories,renderLooksOwnSelectorGarments,openLooksOwnLookSelector,selectLooksOwnGarment,closeLooksOwnLookSelector,saveLooksOwnLook,cancelLooksOwnLook,removeLooksOwnSlot,removeLooksOwnAccessory,renderOwnSelectorGarments,openOwnLookSelector,selectOwnGarment,closeOwnLookSelector,removeOwnSlot,removeOwnAccessory,saveOwnLook,cancelOwnLook,openOwnLookSaveModal,closeOwnLookSaveModal,confirmOwnLookSave,editSavedLook,useSavedLook,chooseSaveLookType,toggleAllGarmentDetails});
+/* =========================================================
+   💎 JOYERO — MOTOR LOCAL
+   ========================================================= */
+
+const jewelryTypeLabels = {
+    anillo: "💍 Anillos",
+    pendientes: "👂 Pendientes",
+    collar: "📿 Collares",
+    pulsera: "✨ Pulseras",
+    reloj: "⌚ Relojes",
+    broche: "🎀 Broches",
+    otros: "✨ Otros"
+};
+
+
+/* ---------------------------------------------------------
+   PERSISTENCIA LOCAL
+--------------------------------------------------------- */
+
+function persistJewelryLocally() {
+
+    try {
+
+        storage.set(
+            STORAGE_JEWELRY,
+            JSON.stringify(jewelry)
+        );
+
+    } catch (e) {
+
+        console.warn(
+            "No se pudo guardar el joyero localmente",
+            e
+        );
+
+    }
+
+}
+
+
+/* ---------------------------------------------------------
+   FOTO
+--------------------------------------------------------- */
+
+function previewJewelPhoto() {
+
+    const input = document.getElementById("jewelPhoto");
+    const preview = document.getElementById("jewelPhotoPreview");
+
+    if (!input || !preview) return;
+
+    const file = input.files?.[0];
+
+    if (!file) {
+
+        preview.innerHTML = "";
+
+        return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = e => {
+
+        preview.innerHTML = `
+            <img
+                src="${e.target.result}"
+                alt="Vista previa"
+                style="
+                    width:120px;
+                    height:120px;
+                    object-fit:cover;
+                    border-radius:18px;
+                    border:1px solid var(--line);
+                    box-shadow:var(--shadow);
+                "
+            >
+        `;
+
+    };
+
+    reader.readAsDataURL(file);
+
+}
+
+
+/* ---------------------------------------------------------
+   LEER FORMULARIO
+--------------------------------------------------------- */
+
+function readJewelForm(old = {}) {
+
+    return {
+
+        id: editingJewelId || uid(),
+
+        nombre:
+            document.getElementById("jewelName")
+                ?.value
+                .trim() || "",
+
+        tipo:
+            document.getElementById("jewelType")
+                ?.value || "",
+
+        marca:
+            document.getElementById("jewelBrand")
+                ?.value
+                .trim() || "",
+
+        material:
+            document.getElementById("jewelMaterial")
+                ?.value || "",
+
+        color:
+            document.getElementById("jewelColor")
+                ?.value
+                .trim() || "",
+
+        precio:
+            document.getElementById("jewelPrice")
+                ?.value || "",
+
+        favorita:
+            !!document.getElementById("jewelFavorite")
+                ?.checked,
+
+        disponible:
+            document.getElementById("jewelAvailable")
+                ? document.getElementById("jewelAvailable").checked
+                : true,
+
+        regalo:
+            !!document.getElementById("jewelGift")
+                ?.checked,
+
+        regalo_de:
+            document.getElementById("jewelGiftFrom")
+                ?.value
+                .trim() || "",
+
+        hecha_a_mano:
+            !!document.getElementById("jewelHandmade")
+                ?.checked,
+
+        notas:
+            document.getElementById("jewelNotes")
+                ?.value
+                .trim() || "",
+
+        foto:
+            old.foto || "",
+
+        relacionadas:
+            Array.isArray(old.relacionadas)
+                ? [...old.relacionadas]
+                : [],
+
+        usos:
+            Number(old.usos || 0),
+
+        ultimo_uso:
+            old.ultimo_uso || null,
+
+        creado_en:
+            old.creado_en || new Date().toISOString(),
+
+        actualizado_en:
+            new Date().toISOString(),
+
+        schema_version:
+            1
+
+    };
+
+}
+
+
+/* ---------------------------------------------------------
+   GUARDAR JOYA
+--------------------------------------------------------- */
+
+async function saveJewel() {
+
+    const name =
+        document.getElementById("jewelName")
+            ?.value
+            .trim() || "";
+
+    const type =
+        document.getElementById("jewelType")
+            ?.value || "";
+
+    if (!name) {
+
+        toast(
+            "Pon al menos un nombre a la joya.",
+            "warn"
+        );
+
+        return;
+    }
+
+    if (!type) {
+
+        toast(
+            "Selecciona el tipo de joya.",
+            "warn"
+        );
+
+        return;
+    }
+
+    const file =
+        document.getElementById("jewelPhoto")
+            ?.files?.[0];
+
+    const old =
+        jewelry.find(
+            j => j.id === editingJewelId
+        ) || {};
+
+    const data =
+        readJewelForm(old);
+
+
+    const finish = finalData => {
+
+        if (editingJewelId) {
+
+            const index =
+                jewelry.findIndex(
+                    j => j.id === editingJewelId
+                );
+
+            if (index !== -1) {
+
+                jewelry[index] = finalData;
+
+            }
+
+        } else {
+
+            jewelry.unshift(finalData);
+
+        }
+
+        persistJewelryLocally();
+
+        resetJewelForm();
+
+        closeJewelForm();
+
+        refreshAll();
+
+        toast(
+            editingJewelId
+                ? "Joya actualizada ✅"
+                : "Joya guardada 💎"
+        );
+
+        editingJewelId = null;
+
+    };
+
+
+    if (file) {
+
+        compressImage(
+            file,
+            600,
+            .55
+        )
+        .then(url => {
+
+            data.foto = url;
+
+            finish(data);
+
+        })
+        .catch(error => {
+
+            console.error(
+                "Error procesando la foto de la joya",
+                error
+            );
+
+            toast(
+                "No he podido procesar la foto.",
+                "warn"
+            );
+
+        });
+
+    } else {
+
+        if (!editingJewelId) {
+
+            toast(
+                "Añade una foto de la joya.",
+                "warn"
+            );
+
+            return;
+
+        }
+
+        finish(data);
+
+    }
+
+}
+
+
+/* ---------------------------------------------------------
+   FILTROS
+--------------------------------------------------------- */
+
+function filteredJewelry() {
+
+    const q =
+        document.getElementById("jewelrySearch")
+            ?.value
+            .trim()
+            .toLowerCase() || "";
+
+    const type =
+        document.getElementById("jewelryTypeFilter")
+            ?.value || "";
+
+    const material =
+        document.getElementById("jewelryMaterialFilter")
+            ?.value || "";
+
+    const brand =
+        document.getElementById("jewelryBrandFilter")
+            ?.value || "";
+
+    const gift =
+        document.getElementById("jewelryGiftFilter")
+            ?.value || "";
+
+    const handmade =
+        document.getElementById("jewelryHandmadeFilter")
+            ?.value || "";
+
+    const sort =
+        document.getElementById("jewelrySort")
+            ?.value || "az";
+
+
+    let data = jewelry.filter(j => {
+
+        const haystack = `
+            ${j.nombre || ""}
+            ${j.marca || ""}
+            ${j.color || ""}
+            ${j.material || ""}
+            ${j.tipo || ""}
+            ${j.regalo_de || ""}
+            ${j.notas || ""}
+        `.toLowerCase();
+
+
+        if (
+            q &&
+            !haystack.includes(q)
+        ) {
+            return false;
+        }
+
+
+        if (
+            type &&
+            j.tipo !== type
+        ) {
+            return false;
+        }
+
+
+        if (
+            material &&
+            j.material !== material
+        ) {
+            return false;
+        }
+
+
+        if (
+            brand &&
+            j.marca !== brand
+        ) {
+            return false;
+        }
+
+
+        if (
+            gift !== "" &&
+            String(!!j.regalo) !== gift
+        ) {
+            return false;
+        }
+
+
+        if (
+            handmade !== "" &&
+            String(!!j.hecha_a_mano) !== handmade
+        ) {
+            return false;
+        }
+
+
+        return true;
+
+    });
+
+
+    /* FILTRO DESDE LOS INDICADORES */
+
+    if (
+        activeJewelrySummaryFilter === "anillo" ||
+        activeJewelrySummaryFilter === "pendientes" ||
+        activeJewelrySummaryFilter === "collar" ||
+        activeJewelrySummaryFilter === "pulsera" ||
+        activeJewelrySummaryFilter === "reloj" ||
+        activeJewelrySummaryFilter === "broche" ||
+        activeJewelrySummaryFilter === "otros"
+    ) {
+
+        data = data.filter(
+            j =>
+                j.tipo ===
+                activeJewelrySummaryFilter
+        );
+
+    }
+
+
+    if (
+        activeJewelrySummaryFilter === "handmade"
+    ) {
+
+        data = data.filter(
+            j => !!j.hecha_a_mano
+        );
+
+    }
+
+
+    if (
+        activeJewelrySummaryFilter === "gifts"
+    ) {
+
+        data = data.filter(
+            j => !!j.regalo
+        );
+
+    }
+
+
+    /* ORDENACIÓN */
+
+    if (sort === "az") {
+
+        data.sort((a,b) =>
+            String(a.nombre || "")
+                .localeCompare(
+                    String(b.nombre || ""),
+                    "es",
+                    {
+                        sensitivity:"base"
+                    }
+                )
+        );
+
+    }
+
+    if (sort === "recent") {
+
+        data.sort((a,b) =>
+            new Date(
+                b.creado_en || 0
+            ) -
+            new Date(
+                a.creado_en || 0
+            )
+        );
+
+    }
+
+    if (sort === "uses_desc") {
+
+        data.sort(
+            (a,b) =>
+                Number(b.usos || 0) -
+                Number(a.usos || 0)
+        );
+
+    }
+
+    if (sort === "uses_asc") {
+
+        data.sort(
+            (a,b) =>
+                Number(a.usos || 0) -
+                Number(b.usos || 0)
+        );
+
+    }
+
+
+    return data;
+
+}
+
+
+/* ---------------------------------------------------------
+   MARCAS
+--------------------------------------------------------- */
+
+function fillJewelryBrandFilter() {
+
+    const select =
+        document.getElementById(
+            "jewelryBrandFilter"
+        );
+
+    if (!select) return;
+
+
+    const current =
+        select.value;
+
+
+    const brands =
+        [...new Set(
+            jewelry
+                .map(j => j.marca)
+                .filter(Boolean)
+        )]
+        .sort((a,b) =>
+            String(a).localeCompare(
+                String(b),
+                "es"
+            )
+        );
+
+
+    select.innerHTML =
+        `<option value="">
+            Todas las marcas
+        </option>` +
+        brands
+            .map(brand =>
+                `<option value="${esc(brand)}">
+                    ${esc(brand)}
+                </option>`
+            )
+            .join("");
+
+
+    if (
+        brands.includes(current)
+    ) {
+
+        select.value = current;
+
+    }
+
+}
+
+
+/* ---------------------------------------------------------
+   INDICADORES
+--------------------------------------------------------- */
+
+function renderJewelryStats(data) {
+
+    const set = (id,value) => {
+
+        const el =
+            document.getElementById(id);
+
+        if (el) {
+            el.textContent = value;
+        }
+
+    };
+
+
+    set(
+        "jewelryStatTotal",
+        data.length
+    );
+
+    set(
+        "jewelryStatAnillos",
+        data.filter(j =>
+            j.tipo === "anillo"
+        ).length
+    );
+
+    set(
+        "jewelryStatPendientes",
+        data.filter(j =>
+            j.tipo === "pendientes"
+        ).length
+    );
+
+    set(
+        "jewelryStatCollares",
+        data.filter(j =>
+            j.tipo === "collar"
+        ).length
+    );
+
+    set(
+        "jewelryStatPulseras",
+        data.filter(j =>
+            j.tipo === "pulsera"
+        ).length
+    );
+    set(
+        "jewelryStatRelojes",
+        data.filter(j =>
+            j.tipo === "reloj"
+        ).length
+    );
+    set(
+        "jewelryStatBroches",
+        data.filter(j =>
+            j.tipo === "broche"
+        ).length
+    );
+
+    set(
+        "jewelryStatOtros",
+        data.filter(j =>
+            j.tipo === "otros"
+        ).length
+    );
+
+    set(
+        "jewelryStatHandmade",
+        data.filter(j =>
+            !!j.hecha_a_mano
+        ).length
+    );
+
+    set(
+        "jewelryStatGifts",
+        data.filter(j =>
+            !!j.regalo
+        ).length
+    );
+
+
+    /* Hacer las tarjetas clicables */
+
+    const actions = {
+
+        jewelryStatTotal:
+            "",
+
+        jewelryStatAnillos:
+            "anillo",
+
+        jewelryStatPendientes:
+            "pendientes",
+
+        jewelryStatCollares:
+            "collar",
+
+        jewelryStatPulseras:
+            "pulsera",
+
+        jewelryStatTobilleras:
+            "tobillera",
+
+        jewelryStatRelojes:
+            "reloj",
+
+        jewelryStatBroches:
+            "broche",
+
+        jewelryStatOtros:
+            "otros",
+
+        jewelryStatHandmade:
+            "handmade",
+
+        jewelryStatGifts:
+            "gifts"
+
+    };
+
+
+    Object.entries(actions)
+        .forEach(([id,filter]) => {
+
+            const number =
+                document.getElementById(id);
+
+            const card =
+                number?.closest(".card");
+
+            if (!card) return;
+
+            card.style.cursor = "pointer";
+
+            card.onclick = () => {
+
+                activeJewelrySummaryFilter =
+                    filter;
+
+                if (
+                    filter === ""
+                ) {
+
+                    activeJewelrySummaryFilter = "";
+
+                }
+
+                renderJewelry();
+
+                document
+                    .getElementById("jewelryGrid")
+                    ?.scrollIntoView({
+                        behavior:"smooth",
+                        block:"start"
+                    });
+
+            };
+
+        });
+
+}
+
+
+/* ---------------------------------------------------------
+   LIMPIAR FILTROS
+--------------------------------------------------------- */
+
+function clearJewelryFilters() {
+
+    activeJewelrySummaryFilter = "";
+
+
+    const ids = [
+
+        "jewelrySearch",
+        "jewelryTypeFilter",
+        "jewelryMaterialFilter",
+        "jewelryBrandFilter",
+        "jewelryGiftFilter",
+        "jewelryHandmadeFilter"
+
+    ];
+
+
+    ids.forEach(id => {
+
+        const el =
+            document.getElementById(id);
+
+        if (el) {
+
+            el.value = "";
+
+        }
+
+    });
+
+
+    const sort =
+        document.getElementById(
+            "jewelrySort"
+        );
+
+    if (sort) {
+        sort.value = "az";
+    }
+
+
+    renderJewelry();
+
+}
+
+
+/* ---------------------------------------------------------
+   TARJETA DE JOYA
+--------------------------------------------------------- */
+
+function jewelryCard(j) {
+
+    const type =
+        jewelryTypeLabels[j.tipo]
+        || "✨ Otros";
+
+
+    return `
+
+        <div class="item-card">
+
+            <img
+                src="${j.foto || placeholderImg}"
+                alt="${esc(j.nombre || "Joya")}"
+            >
+
+            <div class="item-body">
+
+                <div
+                    style="
+                        display:flex;
+                        align-items:center;
+                        justify-content:space-between;
+                        gap:8px;
+                    "
+                >
+
+                    <p
+                        class="item-name"
+                        style="margin:0;"
+                    >
+                        ${esc(j.nombre)}
+                    </p>
+
+                    <span
+                        style="
+                            font-size:.9rem;
+                            cursor:pointer;
+                        "
+                        title="Favorita"
+                        onclick="toggleJewelryFavorite('${j.id}');event.stopPropagation();"
+                    >
+                        ${j.favorita ? "⭐" : "☆"}
+                    </span>
+
+                </div>
+
+
+                <p class="meta">
+                    ${esc(type)}
+                </p>
+
+
+                ${
+                    j.marca
+                        ? `<p class="meta">
+                            🏷️ ${esc(j.marca)}
+                           </p>`
+                        : ""
+                }
+
+
+                ${
+                    j.material
+                        ? `<p class="meta">
+                            🔹 ${esc(
+                                jewelryMaterialLabel(
+                                    j.material
+                                )
+                            )}
+                           </p>`
+                        : ""
+                }
+
+
+                ${
+                    j.color
+                        ? `<p class="meta">
+                            🎨 ${esc(j.color)}
+                           </p>`
+                        : ""
+                }
+
+
+                <div
+                    style="margin-top:8px;"
+                >
+
+                    ${
+                        j.hecha_a_mano
+                            ? `<span class="pill">
+                                🧵 Hecha a mano
+                               </span>`
+                            : ""
+                    }
+
+                    ${
+                        j.regalo
+                            ? `<span class="pill">
+                                🎁 Regalo
+                               </span>`
+                            : ""
+                    }
+
+                </div>
+
+
+                <div
+                    class="button-row"
+                    style="margin-top:10px;"
+                >
+
+                    <button
+                        type="button"
+                        class="small-btn"
+                        onclick="editJewel('${j.id}')"
+                    >
+                        ✏️ Editar
+                    </button>
+
+                    <button
+                        type="button"
+                        class="small-btn danger-btn"
+                        onclick="deleteJewel('${j.id}')"
+                    >
+                        🗑️
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+
+function jewelryMaterialLabel(value) {
+
+    const labels = {
+
+        oro: "Oro",
+        plata: "Plata",
+        arcilla: "Arcilla polimérica",
+        acero: "Acero",
+        oro_plata: "Oro / plata",
+        bisuteria: "Bisutería",
+        resina: "Resina",
+        otro: "Otro"
+
+    };
+
+    return labels[value] || value || "";
+
+}
+
+
+/* ---------------------------------------------------------
+   RENDER JOYERO
+--------------------------------------------------------- */
+
+function renderJewelry() {
+
+    const grid =
+        document.getElementById(
+            "jewelryGrid"
+        );
+
+    if (!grid) return;
+
+
+    fillJewelryBrandFilter();
+
+
+    const data =
+        filteredJewelry();
+
+
+    renderJewelryStats(data);
+
+
+    if (!data.length) {
+
+        grid.className = "";
+
+        grid.innerHTML = `
+
+            <div class="empty">
+
+                ${
+                    jewelry.length
+                        ? "No hay joyas con esos filtros."
+                        : "Tu joyero está vacío. Añade tu primera joya para empezar."
+                }
+
+            </div>
+
+        `;
+
+        return;
+    }
+
+
+    grid.className = "grid";
+
+    grid.innerHTML =
+        data
+            .map(jewelryCard)
+            .join("");
+
+}
+
+
+/* ---------------------------------------------------------
+   EDITAR
+--------------------------------------------------------- */
+
+function editJewel(id) {
+
+    const jewel =
+        jewelry.find(
+            j => j.id === id
+        );
+
+    if (!jewel) return;
+
+
+    editingJewelId = id;
+
+
+    document.getElementById(
+        "jewelName"
+    ).value =
+        jewel.nombre || "";
+
+
+    document.getElementById(
+        "jewelType"
+    ).value =
+        jewel.tipo || "";
+
+
+    document.getElementById(
+        "jewelBrand"
+    ).value =
+        jewel.marca || "";
+
+
+    document.getElementById(
+        "jewelMaterial"
+    ).value =
+        jewel.material || "";
+
+
+    document.getElementById(
+        "jewelColor"
+    ).value =
+        jewel.color || "";
+
+
+    document.getElementById(
+        "jewelPrice"
+    ).value =
+        jewel.precio || "";
+    document.getElementById(
+        "jewelFavorite"
+    ).checked =
+        !!jewel.favorita;
+    document.getElementById(
+        "jewelAvailable"
+    ).checked =
+        jewel.disponible !== false;
+    document.getElementById(
+        "jewelGift"
+    ).checked =
+        !!jewel.regalo;
+    document.getElementById(
+        "jewelGiftFrom"
+    ).value =
+        jewel.regalo_de || "";
+    document.getElementById(
+        "jewelHandmade"
+    ).checked =
+        !!jewel.hecha_a_mano;
+    document.getElementById(
+        "jewelNotes"
+    ).value =
+        jewel.notas || "";
+    updateJewelGiftField();
+    const preview =
+        document.getElementById(
+            "jewelPhotoPreview"
+        );
+    if (preview) {
+        preview.innerHTML =
+            jewel.foto
+                ? `
+                    <img
+                        src="${jewel.foto}"
+                        alt="${esc(jewel.nombre)}"
+                        style="
+                            width:120px;
+                            height:120px;
+                            object-fit:cover;
+                            border-radius:18px;
+                            border:1px solid var(--line);
+                            box-shadow:var(--shadow);"> : "";}
+    openJewelForm(id);
+
+}
+/* ---------------------------------------------------------
+   FAVORITA
+--------------------------------------------------------- */
+function toggleJewelryFavorite(id) {
+
+    const jewel =
+        jewelry.find(
+            j => j.id === id
+        );
+
+    if (!jewel) return;
+
+
+    jewel.favorita =
+        !jewel.favorita;
+
+    jewel.actualizado_en =
+        new Date().toISOString();
+    persistJewelryLocally();
+    renderJewelry();}
+/* ---------------------------------------------------------
+   ELIMINAR
+--------------------------------------------------------- */
+
+function deleteJewel(id) {
+    const jewel =
+        jewelry.find(
+            j => j.id === id
+        );
+
+    if (!jewel) return;
+    if (
+        !confirm(
+            `¿Quieres eliminar "${jewel.nombre}" del joyero?`
+        )
+    ) {
+        return;
+    }
+    jewelry =
+        jewelry.filter(
+            j => j.id !== id
+        );
+
+
+    persistJewelryLocally();
+
+    renderJewelry();
+
+    toast(
+        "Joya eliminada 🗑️"
+    );
+}
+/* ---------------------------------------------------------
+   FOTO — PREVIEW EN TIEMPO REAL
+--------------------------------------------------------- */
+document
+    .getElementById("jewelPhoto")
+    ?.addEventListener(
+        "change",
+        previewJewelPhoto
+    );
+  Object.assign(window,{login,register,openLoginModal,closeLoginModal,openJewelForm,closeJewelForm,resetJewelForm,updateJewelGiftField,saveJewel,renderJewelry,filteredJewelry,clearJewelryFilters,editJewel,toggleJewelryFavorite,deleteJewel,logout,toggleRelated,switchView,populateCategoryOptions,saveGarment,resetForm,renderWardrobe,applySummaryFilter,clearWardrobeFilters,clearWardrobeSpecialFilters,applyWardrobeSpecialFilter,exportData,importData,editGarment,toggleFavorite,toggleVinted,deleteGarment,restoreGarment,deleteGarmentForever,markUsed,openSelector,selectGarmentForSlot,removeFromLook,removeAccessory,clearLook,saveCurrentLook,generateQuickLook,saveQuickLook,copyQuickToManual,generateLook,repeatLastLook,saveRandomLook,copyRandomToManual,loadSavedLook,toggleLookFavorite,deleteSavedLook,saveWish,resetWishForm,wishToWardrobe,deleteWish,generateHomeLook,saveHomeLook,dismissHomeLook,renderSavedLooksCarousel,renderOccasionButtons,renderCombineGroups,clearCombineFilters,chooseCombineGroup,backToCombineGroups,chooseCombineCategory,renderCombineGarments,selectCombineGarment,generateCombineLook,saveCombineLook,openLooksManualEditor,renderLooksManualOutfit,populateLooksSelector,renderLooksSelectorCategories,renderLooksSelectorGarments,openLooksManualSelector,selectLooksManualGarment,closeLooksManualSelector,removeLooksManualSlot,removeLooksManualAccessory,cancelLooksManualEditor,saveLooksManualEditor,renderOwnLook,renderOwnSelectorCategories,renderLooksOwnLook,renderLooksOwnSelectorCategories,renderLooksOwnSelectorGarments,openLooksOwnLookSelector,selectLooksOwnGarment,closeLooksOwnLookSelector,saveLooksOwnLook,cancelLooksOwnLook,removeLooksOwnSlot,removeLooksOwnAccessory,renderOwnSelectorGarments,openOwnLookSelector,selectOwnGarment,closeOwnLookSelector,removeOwnSlot,removeOwnAccessory,saveOwnLook,cancelOwnLook,openOwnLookSaveModal,closeOwnLookSaveModal,confirmOwnLookSave,editSavedLook,useSavedLook,chooseSaveLookType,toggleAllGarmentDetails});
 try{loadData();populateStaticSelects();resetForm();resetWishForm();refreshAll();loadHomeWeather();document.getElementById("authUserBox")?.addEventListener("click",e=>{if(e.target.closest(".user-menu"))return;toggleUserMenu()});document.getElementById("authUserBox")?.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();toggleUserMenu()}else if(e.key==="Escape")closeUserMenu()});document.addEventListener("click",e=>{const box=document.getElementById("authUserBox");if(box&&!box.contains(e.target))closeUserMenu()});document.getElementById("logoutBtn")?.addEventListener("click",e=>{e.stopPropagation();closeUserMenu();logout()});onAuthStateChanged(auth,user=>{updateAuthUi(user);if(user){loadWardrobeFromFirestore(user);setTimeout(()=>syncCalendarPlansWithFirestore(),0)}else{currentUser=null;wardrobeLoaded=false;pendingWardrobeSave=false;garments=[];savedLooks = [];
 recentLooks = [];
 wishlist = [];refreshAll();setSyncStatus("Inicia sesión")}})}catch(e){alert("Había un error cargando la app: "+e.message);console.error(e)}
