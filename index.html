@@ -2202,15 +2202,11 @@ function userJewelryCol() {
         : null;
 }
 async function syncJewelryWithFirestore() {
-
     if (!currentUser) {
         return;
     }
-
     try {
-
         const col = userJewelryCol();
-
         if (!col) {
             console.warn("No se encontró la colección del joyero en Firebase.");
             return;
@@ -2397,7 +2393,6 @@ function persistPendingGarmentIds(){storage.set(STORAGE_PENDING_GARMENTS,JSON.st
 // nunca se pierde aunque Firestore falle, tarde o no exista sesión todavía.
 function persistGarmentsLocally(){try{storage.set(garmentsLocalKey(),JSON.stringify(garments))}catch(e){console.warn("No se pudo guardar el armario localmente",e)}}
 function loadGarmentsLocally(){const scoped=safeParse(storage.get(garmentsLocalKey()),null);if(scoped)return scoped;return safeParse(storage.get(STORAGE_GARMENTS),[])}
-
 // Sincroniza el armario con Firestore escribiendo SOLO las prendas que cambiaron desde la última confirmación
 // (comparando contra lastSyncedGarmentSnapshot) y borrando solo las que ya no existen localmente. Esto evita
 // reescribir todo el array en cada guardado (menos riesgo de choque entre dispositivos y de superar el límite
@@ -2449,7 +2444,6 @@ async function saveWardrobeToFirestore(){
     return { ok:false, error:e };
 }
 }
-
 // Carga el armario: primero muestra la copia local (la app funciona al instante, incluso sin red), y luego
 // intenta traer la versión de Firestore. Si el usuario aún tenía prendas locales sin confirmar (pendingGarmentIds)
 // cuando termina la carga remota, esas versiones locales ganan en la fusión para no perder ediciones hechas
@@ -2532,7 +2526,6 @@ toggleLoginPassword?.addEventListener("click",()=>{
     toggleLoginPassword.setAttribute("aria-label",showing?"Mostrar contraseña":"Ocultar contraseña");
     toggleLoginPassword.setAttribute("title",showing?"Mostrar contraseña":"Ocultar contraseña");
 });
-
 const loginModal = document.getElementById("loginModal");
 loginModal.addEventListener("click", (e) => {
     if (e.target === loginModal) {
@@ -2611,7 +2604,6 @@ function garmentCard(g){
     return `
     <div class="item-card">
         <img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}">
-
         <div class="item-body">
             <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
                 <p class="item-name" style="margin:0">${esc(g.nombre)}</p>
