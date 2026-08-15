@@ -5144,7 +5144,18 @@ function renderJewelryStats(data) {
             !!j.regalo
         ).length
     );
+const totalPrice = data.reduce(
+    (sum, j) => sum + Number(j.precio || 0),
+    0
+);
 
+set(
+    "jewelryStatPrice",
+    totalPrice.toLocaleString("es-ES", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }) + " €"
+);
 
     /* Hacer las tarjetas clicables */
 
@@ -5164,9 +5175,6 @@ function renderJewelryStats(data) {
 
         jewelryStatPulseras:
             "pulsera",
-
-        jewelryStatTobilleras:
-            "tobillera",
 
         jewelryStatRelojes:
             "reloj",
