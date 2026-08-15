@@ -5255,92 +5255,107 @@ function renderJewelry() {
 /* ---------------------------------------------------------
    EDITAR
 --------------------------------------------------------- */
+/* ---------------------------------------------------------
+   EDITAR
+--------------------------------------------------------- */
+
 function editJewel(id) {
-    const jewel =
-        jewelry.find(
-            j => j.id === id
-        );
-    if (!jewel) return;
+
+    const jewel = jewelry.find(
+        j => j.id === id
+    );
+
+    if (!jewel) {
+        return;
+    }
+
     editingJewelId = id;
-    document.getElementById(
-        "jewelName"
-    ).value =
-        jewel.nombre || "";
 
+    const name = document.getElementById("jewelName");
+    const type = document.getElementById("jewelType");
+    const brand = document.getElementById("jewelBrand");
+    const material = document.getElementById("jewelMaterial");
+    const color = document.getElementById("jewelColor");
+    const price = document.getElementById("jewelPrice");
+    const favorite = document.getElementById("jewelFavorite");
+    const available = document.getElementById("jewelAvailable");
+    const gift = document.getElementById("jewelGift");
+    const giftFrom = document.getElementById("jewelGiftFrom");
+    const handmade = document.getElementById("jewelHandmade");
+    const notes = document.getElementById("jewelNotes");
 
-    document.getElementById(
-        "jewelType"
-    ).value =
-        jewel.tipo || "";
+    if (name) {
+        name.value = jewel.nombre || "";
+    }
 
+    if (type) {
+        type.value = jewel.tipo || "";
+    }
 
-    document.getElementById(
-        "jewelBrand"
-    ).value =
-        jewel.marca || "";
+    if (brand) {
+        brand.value = jewel.marca || "";
+    }
 
+    if (material) {
+        material.value = jewel.material || "";
+    }
 
-    document.getElementById(
-        "jewelMaterial"
-    ).value =
-        jewel.material || "";
+    if (color) {
+        color.value = jewel.color || "";
+    }
 
+    if (price) {
+        price.value = jewel.precio || "";
+    }
 
-    document.getElementById(
-        "jewelColor"
-    ).value =
-        jewel.color || "";
+    if (favorite) {
+        favorite.checked = !!jewel.favorita;
+    }
 
+    if (available) {
+        available.checked = jewel.disponible !== false;
+    }
 
-    document.getElementById(
-        "jewelPrice"
-    ).value =
-        jewel.precio || "";
-    document.getElementById(
-        "jewelFavorite"
-    ).checked =
-        !!jewel.favorita;
-    document.getElementById(
-        "jewelAvailable"
-    ).checked =
-        jewel.disponible !== false;
-    document.getElementById(
-        "jewelGift"
-    ).checked =
-        !!jewel.regalo;
-    document.getElementById(
-        "jewelGiftFrom"
-    ).value =
-        jewel.regalo_de || "";
-    document.getElementById(
-        "jewelHandmade"
-    ).checked =
-        !!jewel.hecha_a_mano;
-    document.getElementById(
-        "jewelNotes"
-    ).value =
-        jewel.notas || "";
+    if (gift) {
+        gift.checked = !!jewel.regalo;
+    }
+
+    if (giftFrom) {
+        giftFrom.value = jewel.regalo_de || "";
+    }
+
+    if (handmade) {
+        handmade.checked = !!jewel.hecha_a_mano;
+    }
+
+    if (notes) {
+        notes.value = jewel.notas || "";
+    }
+
     updateJewelGiftField();
-    const preview =
-        document.getElementById(
-            "jewelPhotoPreview"
-        );
-    if (preview) {
-        preview.innerHTML =
-            jewel.foto
-                ? `
-                    <img
-                        src="${jewel.foto}"
-                        alt="${esc(jewel.nombre)}"
-                        style="
-                            width:120px;
-                            height:120px;
-                            object-fit:cover;
-                            border-radius:18px;
-                            border:1px solid var(--line);
-                            box-shadow:var(--shadow);"> : "";}
-    openJewelForm(id);
 
+    const preview =
+        document.getElementById("jewelPhotoPreview");
+
+    if (preview) {
+
+        if (jewel.foto) {
+
+            preview.innerHTML =
+                '<img src="' +
+                jewel.foto +
+                '" alt="' +
+                esc(jewel.nombre || "Joya") +
+                '" style="width:120px;height:120px;object-fit:cover;border-radius:18px;border:1px solid var(--line);box-shadow:var(--shadow);">';
+
+        } else {
+
+            preview.innerHTML = "";
+
+        }
+    }
+
+    openJewelForm(id);
 }
 /* ---------------------------------------------------------
    FAVORITA
