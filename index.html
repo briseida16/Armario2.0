@@ -99,7 +99,15 @@ function finishCalendarLookAssignment(lookId){
 *{box-sizing:border-box}:root{--bg:#fff7fb;--card:rgba(255,255,255,.9);--text:#3f2e3a;--muted:#8a7080;--primary:#d98fb3;--primary-dark:#bf6f97;--line:#efd9e5;--shadow:0 10px 30px rgba(191,111,151,.12);--gradient:linear-gradient(135deg,#ffd9ea 0%,#ffeedd 100%)}
 body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--text);background:radial-gradient(circle at top left,#ffe3ef 0,transparent 28%),radial-gradient(circle at top right,#fff0df 0,transparent 22%),linear-gradient(180deg,#fff9fc 0%,#fff4f8 100%);min-height:100vh}
 header{padding:24px 16px 14px;text-align:center;position:sticky;top:0;z-index:30;backdrop-filter:blur(14px);background:rgba(255,255,255,.68);border-bottom:1px solid rgba(255,255,255,.5)}h1{margin:0;font-size:clamp(1.8rem,4vw,2.5rem);letter-spacing:-.03em}.subtitle{margin-top:6px;color:var(--muted);font-size:1rem}.top-actions{position:absolute;top:16px;right:16px;display:flex;gap:8px;align-items:center;justify-content:flex-end;max-width:min(46vw,420px)}.auth-panel{display:flex;gap:8px;align-items:center}.auth-user{position:relative;display:flex;gap:8px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:999px;padding:5px 9px;box-shadow:var(--shadow);min-width:0;cursor:pointer;-webkit-tap-highlight-color:transparent}.auth-user:hover{border-color:#f1cad6}.auth-menu-arrow{font-size:.65rem;color:var(--primary-dark);transition:transform .2s ease}.auth-user.menu-open .auth-menu-arrow{transform:rotate(180deg)}.user-menu{position:absolute;top:calc(100% + 8px);left:5px;z-index:60;min-width:180px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:8px;box-shadow:var(--shadow);display:grid;gap:4px;opacity:1;transform:translateY(0);transition:opacity .18s ease,transform .18s ease}.user-menu.hidden{display:grid!important;opacity:0;pointer-events:none;transform:translateY(-6px)}.user-menu button{border:0;background:transparent;border-radius:12px;color:var(--text);cursor:pointer;font:inherit;font-weight:850;padding:10px 12px;text-align:left;transition:.2s}.user-menu button:hover{background:#fff2f4;color:#a74f69}.auth-photo,.auth-initials{width:30px;height:30px;border-radius:50%;flex:0 0 30px}.auth-photo{object-fit:cover;background:#f4edf2}.auth-initials{display:inline-flex;align-items:center;justify-content:center;background:var(--gradient);color:#7a4e64;font-weight:950;font-size:.78rem}.login-btn{position:relative;z-index:45;min-height:44px;min-width:190px;-webkit-tap-highlight-color:transparent;touch-action:manipulation}.mini-badge{background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 10px;font-size:.75rem;font-weight:800;color:var(--muted);box-shadow:var(--shadow)}
-.tabs{display:flex;gap:10px;overflow-x:auto;padding:14px 16px 4px;justify-content:center;scrollbar-width:none}.more-menu{position:relative}.more-menu summary{list-style:none}.more-menu summary::-webkit-details-marker{display:none}.more-menu-panel{position:absolute;right:0;top:52px;display:grid;gap:8px;min-width:150px;background:rgba(255,255,255,.96);border:1px solid var(--line);border-radius:20px;padding:10px;box-shadow:var(--shadow);z-index:40}.more-menu-panel .tab-btn{width:100%;box-shadow:none}.tabs::-webkit-scrollbar{display:none}.tab-btn{border:none;background:rgba(255,255,255,.75);color:var(--text);padding:12px 16px;border-radius:999px;font-weight:800;cursor:pointer;white-space:nowrap;box-shadow:var(--shadow);transition:.2s}.tab-btn.active{background:var(--primary);color:#fff;transform:translateY(-1px)}
+.tabs{display:flex;gap:10px;overflow-x:auto;padding:14px 16px 4px;justify-content:center;scrollbar-width:none}.more-menu{position:relative}.more-menu summary{list-style:none}.more-menu summary::-webkit-details-marker{display:none}.more-menu-panel{position:absolute;right:0;top:52px;display:grid;gap:8px;min-width:150px;background:rgba(255,255,255,.96);border:1px solid var(--line);border-radius:20px;padding:10px;box-shadow:var(--shadow);z-index:40}.more-menu-panel .tab-btn{width:100%;box-shadow:none}.tabs::-webkit-scrollbar{display:none}.tab-btn{border:none;background:rgba(255,255,255,.75);color:var(--text);padding:12px 16px;border-radius:999px;font-weight:800;cursor:pointer;white-space:nowrap;box-shadow:var(--shadow);transition:.2s}.tab-btn.active{background:var(--primary);color:#fff;transform:translateY(-1px)}.more-menu.open{
+    z-index:50;
+}
+.more-menu-panel.hidden{
+    display:none;
+}
+.more-menu-panel{
+    min-width:190px;
+}
 main{max-width:1240px;margin:0 auto;padding:18px 14px 40px}.view{display:none}.view.active{display:block}.card{background:var(--card);border:1px solid rgba(255,255,255,.75);border-radius:18px;padding:18px;box-shadow:var(--shadow);margin-bottom:16px;backdrop-filter:blur(10px)}.hero{background:var(--gradient);border:1px solid #ffd3e7;border-raidus:18px;}.section-title{margin:0 0 12px;font-size:1.15rem;letter-spacing:-.02em}.muted{color:var(--muted);font-size:.95rem}.button-row,.filter-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}button,select,input,textarea,a.btn-link{font:inherit}select,
 input{
     border:1px solid var(--line);
@@ -839,31 +847,60 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
         📅 Calendario
     </button>
 
-    <details class="more-menu">
-        <summary class="tab-btn">⋯ Más</summary>
+   <div class="more-menu" id="moreMenu">
+    <button
+        type="button"
+        class="tab-btn"
+        id="moreMenuButton"
+        onclick="toggleMoreMenu(event)"
+        aria-expanded="false"
+        aria-haspopup="true"
+    >
+        ⋯ Más
+    </button>
 
-        <div class="more-menu-panel">
-            <button class="tab-btn" onclick="switchView('favoritos',this)">
-                ❤️ Favoritos
-            </button>
+    <div class="more-menu-panel hidden" id="moreMenuPanel">
+        <button
+            type="button"
+            class="tab-btn"
+            onclick="openMoreView('favoritos', this)"
+        >
+            ❤️ Favoritos
+        </button>
 
-            <button class="tab-btn" onclick="switchView('wishlist',this)">
-                🛒 Wishlist
-            </button>
+        <button
+            type="button"
+            class="tab-btn"
+            onclick="openMoreView('wishlist', this)"
+        >
+            🛒 Wishlist
+        </button>
 
-            <button class="tab-btn" onclick="switchView('vinted',this)">
-                🛍️ En venta
-            </button>
+        <button
+            type="button"
+            class="tab-btn"
+            onclick="openMoreView('vinted', this)"
+        >
+            🛍️ En venta
+        </button>
 
-            <button class="tab-btn" onclick="switchView('papelera',this)">
-                🗑️ Papelera
-            </button>
+        <button
+            type="button"
+            class="tab-btn"
+            onclick="openMoreView('papelera', this)"
+        >
+            🗑️ Papelera
+        </button>
 
-            <button class="tab-btn" onclick="switchView('ajustes',this)">
-                ⚙️ Ajustes
-            </button>
-        </div>
-    </details>
+        <button
+            type="button"
+            class="tab-btn"
+            onclick="openMoreView('ajustes', this)"
+        >
+            ⚙️ Ajustes
+        </button>
+    </div>
+</div>
 </div></header>
 <main>
 <section id="inicio" class="view active"><div class="card" id="homeWeatherCard">
@@ -3441,7 +3478,55 @@ window.addEventListener("scroll",updateHeaderOnScroll,{passive:true});
 
 function refreshAll(){updateSummary();ensureDailyQuickLook();fillFilterOptions();renderRelatedSelect();renderWardrobe();renderTrash();renderCurrentLook();renderRandomLook();renderQuickLook();renderWishlist();renderFavorites();renderVinted();renderSavedLooksCarousel();renderOccasionButtons();renderCombineGroups();renderLooksManualOutfit();renderOwnLook();renderLooksOwnLook()}function toast(msg,type="ok"){const box=document.getElementById("toastBox");if(!box)return alert(msg);const t=document.createElement("div");t.className=`toast toast-${type}`;t.textContent=msg;box.appendChild(t);requestAnimationFrame(()=>t.classList.add("show"));setTimeout(()=>{t.classList.remove("show");setTimeout(()=>t.remove(),300)},3200)}
 const IDB_NAME="bricloset_mirror_db",IDB_STORE="backups";function idbOpen(){return new Promise((resolve,reject)=>{const req=indexedDB.open(IDB_NAME,1);req.onupgradeneeded=()=>req.result.createObjectStore(IDB_STORE);req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}async function mirrorToIndexedDB(){try{const db=await idbOpen(),tx=db.transaction(IDB_STORE,"readwrite");tx.objectStore(IDB_STORE).put({version:APP_DATA_VERSION,savedLooks,recentLooks,wishlist,guardado_en:new Date().toISOString()},"latest")}catch(e){console.warn("No se pudo espejar en IndexedDB",e)}}async function recoverFromIndexedDB(){try{const db=await idbOpen(),tx=db.transaction(IDB_STORE,"readonly"),req=tx.objectStore(IDB_STORE).get("latest");return new Promise(res=>{req.onsuccess=()=>res(req.result||null);req.onerror=()=>res(null)})}catch(e){return null}}
-Object.assign(window,{login,register,openLoginModal,closeLoginModal,logout,toggleRelated,switchView,populateCategoryOptions,saveGarment,resetForm,renderWardrobe,applySummaryFilter,clearWardrobeFilters,clearWardrobeSpecialFilters,applyWardrobeSpecialFilter,exportData,importData,editGarment,toggleFavorite,toggleVinted,deleteGarment,restoreGarment,deleteGarmentForever,markUsed,openSelector,selectGarmentForSlot,removeFromLook,removeAccessory,clearLook,saveCurrentLook,generateQuickLook,saveQuickLook,copyQuickToManual,generateLook,repeatLastLook,saveRandomLook,copyRandomToManual,loadSavedLook,toggleLookFavorite,deleteSavedLook,saveWish,resetWishForm,wishToWardrobe,deleteWish,generateHomeLook,saveHomeLook,dismissHomeLook,renderSavedLooksCarousel,renderOccasionButtons,renderCombineGroups,clearCombineFilters,chooseCombineGroup,backToCombineGroups,chooseCombineCategory,renderCombineGarments,selectCombineGarment,generateCombineLook,saveCombineLook,openLooksManualEditor,renderLooksManualOutfit,populateLooksSelector,renderLooksSelectorCategories,renderLooksSelectorGarments,openLooksManualSelector,selectLooksManualGarment,closeLooksManualSelector,removeLooksManualSlot,removeLooksManualAccessory,cancelLooksManualEditor,saveLooksManualEditor,renderOwnLook,renderOwnSelectorCategories,renderLooksOwnLook,renderLooksOwnSelectorCategories,renderLooksOwnSelectorGarments,openLooksOwnLookSelector,selectLooksOwnGarment,closeLooksOwnLookSelector,saveLooksOwnLook,cancelLooksOwnLook,removeLooksOwnSlot,removeLooksOwnAccessory,renderOwnSelectorGarments,openOwnLookSelector,selectOwnGarment,closeOwnLookSelector,removeOwnSlot,removeOwnAccessory,saveOwnLook,cancelOwnLook,openOwnLookSaveModal,closeOwnLookSaveModal,confirmOwnLookSave,editSavedLook,useSavedLook,chooseSaveLookType,toggleAllGarmentDetails});
+function toggleMoreMenu(event){
+    if(event){
+        event.stopPropagation();
+    }
+
+    const menu=document.getElementById("moreMenu");
+    const panel=document.getElementById("moreMenuPanel");
+    const button=document.getElementById("moreMenuButton");
+
+    if(!menu || !panel || !button)return;
+
+    const isOpen=!panel.classList.contains("hidden");
+
+    if(isOpen){
+        panel.classList.add("hidden");
+        button.setAttribute("aria-expanded","false");
+        menu.classList.remove("open");
+    }else{
+        panel.classList.remove("hidden");
+        button.setAttribute("aria-expanded","true");
+        menu.classList.add("open");
+    }
+}
+
+function closeMoreMenu(){
+    const menu=document.getElementById("moreMenu");
+    const panel=document.getElementById("moreMenuPanel");
+    const button=document.getElementById("moreMenuButton");
+
+    if(!menu || !panel || !button)return;
+
+    panel.classList.add("hidden");
+    button.setAttribute("aria-expanded","false");
+    menu.classList.remove("open");
+}
+
+function openMoreView(view,button){
+    closeMoreMenu();
+    switchView(view,button);
+}
+
+document.addEventListener("click",function(event){
+    const menu=document.getElementById("moreMenu");
+
+    if(menu && !menu.contains(event.target)){
+        closeMoreMenu();
+    }
+});
+  Object.assign(window,{login,register,openLoginModal,closeLoginModal,logout,toggleRelated,switchView,populateCategoryOptions,saveGarment,resetForm,renderWardrobe,applySummaryFilter,clearWardrobeFilters,clearWardrobeSpecialFilters,applyWardrobeSpecialFilter,exportData,importData,editGarment,toggleFavorite,toggleVinted,deleteGarment,restoreGarment,deleteGarmentForever,markUsed,openSelector,selectGarmentForSlot,removeFromLook,removeAccessory,clearLook,saveCurrentLook,generateQuickLook,saveQuickLook,copyQuickToManual,generateLook,repeatLastLook,saveRandomLook,copyRandomToManual,loadSavedLook,toggleLookFavorite,deleteSavedLook,saveWish,resetWishForm,wishToWardrobe,deleteWish,generateHomeLook,saveHomeLook,dismissHomeLook,renderSavedLooksCarousel,renderOccasionButtons,renderCombineGroups,clearCombineFilters,chooseCombineGroup,backToCombineGroups,chooseCombineCategory,renderCombineGarments,selectCombineGarment,generateCombineLook,saveCombineLook,openLooksManualEditor,renderLooksManualOutfit,populateLooksSelector,renderLooksSelectorCategories,renderLooksSelectorGarments,openLooksManualSelector,selectLooksManualGarment,closeLooksManualSelector,removeLooksManualSlot,removeLooksManualAccessory,cancelLooksManualEditor,saveLooksManualEditor,renderOwnLook,renderOwnSelectorCategories,renderLooksOwnLook,renderLooksOwnSelectorCategories,renderLooksOwnSelectorGarments,openLooksOwnLookSelector,selectLooksOwnGarment,closeLooksOwnLookSelector,saveLooksOwnLook,cancelLooksOwnLook,removeLooksOwnSlot,removeLooksOwnAccessory,renderOwnSelectorGarments,openOwnLookSelector,selectOwnGarment,closeOwnLookSelector,removeOwnSlot,removeOwnAccessory,saveOwnLook,cancelOwnLook,openOwnLookSaveModal,closeOwnLookSaveModal,confirmOwnLookSave,editSavedLook,useSavedLook,chooseSaveLookType,toggleAllGarmentDetails});
 try{loadData();populateStaticSelects();resetForm();resetWishForm();refreshAll();loadHomeWeather();document.getElementById("authUserBox")?.addEventListener("click",e=>{if(e.target.closest(".user-menu"))return;toggleUserMenu()});document.getElementById("authUserBox")?.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();toggleUserMenu()}else if(e.key==="Escape")closeUserMenu()});document.addEventListener("click",e=>{const box=document.getElementById("authUserBox");if(box&&!box.contains(e.target))closeUserMenu()});document.getElementById("logoutBtn")?.addEventListener("click",e=>{e.stopPropagation();closeUserMenu();logout()});onAuthStateChanged(auth,user=>{updateAuthUi(user);if(user){loadWardrobeFromFirestore(user);setTimeout(()=>syncCalendarPlansWithFirestore(),0)}else{currentUser=null;wardrobeLoaded=false;pendingWardrobeSave=false;garments=[];savedLooks = [];
 recentLooks = [];
 wishlist = [];refreshAll();setSyncStatus("Inicia sesión")}})}catch(e){alert("Había un error cargando la app: "+e.message);console.error(e)}
