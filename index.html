@@ -2187,6 +2187,210 @@ function userWardrobeRef(){return currentUser?doc(db,"users",currentUser.uid):nu
 }async function logout(){try{await signOut(auth)}catch(e){toast("No he podido cerrar sesión.","warn");console.error(e)}}
 function userGarmentsCol(){return currentUser?collection(db,"users",currentUser.uid,"garments"):null}
 function userMetaRef(){return currentUser?doc(db,"users",currentUser.uid):null}
+/* =========================================================
+   💎 FIREBASE — JOYERO
+========================================================= */
+
+function userJewelryCol() {
+    return currentUser
+        ? collection(
+            db,
+            "users",
+            currentUser.uid,
+            "jewelry"
+        )
+        : null;
+}
+async function syncJewelryWithFirestore() {
+
+    if (!currentUser) {
+        return;
+    }
+
+    try {
+
+        const col = userJewelryCol();
+
+        if (!col) {
+            console.warn("No se encontró la colección del joyero en Firebase.");
+            return;
+        }
+
+        const snap = await getDocs(col);
+
+        const remoteJewelry =
+            snap.docs.map(docSnap => ({
+                id: docSnap.id,
+                ...docSnap.data()
+            }));
+
+        const localJewelry =
+            Array.isArray(jewelry)
+                ? jewelry
+                : [];
+
+        /*
+         * CASO 1:
+         * Firebase tiene joyas.
+         *
+         * Las recuperamos y las usamos como fuente
+         * principal para reconstruir el joyero.
+         */
+
+        if (remoteJewelry.length) {
+
+            jewelry = remoteJewelry;
+
+            persistJewelryLocally();
+
+            renderJewelry();
+
+            console.log(
+                "💎 Joyero recuperado desde Firebase:",
+                jewelry.length
+            );
+
+            return;
+        }
+
+        /*
+         * CASO 2:
+         * Firebase está vacío pero este dispositivo
+         * tiene joyas guardadas localmente.
+         *
+         * Las subimos a Firebase.
+         */
+
+        if (localJewelry.length) {
+
+            await saveJewelryToFirestore();
+
+            renderJewelry();
+
+            console.log(
+                "💎 Joyero local subido a Firebase:",
+                localJewelry.length
+            );
+
+            return;
+        }
+
+        /*
+         * CASO 3:
+         * No hay joyas ni localmente ni en Firebase.
+         */
+
+        jewelry = [];
+
+        persistJewelryLocally();
+
+        renderJewelry();
+
+        console.log(
+            "💎 No había joyas guardadas."
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Error sincronizando el joyero con Firebase:",
+            error
+        );
+
+        toast(
+            "No he podido sincronizar el joyero con Firebase.",
+            "warn"
+        );
+    }
+}
+/* ---------------------------------------------------------
+   GUARDAR JOYERO EN FIREBASE
+--------------------------------------------------------- */
+
+async function saveJewelryToFirestore() {
+
+    if (!currentUser) {
+        return;
+    }
+
+    try {
+
+        const col = userJewelryCol();
+
+        if (!col) {
+            return;
+        }
+
+        const remoteSnap =
+            await getDocs(col);
+
+        const remoteIds =
+            new Set(
+                remoteSnap.docs.map(
+                    docSnap => docSnap.id
+                )
+            );
+
+        const localIds =
+            new Set(
+                jewelry.map(
+                    jewel => jewel.id
+                )
+            );
+
+        const batch =
+            writeBatch(db);
+
+        /*
+         * Guardar / actualizar joyas
+         */
+
+        jewelry.forEach(jewel => {
+
+            batch.set(
+                doc(col, jewel.id),
+                jewel
+            );
+
+        });
+
+        /*
+         * Eliminar de Firebase las que ya no existen
+         * localmente.
+         */
+
+        remoteIds.forEach(id => {
+
+            if (!localIds.has(id)) {
+
+                batch.delete(
+                    doc(col, id)
+                );
+
+            }
+
+        });
+
+        await batch.commit();
+
+        console.log(
+            "💎 Joyero guardado en Firebase:",
+            jewelry.length
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Error guardando el joyero en Firebase:",
+            error
+        );
+
+        toast(
+            "La joya se ha guardado localmente, pero no he podido sincronizar Firebase.",
+            "warn"
+        );
+    }
+}
 function garmentsLocalKey(){return currentUser?`${STORAGE_GARMENTS}_${currentUser.uid}`:STORAGE_GARMENTS}
 function persistPendingGarmentIds(){storage.set(STORAGE_PENDING_GARMENTS,JSON.stringify([...pendingGarmentIds]))}
 // Copia local inmediata del armario. Se hace SIEMPRE, haya o no conexión: es la garantía de que una prenda
@@ -4213,7 +4417,6 @@ function jewelryLocalKey() {
 --------------------------------------------------------- */
 
 function loadJewelryLocally() {
-
     const scoped =
         safeParse(
             storage.get(
@@ -4221,18 +4424,14 @@ function loadJewelryLocally() {
             ),
             null
         );
-
     if (scoped) {
         return scoped;
     }
-
     return safeParse(
         storage.get(STORAGE_JEWELRY),
         []
     );
 }
-
-
 /* ---------------------------------------------------------
    GUARDAR JOYERO LOCAL
 --------------------------------------------------------- */
@@ -4688,12 +4887,10 @@ function readJewelForm(old = {}) {
 --------------------------------------------------------- */
 
 async function saveJewel() {
-
     const name =
         document.getElementById("jewelName")
             ?.value
             .trim() || "";
-
     const type =
         document.getElementById("jewelType")
             ?.value || "";
@@ -4739,33 +4936,23 @@ async function saveJewel() {
     data.id = currentId;
 
     const finish =
-        finalData => {
-
+      async finalData => {
             finalData.relacionadas =
                 [...jewelRelatedIds];
-
             if (wasEditing) {
-
                 const index =
                     jewelry.findIndex(
                         j => j.id === currentId
                     );
-
                 if (index !== -1) {
-
                     jewelry[index] =
                         finalData;
-
                 }
-
             } else {
-
                 jewelry.unshift(
                     finalData
                 );
-
             }
-
             /*
              * Actualiza las relaciones en ambos sentidos.
              */
@@ -4773,23 +4960,17 @@ async function saveJewel() {
                 currentId,
                 jewelRelatedIds
             );
-
             persistJewelryLocally();
-
+ await saveJewelryToFirestore();
             jewelRelatedIds = [];
-
             resetJewelForm();
-
             closeJewelForm();
-
             refreshAll();
-
             toast(
                 wasEditing
                     ? "Joya actualizada ✅"
                     : "Joya guardada 💎"
             );
-
             editingJewelId = null;
         };
 
@@ -5568,8 +5749,9 @@ jewelRelatedIds =
 
     jewel.actualizado_en =
         new Date().toISOString();
-    persistJewelryLocally();
-    renderJewelry();}
+   persistJewelryLocally();
+saveJewelryToFirestore();
+renderJewelry();
 /* ---------------------------------------------------------
    ELIMINAR
 --------------------------------------------------------- */
@@ -5592,15 +5774,12 @@ function deleteJewel(id) {
     if (!confirm(message)) {
         return;
     }
-
     jewelry = jewelry.filter(function(j) {
         return j.id !== id;
     });
-
     persistJewelryLocally();
-
+saveJewelryToFirestore();
     renderJewelry();
-
     toast("Joya eliminada 🗑️");
 }
 /* ---------------------------------------------------------
@@ -5613,9 +5792,29 @@ document
         previewJewelPhoto
     );
   Object.assign(window,{login,register,openLoginModal,closeLoginModal,openJewelForm,closeJewelForm,resetJewelForm,updateJewelGiftField,saveJewel,renderJewelry,filteredJewelry,clearJewelryFilters,editJewel,renderJewelRelatedList,toggleJewelRelated,toggleJewelryFavorite,deleteJewel,logout,toggleRelated,switchView,populateCategoryOptions,saveGarment,resetForm,renderWardrobe,applySummaryFilter,clearWardrobeFilters,clearWardrobeSpecialFilters,applyWardrobeSpecialFilter,exportData,importData,editGarment,toggleFavorite,toggleVinted,deleteGarment,restoreGarment,deleteGarmentForever,markUsed,openSelector,selectGarmentForSlot,removeFromLook,removeAccessory,clearLook,saveCurrentLook,generateQuickLook,saveQuickLook,copyQuickToManual,generateLook,repeatLastLook,saveRandomLook,copyRandomToManual,loadSavedLook,toggleLookFavorite,deleteSavedLook,saveWish,resetWishForm,wishToWardrobe,deleteWish,generateHomeLook,saveHomeLook,dismissHomeLook,renderSavedLooksCarousel,renderOccasionButtons,renderCombineGroups,clearCombineFilters,chooseCombineGroup,backToCombineGroups,chooseCombineCategory,renderCombineGarments,selectCombineGarment,generateCombineLook,saveCombineLook,openLooksManualEditor,renderLooksManualOutfit,populateLooksSelector,renderLooksSelectorCategories,renderLooksSelectorGarments,openLooksManualSelector,selectLooksManualGarment,closeLooksManualSelector,removeLooksManualSlot,removeLooksManualAccessory,cancelLooksManualEditor,saveLooksManualEditor,renderOwnLook,renderOwnSelectorCategories,renderLooksOwnLook,renderLooksOwnSelectorCategories,renderLooksOwnSelectorGarments,openLooksOwnLookSelector,selectLooksOwnGarment,closeLooksOwnLookSelector,saveLooksOwnLook,cancelLooksOwnLook,removeLooksOwnSlot,removeLooksOwnAccessory,renderOwnSelectorGarments,openOwnLookSelector,selectOwnGarment,closeOwnLookSelector,removeOwnSlot,removeOwnAccessory,saveOwnLook,cancelOwnLook,openOwnLookSaveModal,closeOwnLookSaveModal,confirmOwnLookSave,editSavedLook,useSavedLook,chooseSaveLookType,toggleAllGarmentDetails});
-try{loadData();populateStaticSelects();resetForm();resetWishForm();refreshAll();loadHomeWeather();document.getElementById("authUserBox")?.addEventListener("click",e=>{if(e.target.closest(".user-menu"))return;toggleUserMenu()});document.getElementById("authUserBox")?.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();toggleUserMenu()}else if(e.key==="Escape")closeUserMenu()});document.addEventListener("click",e=>{const box=document.getElementById("authUserBox");if(box&&!box.contains(e.target))closeUserMenu()});document.getElementById("logoutBtn")?.addEventListener("click",e=>{e.stopPropagation();closeUserMenu();logout()});onAuthStateChanged(auth,user=>{updateAuthUi(user);if(user){loadWardrobeFromFirestore(user);setTimeout(()=>syncCalendarPlansWithFirestore(),0)}else{currentUser=null;wardrobeLoaded=false;pendingWardrobeSave=false;garments=[];savedLooks = [];
-recentLooks = [];
-wishlist = [];refreshAll();setSyncStatus("Inicia sesión")}})}catch(e){alert("Había un error cargando la app: "+e.message);console.error(e)}
+try{loadData();populateStaticSelects();resetForm();resetWishForm();refreshAll();loadHomeWeather();document.getElementById("authUserBox")?.addEventListener("click",e=>{if(e.target.closest(".user-menu"))return;toggleUserMenu()});document.getElementById("authUserBox")?.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();toggleUserMenu()}else if(e.key==="Escape")closeUserMenu()});document.addEventListener("click",e=>{const box=document.getElementById("authUserBox");if(box&&!box.contains(e.target))closeUserMenu()});document.getElementById("logoutBtn")?.addEventListener("click",e=>{e.stopPropagation();closeUserMenu();logout()});onAuthStateChanged(auth,user=>{updateAuthUi(user);if(user){
+    loadWardrobeFromFirestore(user);
+    jewelry =
+        loadJewelryLocally();
+    renderJewelry();
+    setTimeout(() => {
+        syncJewelryWithFirestore();
+    }, 0);
+    setTimeout(() => {
+        syncCalendarPlansWithFirestore();
+    }, 0);
+}}else{
+    currentUser = null;
+    wardrobeLoaded = false;
+    pendingWardrobeSave = false;
+    garments = [];
+    savedLooks = [];
+    recentLooks = [];
+    wishlist = [];
+    jewelry = [];
+    jewelRelatedIds = [];
+   refreshAll();
+    setSyncStatus("Inicia sesión");}})}catch(e){alert("Había un error cargando la app: "+e.message);console.error(e)}
 initSubnav();
 initLooksFloatingMenu();
 updateHeaderOnScroll();
