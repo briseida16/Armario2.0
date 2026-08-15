@@ -1548,82 +1548,157 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
         </button>
     </div>
 </div>
-    <!-- RESUMEN -->
-    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));" >
-        <div class="card" style="margin-bottom:0;">
-            <div class="muted">Joyas</div>
-            <div
-                id="jewelryTotal"
-                style="font-size:1.7rem;font-weight:900;margin-top:4px;"
-            >
-                0
-            </div>
+    <!-- RESUMEN DEL JOYERO -->
+<div
+    id="jewelryStats"
+    class="grid"
+    style="margin-top:16px;"
+>
+
+    <!-- TOTAL -->
+    <div class="card" style="margin-bottom:0;">
+        <div
+            id="jewelryStatTotal"
+            style="font-size:1.25rem;font-weight:900;"
+        >
+            0
         </div>
-
-        <div class="card" style="margin-bottom:0;">
-            <div class="muted">Favoritas</div>
-
-            <div
-                id="jewelryFavorites"
-                style="font-size:1.7rem;font-weight:900;margin-top:4px;"
-            >
-                0
-            </div>
+        <div class="muted">
+            💎 Total joyas
         </div>
-
     </div>
 
-
-    <!-- FILTROS -->
-    <div class="card" style="margin-top:16px;">
-
-        <div class="filter-row">
-
-            <input
-                id="jewelrySearch"
-                type="search"
-                placeholder="Buscar joya..."
-            >
-
-            <select id="jewelryTypeFilter">
-                <option value="">Todos los tipos</option>
-                <option value="anillo">💍 Anillos</option>
-                <option value="pendientes">👂 Pendientes</option>
-                <option value="collar">📿 Collares/Cadenas</option>
-                <option value="pulsera">✨ Pulseras</option>
-                <option value="reloj">⌚ Relojes</option>
-                <option value="broche">🎀 Broches</option>
-                <option value="otros">✨ Otros</option>
-            </select>
-
-            <select id="jewelryMaterialFilter">
-                <option value="">Todos los materiales</option>
-                <option value="oro">Oro</option>
-                <option value="plata">Plata</option>
-                <option value="arcilla">Arcilla polimérica</option>
-                <option value="acero">Acero</option>
-                <option value="oro_plata">Oro / plata</option>
-                <option value="bisuteria">Bisutería</option>
-              <option value="resina">Resina</option>
-                <option value="otro">Otro</option>
-            </select>
-
-            <select id="jewelrySort">
-                <option value="recent">Más recientes</option>
-                <option value="name">Nombre A-Z</option>
-                <option value="uses">Más usadas</option>
-            </select>
-
-            <button
-                type="button"
-                class="ghost-btn"
-            >
-                ⭐ Favoritas
-            </button>
-
+    <!-- ANILLOS -->
+    <div class="card" style="margin-bottom:0;">
+        <div
+            id="jewelryStatAnillos"
+            style="font-size:1.25rem;font-weight:900;"
+        >
+            0
         </div>
-
+        <div class="muted">
+            💍 Anillos
+        </div>
     </div>
+
+    <!-- PENDIENTES -->
+    <div class="card" style="margin-bottom:0;">
+        <div
+            id="jewelryStatPendientes"
+            style="font-size:1.25rem;font-weight:900;"
+        >
+            0
+        </div>
+        <div class="muted">
+            👂 Pendientes
+        </div>
+    </div>
+
+    <!-- COLLARES -->
+    <div class="card" style="margin-bottom:0;">
+        <div
+            id="jewelryStatCollares"
+            style="font-size:1.25rem;font-weight:900;"
+        >
+            0
+        </div>
+        <div class="muted">
+            📿 Collares
+        </div>
+    </div>
+
+    <!-- PULSERAS -->
+    <div class="card" style="margin-bottom:0;">
+        <div
+            id="jewelryStatPulseras"
+            style="font-size:1.25rem;font-weight:900;"
+        >
+            0
+        </div>
+        <div class="muted">
+            ✨ Pulseras
+        </div>
+    </div>
+
+    <!-- TOBILLERAS -->
+    <div class="card" style="margin-bottom:0;">
+        <div
+            id="jewelryStatTobilleras"
+            style="font-size:1.25rem;font-weight:900;"
+        >
+            0
+        </div>
+        <div class="muted">
+            ⛓️ Tobilleras
+        </div>
+    </div>
+
+    <!-- RELOJES -->
+    <div class="card" style="margin-bottom:0;">
+        <div
+            id="jewelryStatRelojes"
+            style="font-size:1.25rem;font-weight:900;"
+        >
+            0
+        </div>
+        <div class="muted">
+            ⌚ Relojes
+        </div>
+    </div>
+
+    <!-- BROCHES -->
+    <div class="card" style="margin-bottom:0;">
+        <div
+            id="jewelryStatBroches"
+            style="font-size:1.25rem;font-weight:900;"
+        >
+            0
+        </div>
+        <div class="muted">
+            🎀 Broches
+        </div>
+    </div>
+
+    <!-- OTROS -->
+    <div class="card" style="margin-bottom:0;">
+        <div
+            id="jewelryStatOtros"
+            style="font-size:1.25rem;font-weight:900;"
+        >
+            0
+        </div>
+        <div class="muted">
+            ✨ Otros
+        </div>
+    </div>
+
+    <!-- HECHAS A MANO -->
+    <div class="card" style="margin-bottom:0;">
+        <div
+            id="jewelryStatHandmade"
+            style="font-size:1.25rem;font-weight:900;"
+        >
+            0
+        </div>
+        <div class="muted">
+            🧵 Hechas a mano
+        </div>
+    </div>
+
+    <!-- REGALOS -->
+    <div class="card" style="margin-bottom:0;">
+        <div
+            id="jewelryStatGifts"
+            style="font-size:1.25rem;font-weight:900;"
+        >
+            0
+        </div>
+        <div class="muted">
+            🎁 Regalos
+        </div>
+    </div>
+
+</div>
 
 
     <!-- LISTADO -->
