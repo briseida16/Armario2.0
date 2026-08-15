@@ -4186,19 +4186,77 @@ document.addEventListener("click",function(event){
         window.closeMoreMenu();
     }
 });/* =========================================================
-   💎 JOYERO — APERTURA Y CIERRE DEL FORMULARIO
+   💎 DATOS DEL JOYERO
    ========================================================= */
-/* =========================================================
-   💎 DATOS LOCALES DEL JOYERO
-   ========================================================= */
+
 const STORAGE_JEWELRY = "bricloset_jewelry";
-let jewelry = safeParse(
-    storage.get(STORAGE_JEWELRY),
-    []
-);
+
+let jewelry = [];
 let activeJewelrySummaryFilter = "";
 let editingJewelId = null;
 let jewelRelatedIds = [];
+
+
+/* ---------------------------------------------------------
+   CLAVE LOCAL DEL JOYERO POR USUARIO
+--------------------------------------------------------- */
+
+function jewelryLocalKey() {
+    return currentUser
+        ? `${STORAGE_JEWELRY}_${currentUser.uid}`
+        : STORAGE_JEWELRY;
+}
+
+
+/* ---------------------------------------------------------
+   CARGAR JOYERO LOCAL
+--------------------------------------------------------- */
+
+function loadJewelryLocally() {
+
+    const scoped =
+        safeParse(
+            storage.get(
+                jewelryLocalKey()
+            ),
+            null
+        );
+
+    if (scoped) {
+        return scoped;
+    }
+
+    return safeParse(
+        storage.get(STORAGE_JEWELRY),
+        []
+    );
+}
+
+
+/* ---------------------------------------------------------
+   GUARDAR JOYERO LOCAL
+--------------------------------------------------------- */
+
+function persistJewelryLocally() {
+
+    try {
+
+        storage.set(
+            jewelryLocalKey(),
+            JSON.stringify(jewelry)
+        );
+
+    } catch (e) {
+        console.warn(
+            "No se pudo guardar el joyero localmente",
+            e
+        );
+    }
+}
+/* ---------------------------------------------------------
+   FORMULARIO JOYERO
+--------------------------------------------------------- */
+function openJewelForm(editId = null) {
 function openJewelForm(editId = null) {
     const form = document.getElementById("jewelFormCard");
     if (!form) {
