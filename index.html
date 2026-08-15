@@ -4507,16 +4507,12 @@ const jewelryTypeLabels = {
 --------------------------------------------------------- */
 
 function persistJewelryLocally() {
-
     try {
-
         storage.set(
             STORAGE_JEWELRY,
             JSON.stringify(jewelry)
         );
-
     } catch (e) {
-
         console.warn(
             "No se pudo guardar el joyero localmente",
             e
