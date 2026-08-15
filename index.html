@@ -818,8 +818,53 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
 @media(max-width:600px){.calendar-day{min-height:66px;padding:5px}.calendar-plan-dot{font-size:.56rem}.calendar-shell,.calendar-detail{padding:12px}.calendar-look-box{padding:20px}.calendar-saved-looks{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style></head><body><header><h1>BriCloset ✨</h1><div class="subtitle">🌸 Toda tu ropa en un solo armario virtual, crea looks diferentes y utiliza todo lo que tienes para explotar tu potencial 🌸</div><div class="top-actions"><div class="auth-panel"><button type="button" class="primary-btn" id="loginBtn" onclick="openLoginModal()">
     Iniciar sesión
-</button><div class="auth-user hidden" id="authUserBox" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false"><img class="auth-photo hidden" id="authPhoto" alt="Foto de usuario"><span class="auth-initials hidden" id="authInitials" aria-hidden="true"></span><span class="auth-menu-arrow" aria-hidden="true">▼</span><div class="user-menu hidden" id="userMenu"><button type="button">👤 Mi perfil</button><button type="button" id="logoutBtn">🚪 Cerrar sesión</button></div></div><div class="mini-badge hidden" id="syncStatus">Esperando sesión</div></div></div><div class="tabs"><button class="tab-btn active" onclick="switchView('inicio',this)">Inicio</button><button class="tab-btn" onclick="switchView('armario',this)">Mi armario</button><button class="tab-btn" onclick="switchView('anadir',this)">Añadir prenda</button><button class="tab-btn" onclick="switchView('looks',this)">Looks</button><button class="tab-btn" onclick="switchView('calendar',this)">Calendario</button>
-<button class="tab-btn" onclick="switchView('wishlist',this)">Wishlist</button><button class="tab-btn" onclick="switchView('favoritos',this)">Favoritos</button><button class="tab-btn" onclick="switchView('vinted',this)">🛍️ Vinted</button><details class="more-menu"><summary class="tab-btn">Más</summary><div class="more-menu-panel"><button class="tab-btn" onclick="switchView('vinted',this)">En venta</button><button class="tab-btn" onclick="switchView('papelera',this)">Papelera</button><button class="tab-btn" onclick="switchView('ajustes',this)">Ajustes</button></div></details></div></header>
+</button><div class="auth-user hidden" id="authUserBox" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false"><img class="auth-photo hidden" id="authPhoto" alt="Foto de usuario"><span class="auth-initials hidden" id="authInitials" aria-hidden="true"></span><span class="auth-menu-arrow" aria-hidden="true">▼</span><div class="user-menu hidden" id="userMenu"><button type="button">👤 Mi perfil</button><button type="button" id="logoutBtn">🚪 Cerrar sesión</button></div></div><div class="mini-badge hidden" id="syncStatus">Esperando sesión</div></div></div><div class="tabs">
+    <button class="tab-btn active" onclick="switchView('inicio',this)">
+        🏠 Inicio
+    </button>
+
+    <button class="tab-btn" onclick="switchView('armario',this)">
+        👗 Mi armario
+    </button>
+
+    <button class="tab-btn" onclick="switchView('joyero',this)">
+        💎 Mi joyero
+    </button>
+
+    <button class="tab-btn" onclick="switchView('looks',this)">
+        ✨ Looks
+    </button>
+
+    <button class="tab-btn" onclick="switchView('calendar',this)">
+        📅 Calendario
+    </button>
+
+    <details class="more-menu">
+        <summary class="tab-btn">⋯ Más</summary>
+
+        <div class="more-menu-panel">
+            <button class="tab-btn" onclick="switchView('favoritos',this)">
+                ❤️ Favoritos
+            </button>
+
+            <button class="tab-btn" onclick="switchView('wishlist',this)">
+                🛒 Wishlist
+            </button>
+
+            <button class="tab-btn" onclick="switchView('vinted',this)">
+                🛍️ En venta
+            </button>
+
+            <button class="tab-btn" onclick="switchView('papelera',this)">
+                🗑️ Papelera
+            </button>
+
+            <button class="tab-btn" onclick="switchView('ajustes',this)">
+                ⚙️ Ajustes
+            </button>
+        </div>
+    </details>
+</div></header>
 <main>
 <section id="inicio" class="view active"><div class="card" id="homeWeatherCard">
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
@@ -890,8 +935,25 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
 </div></section>
 <section id="armario" class="view">
     <div class="card">
-        <h2 class="section-title">Mi armario</h2>
-        <div class="filter-row">
+
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+            <div>
+                <h2 class="section-title" style="margin-bottom:4px;">👗 Mi armario</h2>
+                <p class="muted" style="margin:0;">
+                    Todas tus prendas y accesorios en un solo sitio.
+                </p>
+            </div>
+
+            <button
+                class="primary-btn"
+                type="button"
+                onclick="switchView('anadir')"
+            >
+                ＋ Añadir prenda
+            </button>
+        </div>
+
+        <div class="filter-row" style="margin-top:16px;">
             <input id="searchInput"
                    placeholder="Buscar por nombre, color, comentarios..."
                    oninput="renderWardrobe()">
