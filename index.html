@@ -5132,146 +5132,83 @@ function clearJewelryFilters() {
 function jewelryCard(j) {
 
     const type =
-        jewelryTypeLabels[j.tipo]
-        || "✨ Otros";
+        jewelryTypeLabels[j.tipo] || "✨ Otros";
 
+    let html = "";
 
-    return `
+    html += '<div class="item-card">';
 
-        <div class="item-card">
+    html += '<img src="' +
+        (j.foto || placeholderImg) +
+        '" alt="' +
+        esc(j.nombre || "Joya") +
+        '">';
 
-            <img
-                src="${j.foto || placeholderImg}"
-                alt="${esc(j.nombre || "Joya")}"
-            >
+    html += '<div class="item-body">';
 
-            <div class="item-body">
+    html += '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">';
 
-                <div
-                    style="
-                        display:flex;
-                        align-items:center;
-                        justify-content:space-between;
-                        gap:8px;
-                    "
-                >
+    html += '<p class="item-name" style="margin:0;">' +
+        esc(j.nombre || "") +
+        '</p>';
 
-                    <p
-                        class="item-name"
-                        style="margin:0;"
-                    >
-                        ${esc(j.nombre)}
-                    </p>
+    html += '<span style="font-size:.9rem;cursor:pointer;" ' +
+        'title="Favorita" ' +
+        'onclick="toggleJewelryFavorite(\'' +
+        j.id +
+        '\');event.stopPropagation();">' +
+        (j.favorita ? "⭐" : "☆") +
+        '</span>';
 
-                    <span
-                        style="
-                            font-size:.9rem;
-                            cursor:pointer;
-                        "
-                        title="Favorita"
-                        onclick="toggleJewelryFavorite('${j.id}');event.stopPropagation();"
-                    >
-                        ${j.favorita ? "⭐" : "☆"}
-                    </span>
+    html += '</div>';
 
-                </div>
+    html += '<p class="meta">' +
+        esc(type) +
+        '</p>';
 
-
-                <p class="meta">
-                    ${esc(type)}
-                </p>
-
-
-                ${
-                    j.marca
-                        ? `<p class="meta">
-                            🏷️ ${esc(j.marca)}
-                           </p>`
-                        : ""
-                }
-
-
-                ${
-                    j.material
-                        ? `<p class="meta">
-                            🔹 ${esc(
-                                jewelryMaterialLabel(
-                                    j.material
-                                )
-                            )}
-                           </p>`
-                        : ""
-                }
-
-
-                ${
-                    j.color
-                        ? `<p class="meta">
-                            🎨 ${esc(j.color)}
-                           </p>`
-                        : ""
-                }
-
-
-                <div
-                    style="margin-top:8px;"
-                >
-
-                    ${
-                        j.hecha_a_mano
-                            ? `<span class="pill">
-                                🧵 Hecha a mano
-                               </span>`
-                            : ""
-                    }
-
-                    ${
-                        j.regalo
-                            ? `<span class="pill">
-                                🎁 Regalo
-                               </span>`
-                            : ""
-                    }
-
-                </div>
-
-
-                <div
-                    class="button-row"
-                    style="margin-top:10px;"
-                >
-
-                    <button
-                        type="button"
-                        class="small-btn"
-                        onclick="editJewel('${j.id}')"
-                    >
-                        ✏️ Editar
-                    </button>
-
-                    <button
-                        type="button"
-                        class="small-btn danger-btn"
-                        onclick="deleteJewel('${j.id}')"
-                    >
-                        🗑️
-                    </button>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    `;
-
+    if (j.marca) {
+        html += '<p class="meta">🏷️ ' +
+            esc(j.marca) +
+            '</p>';
+    }
+    if (j.material) {
+        html += '<p class="meta">🔹 ' +
+            esc(jewelryMaterialLabel(j.material)) +
+            '</p>';
+    }
+    if (j.color) {
+        html += '<p class="meta">🎨 ' +
+            esc(j.color) +
+            '</p>';
+    }
+    html += '<div style="margin-top:8px;">';
+    if (j.hecha_a_mano) {
+        html += '<span class="pill">🧵 Hecha a mano</span>';
+    }
+    if (j.regalo) {
+        html += '<span class="pill">🎁 Regalo</span>';
+    }
+    html += '</div>';
+    html += '<div class="button-row" style="margin-top:10px;">';
+    html += '<button type="button" class="small-btn" ' +
+        'onclick="editJewel(\'' +
+        j.id +
+        '\')">' +
+        '✏️ Editar' +
+        '</button>';
+    html += '<button type="button" class="small-btn danger-btn" ' +
+        'onclick="deleteJewel(\'' +
+        j.id +
+        '\')">' +
+        '🗑️' +
+        '</button>';
+    html += '</div>';
+    html += '</div>';
+    html += '</div>';
+    return html;
 }
-
-
 function jewelryMaterialLabel(value) {
-
     const labels = {
-
         oro: "Oro",
         plata: "Plata",
         arcilla: "Arcilla polimérica",
@@ -5280,87 +5217,51 @@ function jewelryMaterialLabel(value) {
         bisuteria: "Bisutería",
         resina: "Resina",
         otro: "Otro"
-
     };
-
     return labels[value] || value || "";
-
 }
-
-
 /* ---------------------------------------------------------
    RENDER JOYERO
 --------------------------------------------------------- */
-
 function renderJewelry() {
-
     const grid =
-        document.getElementById(
-            "jewelryGrid"
-        );
-
-    if (!grid) return;
-
-
-    fillJewelryBrandFilter();
-
-
-    const data =
-        filteredJewelry();
-
-
-    renderJewelryStats(data);
-
-
-    if (!data.length) {
-
-        grid.className = "";
-
-        grid.innerHTML = `
-
-            <div class="empty">
-
-                ${
-                    jewelry.length
-                        ? "No hay joyas con esos filtros."
-                        : "Tu joyero está vacío. Añade tu primera joya para empezar."
-                }
-
-            </div>
-
-        `;
-
+        document.getElementById("jewelryGrid");
+    if (!grid) {
         return;
     }
-
-
+    fillJewelryBrandFilter();
+    const data =
+        filteredJewelry();
+    renderJewelryStats(data);
+    if (!data.length) {
+        grid.className = "";
+        if (jewelry.length) {
+            grid.innerHTML =
+                '<div class="empty">' +
+                'No hay joyas con esos filtros.' +
+                '</div>';
+        } else {
+            grid.innerHTML =
+                '<div class="empty">' +
+                'Tu joyero está vacío. Añade tu primera joya para empezar.' +
+                '</div>';
+        }
+        return;
+    }
     grid.className = "grid";
-
     grid.innerHTML =
-        data
-            .map(jewelryCard)
-            .join("");
-
+        data.map(jewelryCard).join("");
 }
-
-
 /* ---------------------------------------------------------
    EDITAR
 --------------------------------------------------------- */
-
 function editJewel(id) {
-
     const jewel =
         jewelry.find(
             j => j.id === id
         );
-
     if (!jewel) return;
-
-
     editingJewelId = id;
-
-
     document.getElementById(
         "jewelName"
     ).value =
