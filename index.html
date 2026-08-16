@@ -200,7 +200,25 @@ input{
     color:var(--text);
     box-shadow:var(--shadow);
 }.check-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:8px;padding:10px;border:1px solid var(--line);border-radius:16px;background:#fff}.check-grid label{display:flex;gap:7px;align-items:center;font-weight:700;color:var(--muted)}
-.outfit-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}.slot{background:rgba(255,255,255,.75);border:2px dashed #ead2df;border-radius:20px;padding:12px;min-height:225px;display:flex;flex-direction:column;gap:8px}.slot-title{font-weight:900;color:#6e5361}.slot img{width:100%;border-radius:14px;aspect-ratio:1/1;object-fit:cover;background:#f2edf0}.occasion-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:10px}.occasion-btn{padding:18px 12px;background:#fff;color:var(--text);border:1px solid var(--line);box-shadow:var(--shadow)}.empty{text-align:center;padding:22px;color:var(--muted);background:rgba(255,255,255,.7);border-radius:18px}.summary-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-top:10px}.summary-box{background:rgba(255,255,255,.82);border-radius:14px;padding:14px;border:1px solid var(--line)}cursor:pointer;
+.outfit-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}.slot{background:rgba(255,255,255,.75);border:2px dashed #ead2df;border-radius:20px;padding:12px;min-height:225px;display:flex;flex-direction:column;gap:8px}.slot-title{font-weight:900;color:#6e5361}.slot img{width:100%;border-radius:14px;aspect-ratio:1/1;object-fit:cover;background:#f2edf0}.occasion-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:10px}.occasion-btn{padding:18px 12px;background:#fff;color:var(--text);border:1px solid var(--line);box-shadow:var(--shadow)}.empty{text-align:center;padding:22px;color:var(--muted);background:rgba(255,255,255,.7);border-radius:18px}
+  .summary-row{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    gap:12px;
+    margin-top:10px;
+}
+.summary-box{
+    background:#fff;
+    border-radius:18px;
+    padding:16px 14px;
+    border:1px solid var(--line);
+    box-shadow:var(--shadow);
+    text-align:center;
+    transition:transform .15s ease, box-shadow .15s ease;
+}.summary-box:hover{
+    transform:translateY(-2px);
+    box-shadow:0 8px 20px rgba(110,83,97,.10);
+}cursor:pointer;
 transition:transform .15s ease, box-shadow .15s ease;.summary-box:hover{
     transform:translateY(-2px);
     box-shadow:0 6px 18px rgba(0,0,0,.08);
@@ -1607,7 +1625,18 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
             💎 Total joyas
         </div>
     </div>
-
+<!-- FAVORITAS -->
+<div class="card" style="margin-bottom:0;cursor:pointer;" onclick="goToFavorites('jewelry')">
+    <div
+        id="jewelryStatFavorites"
+        style="font-size:1.25rem;font-weight:900;"
+    >
+        0
+    </div>
+    <div class="muted">
+        ⭐ Joyas favoritas
+    </div>
+</div>
     <!-- ANILLOS -->
     <div class="card" style="margin-bottom:0;">
         <div
@@ -1981,8 +2010,21 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
     </div>
 </div>
 </section>
-<section id="favoritos" class="view"><div class="card"><h2 class="section-title">Prendas favoritas</h2><div id="favoritesGrid" class="grid"></div></div><div class="card"><h2 class="section-title">Looks favoritos</h2><div id="favoriteLooksGrid" class="grid"></div></div><div class="card"><h2 class="section-title">Últimos 10 looks usados</h2><div id="recentLooksGrid" class="grid"></div></div><div class="card"><h2 class="section-title">Todos los looks guardados</h2><div id="savedLooksGrid" class="grid"></div></div></section>
-<section id="vinted" class="view">
+<section id="favoritos" class="view">
+    <div class="card">
+        <h2 class="section-title">Prendas favoritas</h2>
+        <div id="favoritesGrid" class="grid"></div>
+    </div>
+<div class="card" id="favoriteJewelrySection">
+    <h2 class="section-title">💎 Joyas favoritas</h2>
+    <div id="favoriteJewelryGrid" class="grid"></div>
+</div>
+    <div class="card">
+        <h2 class="section-title">Looks favoritos</h2>
+        <div id="favoriteLooksGrid" class="grid"></div>
+    </div>
+</section>
+  <section id="vinted" class="view">
     <div class="card hero">
         <h2 class="section-title">🛍️ Mi Vinted</h2>
         <p class="muted">Gestiona desde aquí las prendas que tienes anunciadas y las que ya has vendido.</p>
@@ -4046,7 +4088,33 @@ function ensureDailyQuickLook(){
 function saveQuickLook(){saveLookObject(quickLook,`Look rápido ${savedLooks.length+1}`,"casual","rápido")}function saveRandomLook(){saveLookObject(randomLook,`Look ${savedLooks.length+1}`,lastOccasion||"casual","aleatorio")}function saveCurrentLook(){const occ=Object.values(currentLook).find(v=>v&&!Array.isArray(v))?.ocasiones?.[0]||"casual";saveLookObject(currentLook,`Look ${savedLooks.length+1}`,occ,"manual")}function copyQuickToManual(){currentLook={...quickLook,accesorios:[...(quickLook.accesorios||[])]};renderCurrentLook();switchView("crearLook")}function copyRandomToManual(){currentLook={...randomLook,accesorios:[...(randomLook.accesorios||[])]};renderCurrentLook();switchView("crearLook")}
 function savedLookCard(l,editable=true){const look=idsToLook(l),first=look.abrigo||look.exterior||look.interior||look.inferior||look.vestido||look.calzado||look.bolso||look.accesorios[0],count=[look.abrigo,look.exterior,look.interior,look.inferior,look.vestido,look.calzado,look.bolso].filter(Boolean).length+look.accesorios.length;return`<div class="item-card"><img src="${first?.foto||placeholderImg}" alt="Look"><div class="item-body"><p class="item-name">${esc(l.nombre)}</p><p class="meta">Ocasión: ${esc(fmtOcc(l.ocasion||"-"))}</p><p class="meta">Prendas: ${count}</p>${l.favorito?'<span class="pill">Look favorito</span>':''}${editable?`<div class="button-row" style="margin-top:10px"><button class="small-btn" onclick="loadSavedLook('${l.id}')">Abrir</button><button class="small-btn" onclick="toggleLookFavorite('${l.id}')">${l.favorito?'Quitar ♥':'Favorito ♥'}</button><button class="small-btn danger-btn" onclick="deleteSavedLook('${l.id}')">Eliminar</button></div>`:""}</div></div>`}function loadSavedLook(id){const l=savedLooks.find(x=>x.id===id);if(l){currentLook=idsToLook(l);renderCurrentLook();switchView("crearLook")}}function toggleLookFavorite(id){const l=savedLooks.find(x=>x.id===id);if(l){l.favorito=!l.favorito;persist();refreshAll()}}
 function resetWishForm(){editingWishId=null;["wishNombre","wishMarca","wishPrecio","wishEnlace","wishComentarios"].forEach(id=>document.getElementById(id).value="");document.getElementById("wishPrioridad").value="Alta";document.getElementById("wishFoto").value=""}function saveWish(){const file=document.getElementById("wishFoto").files[0],old=wishlist.find(w=>w.id===editingWishId)||{},data=migrateWish({id:editingWishId||uid(),foto:old.foto,nombre:document.getElementById("wishNombre").value.trim(),marca:document.getElementById("wishMarca").value.trim(),precio:document.getElementById("wishPrecio").value,enlace:document.getElementById("wishEnlace").value.trim(),prioridad:document.getElementById("wishPrioridad").value,comentarios:document.getElementById("wishComentarios").value.trim()});if(!data.nombre)return toast("Pon al menos un nombre en la wishlist.","warn");const finish=w=>{if(editingWishId){const i=wishlist.findIndex(x=>x.id===editingWishId);if(i!==-1)wishlist[i]=w}else wishlist.unshift(w);persist();resetWishForm();refreshAll();toast("Wishlist guardada ✅")};file?compressImage(file).then(url=>{data.foto=url;finish(data)}).catch(()=>finish(data)):finish(data)}function wishToWardrobe(id){const w=wishlist.find(x=>x.id===id);if(!w)return;garments.unshift(migrateGarment({nombre:w.nombre,marca:w.marca,precio:w.precio,comentarios:w.comentarios,foto:w.foto,grupo:"parte_superior",categoria:"camiseta",temporada:"todo_anio",ocasiones:["casual"],cantidad:1,disponible:true}));wishlist=wishlist.filter(x=>x.id!==id);persist();refreshAll();switchView("armario");toast("Añadido al armario ✅")}function deleteWish(id){wishlist=wishlist.filter(w=>w.id!==id);persist();refreshAll()}function renderWishlist(){document.getElementById("wishlistGrid").innerHTML=wishlist.length?wishlist.map(w=>`<div class="item-card"><img src="${w.foto||placeholderImg}" alt="${esc(w.nombre)}"><div class="item-body"><p class="item-name">${esc(w.nombre)}</p>${w.marca?`<p class="meta">Marca: ${esc(w.marca)}</p>`:""}${w.precio?`<p class="meta">Precio: ${esc(w.precio)} €</p>`:""}<p class="meta">Prioridad: ${esc(w.prioridad)}</p>${w.enlace?`<p class="meta"><a href="${esc(w.enlace)}" target="_blank" rel="noopener noreferrer">Enlace de compra</a></p>`:""}${w.comentarios?`<p class="meta">💬 ${esc(w.comentarios)}</p>`:""}<div class="button-row" style="margin-top:10px"><button class="small-btn" onclick="wishToWardrobe('${w.id}')">Añadir al armario</button><button class="small-btn danger-btn" onclick="deleteWish('${w.id}')">Eliminar</button></div></div></div>`).join(""):'<div class="empty">Tu wishlist está vacía.</div>'}
-function renderFavorites(){document.getElementById("favoritesGrid").innerHTML=garments.filter(g=>g.favorito&&!g.eliminado_en).map(garmentCard).join("")||'<div class="empty">No tienes prendas favoritas todavía.</div>';document.getElementById("favoriteLooksGrid").innerHTML=savedLooks.filter(l=>l.favorito).map(savedLookCard).join("")||'<div class="empty">No tienes looks favoritos todavía.</div>';document.getElementById("recentLooksGrid").innerHTML=recentLooks.map(l=>savedLookCard(l,false)).join("")||'<div class="empty">Todavía no has usado looks.</div>';document.getElementById("savedLooksGrid").innerHTML=savedLooks.map(l=>savedLookCard(l,true)).join("")||'<div class="empty">No has guardado looks todavía.</div>'}function renderVinted(){
+function renderFavorites() {
+    document.getElementById("favoritesGrid").innerHTML =
+        garments
+            .filter(g => g.favorito && !g.eliminado_en)
+            .map(garmentCard)
+            .join("") ||
+        '<div class="empty">No tienes prendas favoritas todavía.</div>';
+
+    document.getElementById("favoriteLooksGrid").innerHTML =
+        savedLooks
+            .filter(l => l.favorito)
+            .map(savedLookCard)
+            .join("") ||
+        '<div class="empty">No tienes looks favoritos todavía.</div>';
+
+    const favoriteJewelryGrid =
+        document.getElementById("favoriteJewelryGrid");
+
+    if (favoriteJewelryGrid) {
+        favoriteJewelryGrid.innerHTML =
+            jewelry
+                .filter(j => j.favorita)
+                .map(jewelryCard)
+                .join("") ||
+            '<div class="empty">No tienes joyas favoritas todavía.</div>';
+    }
+}function renderVinted(){
     const active=garments.filter(g=>g.en_vinted&&!g.vendida&&!g.eliminado_en);
     const sold=garments.filter(g=>g.vendida&&!g.eliminado_en);
     document.getElementById("vintedGrid").innerHTML=active.length?active.map(garmentCard).join(""):'<div class="empty">No tienes prendas actualmente en venta.</div>';
@@ -4252,8 +4320,7 @@ const subnavConfig={
     inicio:[["homeWeatherCard","🌤️ Tiempo"],["quickLookCard","✨ Look de hoy"],["homeStayCard","🏠 ¿Nos quedamos en casa?"],["homeWardrobeSummary","Resumen de mi armario"],
     ["homeVirtualMoveCard","📦 Mudanza virtual"],["homeFutureVersionsCard","🚀 Futuras versiones"]],
     wishlist:[["wishlist","💖 Wishlist"],["wishlistGrid","🛍️ Mi wishlist"]],
-    favoritos:[["favoritos","❤️ Favoritos"],["favoritesGrid","👗 Prendas favoritas"],["favoriteLooksGrid","✨ Looks favoritos"],["recentLooksGrid","🕘 Últimos looks"],["savedLooksGrid","💾 Looks guardados"]],
-    looks:[["savedLooksCarouselCard","💾 Looks guardados"],["looksOccasionCard","✨ ¿Qué buscamos hoy?"],["combineLookCard","👗 ¿Qué me combina con esto?"],["createOwnLookCard","🎨 Crear mi propio look"]],
+favoritos:[["favoritos","❤️ Favoritos"],["favoritesGrid","👗 Prendas favoritas"],["favoriteJewelrySection","💎 Joyas favoritas"],["favoriteLooksGrid","✨ Looks favoritos"]],    looks:[["savedLooksCarouselCard","💾 Looks guardados"],["looksOccasionCard","✨ ¿Qué buscamos hoy?"],["combineLookCard","👗 ¿Qué me combina con esto?"],["createOwnLookCard","🎨 Crear mi propio look"]],
     vinted:[["vinted","🛍️ Vinted"],["vintedGrid","🛒 En venta"],["vintedSoldGrid","✅ Vendidas"]],
 };
 function closeSubnav(){
@@ -4804,20 +4871,15 @@ function previewJewelPhoto() {
 --------------------------------------------------------- */
 
 function readJewelForm(old = {}) {
-
     return {
-
         id: editingJewelId || uid(),
-
         nombre:
             document.getElementById("jewelName")
                 ?.value
                 .trim() || "",
-
         tipo:
             document.getElementById("jewelType")
                 ?.value || "",
-
         marca:
             document.getElementById("jewelBrand")
                 ?.value
@@ -5295,7 +5357,12 @@ function renderJewelryStats(data) {
         "jewelryStatTotal",
         data.length
     );
-
+set(
+    "jewelryStatFavorites",
+    data.filter(j =>
+        !!j.favorita
+    ).length
+);
     set(
         "jewelryStatAnillos",
         data.filter(j =>
@@ -5444,10 +5511,28 @@ set(
             };
 
         });
+const favoriteJewelryCard =
+    document
+        .getElementById("jewelryStatFavorites")
+        ?.closest(".card");
 
-}
+if (favoriteJewelryCard) {
 
+    favoriteJewelryCard.style.cursor = "pointer";
 
+    favoriteJewelryCard.onclick = () => {
+
+        showView("favoritos");
+
+        document
+            .getElementById("favoriteJewelrySection")
+            ?.scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            });
+
+    };
+}}
 /* ---------------------------------------------------------
    LIMPIAR FILTROS
 --------------------------------------------------------- */
