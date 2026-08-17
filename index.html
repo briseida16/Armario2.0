@@ -2495,7 +2495,9 @@ let garments=[],
     lastOccasion=null,
     lastBold=false,
     relatedSelectedIds=[],
-    activeSummaryFilter="";function uid(){try{return crypto.randomUUID()}catch(e){return Date.now()+Math.random().toString(16).slice(2)}}function safeParse(s,f){try{return s?JSON.parse(s):f}catch(e){return f}}function esc(t){return String(t??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}function getChecks(id){return [...document.querySelectorAll(`#${id} input:checked`)].map(x=>x.value)}function setChecks(id,values){const arr=Array.isArray(values)?values:[];document.querySelectorAll(`#${id} input`).forEach(x=>x.checked=arr.includes(x.value))}function fmtOcc(v){return occasions.find(o=>o[0]===v)?.[1]||v}function fmtSeason(v){
+    activeSummaryFilter="",
+    activeShoeSummaryFilter="";
+  function uid(){try{return crypto.randomUUID()}catch(e){return Date.now()+Math.random().toString(16).slice(2)}}function safeParse(s,f){try{return s?JSON.parse(s):f}catch(e){return f}}function esc(t){return String(t??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}function getChecks(id){return [...document.querySelectorAll(`#${id} input:checked`)].map(x=>x.value)}function setChecks(id,values){const arr=Array.isArray(values)?values:[];document.querySelectorAll(`#${id} input`).forEach(x=>x.checked=arr.includes(x.value))}function fmtOcc(v){return occasions.find(o=>o[0]===v)?.[1]||v}function fmtSeason(v){
     if(Array.isArray(v)){
         return v
             .map(x => seasons.find(s => s[0] === x)?.[1] || x)
@@ -3410,7 +3412,6 @@ function renderWardrobe(){
     }else{
         box.className="grid";
        box.innerHTML=orderedData.map(garmentCard).join("");
-      let activeShoeSummaryFilter = "";
     }
 }
 function filteredShoes() {
