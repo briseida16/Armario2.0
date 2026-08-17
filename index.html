@@ -2825,10 +2825,8 @@ function resetForm() {
     });
 
     document.getElementById("grupo").disabled = false;
-
-    document.getElementById("categoria").innerHTML = "";
-    document.getElementById("occasionChecks").innerHTML = "";
-
+document.getElementById("categoria").innerHTML = "";
+setChecks("occasionChecks", ["diario"]);
     document.querySelectorAll("#temporadaChecks input")
         .forEach(cb => cb.checked = false);
 
