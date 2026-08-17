@@ -1038,6 +1038,10 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
     <div class="summary-number" id="sumJewelryTotal">0</div>
     <div class="muted">💎 Total joyas</div>
 </div>
+  <div class="summary-box" onclick="switchView('zapatero')">
+    <div class="summary-number" id="sumShoes">0</div>
+    <div class="muted">👟 Calzado</div>
+</div>
    <div class="summary-box" onclick="switchView('favoritos')">
     <div class="summary-number" id="sumFavorites">0</div>
     <div class="muted">Favoritas</div>
@@ -4413,7 +4417,8 @@ function updateSummary(){
     document.getElementById("sumGarments").textContent=active.length;
     // Actualiza el nuevo indicador de joyas reutilizando jewelry.length
     document.getElementById("sumJewelryTotal").textContent = jewelry.length;
-    document.getElementById("sumFavorites").textContent=active.filter(g=>g.favorito).length;
+    document.getElementById("sumShoes").textContent=active.filter(g => g.grupo === "calzado").length;
+  document.getElementById("sumFavorites").textContent=active.filter(g=>g.favorito).length;
     document.getElementById("sumWishlist").textContent=wishlist.length;
     document.getElementById("sumLooks").textContent=savedLooks.length;
     document.getElementById("sumVinted").textContent=active.filter(g=>g.en_vinted).length;
