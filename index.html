@@ -1080,11 +1080,16 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
     <div id="futureGrid" class="future-grid"></div>
 </div></section>
 <section id="armario" class="view">
-    <div class="card">
 
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+    <!-- CABECERA -->
+    <div class="card hero">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;">
+
             <div>
-                <h2 class="section-title" style="margin-bottom:4px;">👗 Mi armario</h2>
+                <h2 class="section-title" style="margin-bottom:4px;">
+                    👗 Mi armario
+                </h2>
+
                 <p class="muted" style="margin:0;">
                     Todas tus prendas y accesorios en un solo sitio.
                 </p>
@@ -1093,66 +1098,132 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
             <button
                 class="primary-btn"
                 type="button"
-                onclick="garmentFormReturnView='armario';switchView('anadir')"            >
+                onclick="garmentFormReturnView='armario';switchView('anadir')"
+            >
                 ＋ Añadir prenda
             </button>
+
         </div>
+    </div>
 
-        <div class="filter-row" style="margin-top:16px;">
-            <input id="searchInput"
-                   placeholder="Buscar por nombre, color, comentarios..."
-                   oninput="renderWardrobe()">
+    <!-- FILTROS -->
+    <div class="card" style="margin-top:16px;">
 
-            <button class="ghost-btn"
-                    type="button"
-                    onclick="clearWardrobeFilters()">
+        <div class="filter-row">
+
+            <input
+                id="searchInput"
+                placeholder="Buscar por nombre, color, comentarios..."
+                oninput="renderWardrobe()"
+            >
+
+            <button
+                class="ghost-btn"
+                type="button"
+                onclick="clearWardrobeFilters()"
+            >
                 ✕ Limpiar filtros
             </button>
 
-            <select id="filterGroup" onchange="renderWardrobe()">
+            <select
+                id="filterGroup"
+                onchange="renderWardrobe()"
+            >
                 <option value="">Todos los grupos</option>
             </select>
 
-            <select id="filterCategory" onchange="renderWardrobe()">
+            <select
+                id="filterCategory"
+                onchange="renderWardrobe()"
+            >
                 <option value="">Todas las categorías</option>
             </select>
 
-            <select id="filterOccasion" onchange="renderWardrobe()">
+            <select
+                id="filterOccasion"
+                onchange="renderWardrobe()"
+            >
                 <option value="">Todas las ocasiones</option>
             </select>
 
-            <select id="filterFavorite" onchange="renderWardrobe()">
+            <select
+                id="filterFavorite"
+                onchange="renderWardrobe()"
+            >
                 <option value="">Favoritas y no favoritas</option>
                 <option value="true">Solo favoritas</option>
                 <option value="false">Solo no favoritas</option>
             </select>
 
-            <select id="filterBrand" onchange="renderWardrobe()">
+            <select
+                id="filterBrand"
+                onchange="renderWardrobe()"
+            >
                 <option value="">Todas las marcas</option>
             </select>
 
-            <select id="filterSeason" onchange="renderWardrobe()">
+            <select
+                id="filterSeason"
+                onchange="renderWardrobe()"
+            >
                 <option value="">Todas las temporadas</option>
             </select>
 
-            <select id="filterSize" onchange="renderWardrobe()">
+            <select
+                id="filterSize"
+                onchange="renderWardrobe()"
+            >
                 <option value="">Todas las tallas</option>
             </select>
 
-            <select id="sortWardrobe" onchange="renderWardrobe()">
-    <option value="az">Nombre A-Z</option>
-    <option value="reciente">Más recientes primero</option>
-    <option value="usos_desc">Más usadas primero</option>
-    <option value="usos_asc">Menos usadas primero</option>
-</select>
+            <select
+                id="sortWardrobe"
+                onchange="renderWardrobe()"
+            >
+                <option value="az">Nombre A-Z</option>
+                <option value="reciente">Más recientes primero</option>
+                <option value="usos_desc">Más usadas primero</option>
+                <option value="usos_asc">Menos usadas primero</option>
+            </select>
+
         </div>
 
-        <div id="wardrobeSummary" class="summary-row"></div>
-
-        <div id="wardrobeStats" class="summary-row"></div>
     </div>
 
-    <div id="wardrobeGrid"></div>
+    <!-- INDICADORES -->
+    <div
+        id="wardrobeSummary"
+        class="summary-row"
+        style="margin-top:16px;"
+    ></div>
+
+    <!-- ESTADÍSTICAS -->
+    <div
+        id="wardrobeStats"
+        class="summary-row"
+        style="margin-top:10px;"
+    ></div>
+
+    <!-- LISTADO -->
+    <div class="card" style="margin-top:16px;">
+
+        <div>
+            <h3 class="section-title" style="margin-bottom:4px;">
+                👗 Mis prendas
+            </h3>
+
+            <p class="muted" style="margin:0;">
+                Aquí aparecerá toda tu ropa organizada por categorías.
+            </p>
+        </div>
+
+        <div
+            id="wardrobeGrid"
+            style="margin-top:16px;"
+        ></div>
+
+    </div>
+
 </section>
 <section id="anadir" class="view"><div class="card"><h2 class="section-title" id="formTitle">Añadir prenda</h2><div class="form-grid"><div class="field"><label>Foto</label><input id="foto" type="file" accept="image/*"></div><div class="field"><label>Nombre</label><input id="nombre" placeholder="Ej. Blazer rosa palo"></div><div class="field">
     <label>Grupo</label>
@@ -1243,7 +1314,13 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
    <div id="occasionChecks" class="check-grid"></div></div><div class="field" style="grid-column:1/-1"><label>Opciones</label><div class="check-grid">
 <label><input id="disponible" type="checkbox" checked> Disponible</label>
 <label><input id="enVinted" type="checkbox"> En venta</label>
-</div></div><div class="field" style="grid-column:1/-1"><label>Comentarios</label><textarea id="comentarios" placeholder="Ej. combina muy bien con dorado..."></textarea></div><div class="field" style="grid-column:1/-1"><label>Relacionar con prendas existentes</label><div class="related-picker"><div id="relatedSelectedPreview" class="related-selected"></div><div id="relatedOptions" class="related-options"></div></div><p class="muted" style="margin:0">Toca una o varias prendas para relacionarlas.</p></div></div><div class="button-row" style="margin-top:14px"><button class="primary-btn" onclick="saveGarment()">Guardar prenda</button><button class="ghost-btn" onclick="resetForm()">Limpiar formulario</button></div></div></section>
+</div></div><div class="field" style="grid-column:1/-1"><label>Comentarios</label><textarea id="comentarios" placeholder="Ej. combina muy bien con dorado..."></textarea></div><div class="field" style="grid-column:1/-1"><label>Relacionar con prendas existentes</label><div class="related-picker"><div id="relatedSelectedPreview" class="related-selected"></div><div id="relatedOptions" class="related-options"></div></div><p class="muted" style="margin:0">Toca una o varias prendas para relacionarlas.</p></div></div><div class="button-row" style="margin-top:14px"><button
+    id="saveGarmentBtn"
+    class="primary-btn"
+    onclick="saveGarment()"
+>
+    Guardar prenda
+</button><button class="ghost-btn" onclick="resetForm()">Limpiar formulario</button></div></div></section>
 <section id="wishlist" class="view"><div class="card"><h2 class="section-title">Wishlist</h2><div class="form-grid"><div class="field"><label>Foto</label><input id="wishFoto" type="file" accept="image/*"></div><div class="field"><label>Nombre</label><input id="wishNombre"></div><div class="field"><label>Marca</label><input id="wishMarca"></div><div class="field"><label>Precio</label><input id="wishPrecio" type="number" step="0.01" min="0"></div><div class="field"><label>Enlace de compra</label><input id="wishEnlace" type="url"></div><div class="field"><label>Prioridad</label><select id="wishPrioridad"><option>Alta</option><option>Media</option><option>Baja</option></select></div><div class="field" style="grid-column:1/-1"><label>Comentarios</label><textarea id="wishComentarios"></textarea></div></div><div class="button-row" style="margin-top:14px"><button class="primary-btn" onclick="saveWish()">Añadir a wishlist</button><button class="ghost-btn" onclick="resetWishForm()">Limpiar</button></div></div><div id="wishlistGrid" class="grid"></div></section>
 
 <style>
@@ -2936,6 +3013,19 @@ setChecks("occasionChecks", ["diario"]);
         garmentFormReturnView === "zapatero"
             ? "Añadir calzado"
             : "Añadir prenda";
+  const saveGarmentBtn =
+    document.getElementById(
+        "saveGarmentBtn"
+    );
+
+if (saveGarmentBtn) {
+
+    saveGarmentBtn.textContent =
+        garmentFormReturnView === "zapatero"
+            ? "Guardar calzado"
+            : "Guardar prenda";
+
+}
     populateCategoryOptions("");
 }
 function readGarmentForm(old={}){return{id:editingGarmentId||uid(),nombre:document.getElementById("nombre").value.trim(),grupo:document.getElementById("grupo").value,categoria:document.getElementById("categoria").value,color:document.getElementById("color").value.trim(),marca:document.getElementById("marca").value.trim(),temporada: getChecks("temporadaChecks"),estado:document.getElementById("estado").value,ocasiones:getChecks("occasionChecks"),talla:document.getElementById("talla").value.trim(),precio:document.getElementById("precio").value,cantidad:Math.max(1,Number(document.getElementById("cantidad").value||1)),basico:document.getElementById("basico").checked,reversible:document.getElementById("reversible").checked,favorito:document.getElementById("favorito").value==="true",disponible:document.getElementById("disponible").checked,en_vinted:document.getElementById("enVinted").checked,comentarios:document.getElementById("comentarios").value.trim(),relacionadas:selectedRelated(),foto:old.foto||placeholderImg,usos:old.usos||0,ultimo_uso:old.ultimo_uso||null,eliminado_en:null,schema_version:APP_DATA_VERSION}}
@@ -3122,42 +3212,92 @@ if(activeSummaryFilter==="amortized" && (g.usos||0)<AMORTIZED_USES)return false;
         data.sort((a,b)=>(a.nombre||"").localeCompare(b.nombre||"","es"));
 
     return data;
-}function renderWardrobeSummary(){
-    const active=filteredGarments();
-    const box=document.getElementById("wardrobeSummary");
-    if(!box)return;
+}
+  function renderWardrobeSummary(){
 
-    const counts={};
-    Object.keys(groupLabels).forEach(g=>counts[g]=0);
+    const active =
+        filteredGarments();
 
-    active.forEach(g=>{
-        if(g.grupo){
-            counts[g.grupo]=(counts[g.grupo]||0)+1;
+    const box =
+        document.getElementById(
+            "wardrobeSummary"
+        );
+
+    if (!box) return;
+
+    const selectedGroup =
+        document.getElementById(
+            "filterGroup"
+        )?.value || "";
+
+    const counts = {};
+
+    Object.keys(groupLabels)
+        .filter(group => group !== "calzado")
+        .forEach(group => {
+            counts[group] = 0;
+        });
+
+    active.forEach(g => {
+
+        if (
+            g.grupo &&
+            g.grupo !== "calzado"
+        ) {
+            counts[g.grupo] =
+                (counts[g.grupo] || 0) + 1;
         }
+
     });
 
-    box.innerHTML=`
+    box.innerHTML = `
+
         <div
-            class="summary-box ${activeSummaryFilter===""?"active-summary":""}"
+            class="summary-box ${
+                selectedGroup === ""
+                    ? "active-summary"
+                    : ""
+            }"
             onclick="applySummaryFilter('')"
         >
-            <div class="summary-number">${active.length}</div>
-            <div class="muted">Total prendas</div>
-        </div>
-    `+
-    Object.entries(counts).map(([k,v])=>`
-        <div
-            class="summary-box ${activeSummaryFilter===k?"active-summary":""}"
-            onclick="applySummaryFilter('${k}')"
-        >
-            <div class="summary-number">${v}</div>
-            <div class="muted">${esc(fmtGroup(k))}</div>
-        </div>
-    `).join("");
-}
-const AMORTIZED_USES = 10;
+            <div class="summary-number">
+                ${active.length}
+            </div>
 
-function clearWardrobeSpecialFilters(){
+            <div class="muted">
+                👗 Total prendas
+            </div>
+        </div>
+
+    ` +
+
+    Object.entries(counts)
+        .map(([group,count]) => `
+
+            <div
+                class="summary-box ${
+                    selectedGroup === group
+                        ? "active-summary"
+                        : ""
+                }"
+                onclick="applySummaryFilter('${group}')"
+            >
+
+                <div class="summary-number">
+                    ${count}
+                </div>
+
+                <div class="muted">
+                    ${esc(fmtGroup(group))}
+                </div>
+
+            </div>
+
+        `)
+        .join("");
+
+}
+  function clearWardrobeSpecialFilters(){
     activeSummaryFilter="";
     document.getElementById("searchInput").value="";
     document.getElementById("filterGroup").value="";
@@ -3270,6 +3410,7 @@ function renderWardrobe(){
     }else{
         box.className="grid";
        box.innerHTML=orderedData.map(garmentCard).join("");
+      let activeShoeSummaryFilter = "";
     }
 }
 function filteredShoes() {
@@ -3342,8 +3483,15 @@ function filteredShoes() {
             (!size || g.talla === size)
         );
     });
+    if (activeShoeSummaryFilter) {
 
+        data = data.filter(
+            g =>
+                g.categoria ===
+                activeShoeSummaryFilter
+        );
 
+    }
     if (sort === "usos_desc") {
 
         data.sort(
@@ -3381,24 +3529,26 @@ function filteredShoes() {
 
     return data;
 }
-
-
 function renderShoeStats(data) {
 
     const summary =
-        document.getElementById("shoeSummary");
+        document.getElementById(
+            "shoeSummary"
+        );
 
     const stats =
-        document.getElementById("shoeStats");
+        document.getElementById(
+            "shoeStats"
+        );
 
     if (!summary || !stats) return;
 
 
     const favorites =
-        data.filter(g => !!g.favorito).length;
+        data.filter(
+            g => !!g.favorito
+        ).length;
 
-    const unused =
-        data.filter(g => (g.usos || 0) === 0).length;
 
     const totalCost =
         data.reduce(
@@ -3409,53 +3559,127 @@ function renderShoeStats(data) {
             0
         );
 
+
     const averageCost =
         data.length
             ? totalCost / data.length
             : 0;
 
 
+    /*
+     * INDICADORES PRINCIPALES
+     */
+
     summary.innerHTML = `
-        <div class="summary-box">
+
+        <div
+            class="summary-box ${
+                activeShoeSummaryFilter === ""
+                    ? "active-summary"
+                    : ""
+            }"
+            onclick="
+                activeShoeSummaryFilter = '';
+                document.getElementById('shoeCategoryFilter').value = '';
+                renderShoes();
+            "
+        >
             <div class="summary-number">
                 ${data.length}
             </div>
+
             <div class="muted">
                 👟 Total calzado
             </div>
         </div>
 
-        <div class="summary-box">
+
+        <div
+            class="summary-box"
+            onclick="
+                activeShoeSummaryFilter = '';
+document.getElementById('shoeCategoryFilter').value = '';
+document.getElementById('shoeFavoriteFilter').value = 'true';
+                renderShoes();
+            "
+        >
             <div class="summary-number">
                 ${favorites}
             </div>
+
             <div class="muted">
                 ❤️ Favoritos
             </div>
         </div>
 
-        <div class="summary-box">
-            <div class="summary-number">
-                ${unused}
-            </div>
-            <div class="muted">
-                🆕 Sin estrenar
-            </div>
-        </div>
+
+        ${
+            (categoryOptions.calzado || [])
+                .map(([category,label]) => {
+
+                    const count =
+                        data.filter(
+                            g =>
+                                g.categoria ===
+                                category
+                        ).length;
+
+                    return `
+
+                        <div
+                            class="summary-box ${
+                                activeShoeSummaryFilter === category
+                                    ? "active-summary"
+                                    : ""
+                            }"
+                            onclick="
+                                activeShoeSummaryFilter = '${category}';
+                                document.getElementById('shoeCategoryFilter').value = '${category}';
+                                document.getElementById('shoeFavoriteFilter').value = '';
+                                renderShoes();
+                            "
+                        >
+
+                            <div class="summary-number">
+                                ${count}
+                            </div>
+
+                            <div class="muted">
+                                ${esc(label)}
+                            </div>
+
+                        </div>
+
+                    `;
+
+                })
+                .join("")
+        }
+
     `;
 
 
+    /*
+     * ESTADÍSTICAS ECONÓMICAS
+     */
+
     stats.innerHTML = `
+
         <div class="summary-box">
+
             <div class="summary-number">
                 ${totalCost.toFixed(2)} €
             </div>
+
             <div class="muted">
                 💰 Coste total
             </div>
+
         </div>
 
+
         <div class="summary-box">
+
             <div class="summary-number">
                 ${
                     data.length
@@ -3463,16 +3687,18 @@ function renderShoeStats(data) {
                         : "—"
                 }
             </div>
+
             <div class="muted">
                 💶 Coste medio por par
             </div>
+
         </div>
+
     `;
+
 }
-
-
 function clearShoesFilters() {
-
+    activeShoeSummaryFilter = "";
     const ids = [
         "shoeSearch",
         "shoeCategoryFilter",
