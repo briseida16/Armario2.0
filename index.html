@@ -1836,35 +1836,6 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
 
         </div>
     </div>
-
-    <div class="card" id="shoeFormCard" style="display:none;">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;">
-
-            <div>
-                <h2 class="section-title" style="margin-bottom:4px;">
-                    👟 Añadir calzado
-                </h2>
-
-                <p class="muted" style="margin:0;">
-                    Guarda todos los detalles de tu calzado.
-                </p>
-            </div>
-
-            <button
-                type="button"
-                class="small-btn"
-                onclick="closeShoeForm()"
-            >
-                ✕ Cerrar
-            </button>
-
-        </div>
-
-        <div class="empty">
-            👟 El formulario de calzado se incorporará aquí.
-        </div>
-    </div>
-
     <div class="card" style="margin-top:16px;">
         <div>
             <h3 class="section-title" style="margin-bottom:4px;">
@@ -2807,32 +2778,27 @@ async function login() {
         console.error(e);
     }
 }
-  function openShoeForm() {
-
+    function switchView(id,btn){document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));document.getElementById(id)?.classList.add("active");if(btn)btn.classList.add("active");else[...document.querySelectorAll(".tab-btn")].find(b=>b.getAttribute("onclick")?.includes("'"+id+"'"))?.classList.add("active");if(id==="tiempo"&&document.getElementById("weatherCurrent")?.innerHTML==="")loadWeather();if(id==="calendar")requestAnimationFrame(()=>renderCalendarPage());updateLooksFloatingMenuVisibility();updateSubnavVisibility();scrollTo({top:0,behavior:"smooth"})}
+function openShoeForm() {
     garmentFormReturnView = "zapatero";
-
     editingGarmentId = null;
     relatedSelectedIds = [];
 
-    switchView("anadir");
+    resetForm();
 
-    const group =
-        document.getElementById("grupo");
+    const group = document.getElementById("grupo");
 
     if (group) {
         group.value = "calzado";
         populateCategoryOptions("calzado");
     }
 
-    const title =
-        document.getElementById("formTitle");
+    document.getElementById("formTitle").textContent =
+        "Añadir calzado";
 
-    if (title) {
-        title.textContent = "Añadir calzado";
-    }
+    switchView("anadir");
 }
-    function switchView(id,btn){document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));document.getElementById(id)?.classList.add("active");if(btn)btn.classList.add("active");else[...document.querySelectorAll(".tab-btn")].find(b=>b.getAttribute("onclick")?.includes("'"+id+"'"))?.classList.add("active");if(id==="tiempo"&&document.getElementById("weatherCurrent")?.innerHTML==="")loadWeather();if(id==="calendar")requestAnimationFrame(()=>renderCalendarPage());updateLooksFloatingMenuVisibility();updateSubnavVisibility();scrollTo({top:0,behavior:"smooth"})}
-function populateStaticSelects(){document.getElementById("grupo").innerHTML=Object.entries(groupLabels).map(([v,l])=>`<option value="${v}">${l}</option>`).join("");const temporadaSelect = document.getElementById("temporada");
+  function populateStaticSelects(){document.getElementById("grupo").innerHTML=Object.entries(groupLabels).map(([v,l])=>`<option value="${v}">${l}</option>`).join("");const temporadaSelect = document.getElementById("temporada");
 if (temporadaSelect) {
     temporadaSelect.innerHTML = seasons
         .map(([v,l]) => `<option value="${v}">${l}</option>`)
