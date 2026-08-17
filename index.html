@@ -3451,98 +3451,119 @@ function filteredShoes() {
             ?.value || "az";
 
 
-    let data = garments.filter(g => {
+    /*
+     * El filtro seleccionado manualmente en el selector
+     * pasa a ser también el indicador activo.
+     */
+    activeShoeSummaryFilter = category;
 
-        if (g.grupo !== "calzado") return false;
-        if (g.eliminado_en) return false;
 
-        const hay =
-            `${g.nombre || ""}
-             ${g.color || ""}
-             ${g.marca || ""}
-             ${g.categoria || ""}
-             ${(g.ocasiones || []).join(" ")}`
-                .toLowerCase();
+    let data =
+        garments.filter(g => {
 
-        return (
-            (!q || hay.includes(q)) &&
-            (!category || g.categoria === category) &&
-            (!occasion || (g.ocasiones || []).includes(occasion)) &&
-            (
-                favorite === "" ||
-                String(!!g.favorito) === favorite
-            ) &&
-            (!brand || g.marca === brand) &&
-            (
-                !season ||
+            if (g.grupo !== "calzado") {
+                return false;
+            }
+
+            if (g.eliminado_en) {
+                return false;
+            }
+
+            const hay =
+                `${g.nombre || ""}
+                 ${g.color || ""}
+                 ${g.marca || ""}
+                 ${g.categoria || ""}
+                 ${(g.ocasiones || []).join(" ")}`
+                    .toLowerCase();
+
+            return (
+                (!q || hay.includes(q)) &&
+
+                (!category ||
+                    g.categoria === category) &&
+
+                (!occasion ||
+                    (g.ocasiones || []).includes(occasion)) &&
+
                 (
-                    Array.isArray(g.temporada)
-                        ? g.temporada.includes(season)
-                        : (g.temporada || "todo_anio") === season
-                )
-            ) &&
-            (!size || g.talla === size)
-        );
-    });
-    if (activeShoeSummaryFilter) {
+                    favorite === "" ||
+                    String(!!g.favorito) === favorite
+                ) &&
 
-        data = data.filter(
-            g =>
-                g.categoria ===
-                activeShoeSummaryFilter
-        );
+                (!brand ||
+                    g.marca === brand) &&
 
-    }
+                (
+                    !season ||
+                    (
+                        Array.isArray(g.temporada)
+                            ? g.temporada.includes(season)
+                            : (g.temporada || "todo_anio") === season
+                    )
+                ) &&
+
+                (!size ||
+                    g.talla === size)
+            );
+        });
+
+
     if (sort === "usos_desc") {
 
         data.sort(
             (a,b) =>
-                (b.usos || 0) - (a.usos || 0)
+                (b.usos || 0) -
+                (a.usos || 0)
         );
 
     } else if (sort === "usos_asc") {
 
         data.sort(
             (a,b) =>
-                (a.usos || 0) - (b.usos || 0)
+                (a.usos || 0) -
+                (b.usos || 0)
         );
 
     } else if (sort === "reciente") {
 
         data.sort(
             (a,b) =>
-                String(b.id || "").localeCompare(
-                    String(a.id || "")
-                )
+                String(b.id || "")
+                    .localeCompare(
+                        String(a.id || "")
+                    )
         );
 
     } else {
 
         data.sort(
             (a,b) =>
-                String(a.nombre || "").localeCompare(
-                    String(b.nombre || ""),
-                    "es",
-                    { sensitivity:"base" }
-                )
+                String(a.nombre || "")
+                    .localeCompare(
+                        String(b.nombre || ""),
+                        "es",
+                        {
+                            sensitivity:"base"
+                        }
+                    )
         );
     }
+
 
     return data;
 }
 function renderShoeStats(data) {
 
     const summary =
-        document.getElementById(
-            "shoeSummary"
-        );
+        document.getElementById("shoeSummary");
 
     const stats =
-        document.getElementById(
-            "shoeStats"
-        );
+        document.getElementById("shoeStats");
 
-    if (!summary || !stats) return;
+    if (!summary || !stats) {
+        return;
+    }
 
 
     const favorites =
@@ -3568,7 +3589,7 @@ function renderShoeStats(data) {
 
 
     /*
-     * INDICADORES PRINCIPALES
+     * INDICADORES
      */
 
     summary.innerHTML = `
@@ -3581,10 +3602,13 @@ function renderShoeStats(data) {
             }"
             onclick="
                 activeShoeSummaryFilter = '';
-                document.getElementById('shoeCategoryFilter').value = '';
+                document.getElementById(
+                    'shoeCategoryFilter'
+                ).value = '';
                 renderShoes();
             "
         >
+
             <div class="summary-number">
                 ${data.length}
             </div>
@@ -3592,18 +3616,30 @@ function renderShoeStats(data) {
             <div class="muted">
                 👟 Total calzado
             </div>
+
         </div>
 
 
         <div
-            class="summary-box"
+            class="summary-box ${
+                document.getElementById(
+                    "shoeFavoriteFilter"
+                )?.value === "true"
+                    ? "active-summary"
+                    : ""
+            }"
             onclick="
                 activeShoeSummaryFilter = '';
-document.getElementById('shoeCategoryFilter').value = '';
-document.getElementById('shoeFavoriteFilter').value = 'true';
+                document.getElementById(
+                    'shoeCategoryFilter'
+                ).value = '';
+                document.getElementById(
+                    'shoeFavoriteFilter'
+                ).value = 'true';
                 renderShoes();
             "
         >
+
             <div class="summary-number">
                 ${favorites}
             </div>
@@ -3611,6 +3647,7 @@ document.getElementById('shoeFavoriteFilter').value = 'true';
             <div class="muted">
                 ❤️ Favoritos
             </div>
+
         </div>
 
 
@@ -3621,9 +3658,9 @@ document.getElementById('shoeFavoriteFilter').value = 'true';
                     const count =
                         data.filter(
                             g =>
-                                g.categoria ===
-                                category
+                                g.categoria === category
                         ).length;
+
 
                     return `
 
@@ -3635,8 +3672,11 @@ document.getElementById('shoeFavoriteFilter').value = 'true';
                             }"
                             onclick="
                                 activeShoeSummaryFilter = '${category}';
-                                document.getElementById('shoeCategoryFilter').value = '${category}';
-                                document.getElementById('shoeFavoriteFilter').value = '';
+
+                                document.getElementById(
+                                    'shoeCategoryFilter'
+                                ).value = '${category}';
+
                                 renderShoes();
                             "
                         >
@@ -3699,7 +3739,10 @@ document.getElementById('shoeFavoriteFilter').value = 'true';
 
 }
 function clearShoesFilters() {
+
     activeShoeSummaryFilter = "";
+
+
     const ids = [
         "shoeSearch",
         "shoeCategoryFilter",
@@ -3711,12 +3754,15 @@ function clearShoesFilters() {
         "shoeSort"
     ];
 
+
     ids.forEach(id => {
 
         const el =
             document.getElementById(id);
 
-        if (!el) return;
+        if (!el) {
+            return;
+        }
 
         el.value =
             id === "shoeSort"
@@ -3725,10 +3771,9 @@ function clearShoesFilters() {
 
     });
 
+
     renderShoes();
 }
-
-
 function fillShoeFilterOptions() {
 
     const shoes =
@@ -5101,8 +5146,9 @@ function renderFavorites() {
 }
 function updateSummary(){
     const active=garments.filter(g=>!g.eliminado_en);
-    document.getElementById("sumGarments").textContent=active.length;
-    // Actualiza el nuevo indicador de joyas reutilizando jewelry.length
+document.getElementById("sumGarments").textContent =
+    active.filter(g => g.grupo !== "calzado").length;    
+  // Actualiza el nuevo indicador de joyas reutilizando jewelry.length
     document.getElementById("sumJewelryTotal").textContent = jewelry.length;
     document.getElementById("sumShoes").textContent=active.filter(g => g.grupo === "calzado").length;
   document.getElementById("sumFavorites").textContent=active.filter(g=>g.favorito).length;
