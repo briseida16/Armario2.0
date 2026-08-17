@@ -3163,9 +3163,10 @@ function renderWardrobe(){
     if(!filtersActive() && !activeSummaryFilter){
         box.className="category-layout";
 
-        box.innerHTML=Object.entries(groupLabels).map(([gr,label])=>{
-            const items=orderedData.filter(g=>g.grupo===gr);
-
+       box.innerHTML=Object.entries(groupLabels)
+    .filter(([gr]) => gr !== "calzado")
+    .map(([gr,label])=>{
+    const items=orderedData.filter(g=>g.grupo===gr);
             return `
             <details class="category-panel" open>
                 <summary>${esc(label)} (${items.length})</summary>
@@ -3180,7 +3181,62 @@ function renderWardrobe(){
         box.className="grid";
        box.innerHTML=orderedData.map(garmentCard).join("");
     }
-}function applySummaryFilter(group){
+}
+  function renderShoes() {
+    const box = document.getElementById("shoeGrid");
+    const empty = document.getElementById("shoeEmpty");
+
+    if (!box) return;
+
+    const shoes = garments
+        .filter(g =>
+            g.grupo === "calzado" &&
+            !g.eliminado_en
+        )
+        .sort((a,b) =>
+            String(a.nombre || "").localeCompare(
+                String(b.nombre || ""),
+                "es",
+                { sensitivity: "base" }
+            )
+        );
+
+    if (!shoes.length) {
+        box.innerHTML = "";
+        if (empty) empty.style.display = "block";
+        return;
+    }
+
+    if (empty) empty.style.display = "none";
+
+    box.className = "category-layout";
+
+    box.innerHTML = categoryOptions.calzado
+        .map(([category, label]) => {
+
+            const items = shoes.filter(
+                g => g.categoria === category
+            );
+
+            if (!items.length) return "";
+
+            return `
+                <details class="category-panel" open>
+                    <summary>
+                        ${esc(label)} (${items.length})
+                    </summary>
+
+                    <div class="category-content">
+                        <div class="grid">
+                            ${items.map(garmentCard).join("")}
+                        </div>
+                    </div>
+                </details>
+            `;
+        })
+        .join("");
+}
+  function applySummaryFilter(group){
     activeSummaryFilter = group;
     document.getElementById("filterGroup").value = group;
     renderWardrobeSummary();
@@ -4592,7 +4648,7 @@ document.addEventListener("click",e=>{
 function updateHeaderOnScroll(){document.querySelector("header")?.classList.toggle("compact",window.scrollY>20);}
 window.addEventListener("scroll",updateHeaderOnScroll,{passive:true});
 
-function refreshAll(){updateSummary();ensureDailyQuickLook();fillFilterOptions();renderRelatedSelect();renderWardrobe();renderJewelry();renderTrash();renderCurrentLook();renderRandomLook();renderQuickLook();renderWishlist();renderFavorites();renderVinted();renderSavedLooksCarousel();renderOccasionButtons();renderCombineGroups();renderLooksManualOutfit();renderOwnLook();renderLooksOwnLook()}function toast(msg,type="ok"){const box=document.getElementById("toastBox");if(!box)return alert(msg);const t=document.createElement("div");t.className=`toast toast-${type}`;t.textContent=msg;box.appendChild(t);requestAnimationFrame(()=>t.classList.add("show"));setTimeout(()=>{t.classList.remove("show");setTimeout(()=>t.remove(),300)},3200)}
+function refreshAll(){updateSummary();ensureDailyQuickLook();fillFilterOptions();renderRelatedSelect();renderWardrobe();renderShoes();renderJewelry();renderTrash();renderCurrentLook();renderRandomLook();renderQuickLook();renderWishlist();renderFavorites();renderVinted();renderSavedLooksCarousel();renderOccasionButtons();renderCombineGroups();renderLooksManualOutfit();renderOwnLook();renderLooksOwnLook()}function toast(msg,type="ok"){const box=document.getElementById("toastBox");if(!box)return alert(msg);const t=document.createElement("div");t.className=`toast toast-${type}`;t.textContent=msg;box.appendChild(t);requestAnimationFrame(()=>t.classList.add("show"));setTimeout(()=>{t.classList.remove("show");setTimeout(()=>t.remove(),300)},3200)}
 const IDB_NAME="bricloset_mirror_db",IDB_STORE="backups";function idbOpen(){return new Promise((resolve,reject)=>{const req=indexedDB.open(IDB_NAME,1);req.onupgradeneeded=()=>req.result.createObjectStore(IDB_STORE);req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}async function mirrorToIndexedDB(){try{const db=await idbOpen(),tx=db.transaction(IDB_STORE,"readwrite");tx.objectStore(IDB_STORE).put({version:APP_DATA_VERSION,savedLooks,recentLooks,wishlist,guardado_en:new Date().toISOString()},"latest")}catch(e){console.warn("No se pudo espejar en IndexedDB",e)}}async function recoverFromIndexedDB(){try{const db=await idbOpen(),tx=db.transaction(IDB_STORE,"readonly"),req=tx.objectStore(IDB_STORE).get("latest");return new Promise(res=>{req.onsuccess=()=>res(req.result||null);req.onerror=()=>res(null)})}catch(e){return null}}
 window.toggleMoreMenu = function(event){
     if(event){
