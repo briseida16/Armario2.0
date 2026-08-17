@@ -1626,8 +1626,8 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
         </div>
     </div>
 <!-- FAVORITAS -->
-<div class="card" style="margin-bottom:0;cursor:pointer;" onclick="goToFavorites('jewelry')">
-    <div
+<div class="card" style="margin-bottom:0;">
+  <div
         id="jewelryStatFavorites"
         style="font-size:1.25rem;font-weight:900;"
     >
@@ -5522,7 +5522,7 @@ if (favoriteJewelryCard) {
 
     favoriteJewelryCard.onclick = () => {
 
-        showView("favoritos");
+        switchView("favoritos");
 
         document
             .getElementById("favoriteJewelrySection")
@@ -5532,7 +5532,7 @@ if (favoriteJewelryCard) {
             });
 
     };
-}}
+}
 /* ---------------------------------------------------------
    LIMPIAR FILTROS
 --------------------------------------------------------- */
@@ -5684,15 +5684,21 @@ function jewelryMaterialLabel(value) {
 function renderJewelry() {
     const grid =
         document.getElementById("jewelryGrid");
+
     if (!grid) {
         return;
     }
+
     fillJewelryBrandFilter();
+
     const data =
         filteredJewelry();
+
     renderJewelryStats(data);
+
     if (!data.length) {
         grid.className = "";
+
         if (jewelry.length) {
             grid.innerHTML =
                 '<div class="empty">' +
@@ -5704,15 +5710,67 @@ function renderJewelry() {
                 'Tu joyero está vacío. Añade tu primera joya para empezar.' +
                 '</div>';
         }
+
         return;
     }
-    grid.className = "grid";
-    grid.innerHTML =
-        data.map(jewelryCard).join("");
+
+    /*
+     * Sin filtros → misma visualización que Mi armario:
+     * un apartado desplegable por tipo de joya.
+     */
+    if (
+        !document.getElementById("jewelrySearch")?.value &&
+        !document.getElementById("jewelryTypeFilter")?.value &&
+        !document.getElementById("jewelryMaterialFilter")?.value &&
+        !document.getElementById("jewelryBrandFilter")?.value &&
+        !document.getElementById("jewelryGiftFilter")?.value &&
+        !document.getElementById("jewelryHandmadeFilter")?.value &&
+        !activeJewelrySummaryFilter
+    ) {
+
+        grid.className = "category-layout";
+
+        grid.innerHTML =
+            Object.entries(jewelryTypeLabels)
+                .map(([type, label]) => {
+
+                    const items =
+                        data.filter(
+                            j => j.tipo === type
+                        );
+
+                    return `
+                        <details class="category-panel" open>
+                            <summary>
+                                ${esc(label)} (${items.length})
+                            </summary>
+
+                            <div class="category-content">
+                                ${
+                                    items.length
+                                        ? `<div class="grid">
+                                            ${items.map(jewelryCard).join("")}
+                                          </div>`
+                                        : '<div class="empty">Sin joyas en esta categoría.</div>'
+                                }
+                            </div>
+                        </details>
+                    `;
+
+                })
+                .join("");
+
+    } else {
+
+        /*
+         * Con cualquier filtro activo → vista plana,
+         * igual que Mi armario.
+         */
+        grid.className = "grid";
+        grid.innerHTML =
+            data.map(jewelryCard).join("");
+    }
 }
-/* ---------------------------------------------------------
-   EDITAR
---------------------------------------------------------- */
 /* ---------------------------------------------------------
    EDITAR
 --------------------------------------------------------- */
