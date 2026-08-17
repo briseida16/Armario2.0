@@ -3418,7 +3418,9 @@ function filteredShoes() {
 
     const q =
         document.getElementById("shoeSearch")
-            ?.value.trim().toLowerCase() || "";
+            ?.value
+            .trim()
+            .toLowerCase() || "";
 
     const category =
         document.getElementById("shoeCategoryFilter")
@@ -3451,59 +3453,35 @@ function filteredShoes() {
 
     let data = garments.filter(g => {
 
-        if (!g || g.eliminado_en) {
-            return false;
-        }
+        if (g.grupo !== "calzado") return false;
+        if (g.eliminado_en) return false;
 
-        if (g.grupo !== "calzado") {
-            return false;
-        }
-
-
-        const hay = `
-            ${g.nombre || ""}
-            ${g.color || ""}
-            ${g.marca || ""}
-            ${g.categoria || ""}
-            ${(g.ocasiones || []).join(" ")}
-        `.toLowerCase();
-
+        const hay =
+            `${g.nombre || ""}
+             ${g.color || ""}
+             ${g.marca || ""}
+             ${g.categoria || ""}
+             ${(g.ocasiones || []).join(" ")}`
+                .toLowerCase();
 
         return (
-
             (!q || hay.includes(q)) &&
-
-            (!category ||
-                String(g.categoria || "") ===
-                String(category)) &&
-
-            (!occasion ||
-                (g.ocasiones || []).includes(occasion)) &&
-
+            (!category || g.categoria === category) &&
+            (!occasion || (g.ocasiones || []).includes(occasion)) &&
             (
                 favorite === "" ||
                 String(!!g.favorito) === favorite
             ) &&
-
-            (!brand ||
-                String(g.marca || "") ===
-                String(brand)) &&
-
+            (!brand || g.marca === brand) &&
             (
                 !season ||
                 (
                     Array.isArray(g.temporada)
                         ? g.temporada.includes(season)
-                        : String(
-                            g.temporada ||
-                            "todo_anio"
-                        ) === String(season)
+                        : (g.temporada || "todo_anio") === season
                 )
             ) &&
-
-            (!size ||
-                String(g.talla || "") ===
-                String(size))
+            (!size || g.talla === size)
         );
     });
 
@@ -3512,43 +3490,36 @@ function filteredShoes() {
 
         data.sort(
             (a,b) =>
-                (b.usos || 0) -
-                (a.usos || 0)
+                (b.usos || 0) - (a.usos || 0)
         );
 
     } else if (sort === "usos_asc") {
 
         data.sort(
             (a,b) =>
-                (a.usos || 0) -
-                (b.usos || 0)
+                (a.usos || 0) - (b.usos || 0)
         );
 
     } else if (sort === "reciente") {
 
         data.sort(
             (a,b) =>
-                String(b.id || "")
-                    .localeCompare(
-                        String(a.id || "")
-                    )
+                String(b.id || "").localeCompare(
+                    String(a.id || "")
+                )
         );
 
     } else {
 
         data.sort(
             (a,b) =>
-                String(a.nombre || "")
-                    .localeCompare(
-                        String(b.nombre || ""),
-                        "es",
-                        {
-                            sensitivity: "base"
-                        }
-                    )
+                String(a.nombre || "").localeCompare(
+                    String(b.nombre || ""),
+                    "es",
+                    { sensitivity:"base" }
+                )
         );
     }
-
 
     return data;
 }
@@ -3560,9 +3531,7 @@ function renderShoeStats(data) {
     const stats =
         document.getElementById("shoeStats");
 
-    if (!summary || !stats) {
-        return;
-    }
+    if (!summary || !stats) return;
 
 
     const favorites =
@@ -3573,7 +3542,7 @@ function renderShoeStats(data) {
 
     const totalCost =
         data.reduce(
-            (sum, g) =>
+            (sum,g) =>
                 sum +
                 (Number(g.precio) || 0) *
                 (Number(g.cantidad) || 1),
@@ -3590,27 +3559,9 @@ function renderShoeStats(data) {
     summary.innerHTML = `
 
         <div
-            class="summary-box ${
-                !document.getElementById(
-                    "shoeCategoryFilter"
-                )?.value &&
-                !document.getElementById(
-                    "shoeFavoriteFilter"
-                )?.value
-                    ? "active-summary"
-                    : ""
-            }"
+            class="summary-box"
             onclick="
-                document.getElementById(
-                    'shoeCategoryFilter'
-                ).value = '';
-
-                document.getElementById(
-                    'shoeFavoriteFilter'
-                ).value = '';
-
-                activeShoeSummaryFilter = '';
-
+                document.getElementById('shoeCategoryFilter').value = '';
                 renderShoes();
             "
         >
@@ -3625,23 +3576,9 @@ function renderShoeStats(data) {
 
 
         <div
-            class="summary-box ${
-                document.getElementById(
-                    "shoeFavoriteFilter"
-                )?.value === "true"
-                    ? "active-summary"
-                    : ""
-            }"
+            class="summary-box"
             onclick="
-                document.getElementById(
-                    'shoeFavoriteFilter'
-                ).value =
-                    document.getElementById(
-                        'shoeFavoriteFilter'
-                    ).value === 'true'
-                        ? ''
-                        : 'true';
-
+                document.getElementById('shoeFavoriteFilter').value = 'true';
                 renderShoes();
             "
         >
@@ -3662,33 +3599,15 @@ function renderShoeStats(data) {
                     const count =
                         data.filter(
                             g =>
-                                String(
-                                    g.categoria || ""
-                                ) ===
-                                String(category)
+                                g.categoria === category
                         ).length;
-
 
                     return `
 
                         <div
-                            class="summary-box ${
-                                document.getElementById(
-                                    "shoeCategoryFilter"
-                                )?.value === category
-                                    ? "active-summary"
-                                    : ""
-                            }"
+                            class="summary-box"
                             onclick="
-                                document.getElementById(
-                                    'shoeCategoryFilter'
-                                ).value =
-                                    document.getElementById(
-                                        'shoeCategoryFilter'
-                                    ).value === '${category}'
-                                        ? ''
-                                        : '${category}';
-
+                                document.getElementById('shoeCategoryFilter').value = '${category}';
                                 renderShoes();
                             "
                         >
@@ -3704,6 +3623,7 @@ function renderShoeStats(data) {
                         </div>
 
                     `;
+
                 })
                 .join("")
         }
@@ -3743,11 +3663,9 @@ function renderShoeStats(data) {
         </div>
 
     `;
+
 }
 function clearShoesFilters() {
-
-    activeShoeSummaryFilter = "";
-
 
     const ids = [
         "shoeSearch",
@@ -3760,15 +3678,12 @@ function clearShoesFilters() {
         "shoeSort"
     ];
 
-
     ids.forEach(id => {
 
         const el =
             document.getElementById(id);
 
-        if (!el) {
-            return;
-        }
+        if (!el) return;
 
         el.value =
             id === "shoeSort"
@@ -3776,7 +3691,6 @@ function clearShoesFilters() {
                 : "";
 
     });
-
 
     renderShoes();
 }
