@@ -3004,7 +3004,7 @@ function filteredGarments(){
 
     let data=garments.filter(g=>{
         if(g.eliminado_en)return false;
-
+      if(g.grupo==="calzado")return false;
         if(activeSummaryFilter==="new_tag" && g.estado!=="nuevo_etiqueta")return false;
 if(activeSummaryFilter==="unused" && (g.usos||0)!==0)return false;
 if(activeSummaryFilter==="amortized" && (g.usos||0)<AMORTIZED_USES)return false;
@@ -3571,7 +3571,9 @@ function renderCombineGroups(){
     if(!select)return;
     const current=select.value;
     select.innerHTML=`<option value="">Elige un grupo...</option>`+
-        Object.entries(groupLabels).map(([v,l])=>`<option value="${v}">${l}</option>`).join("");
+        Object.entries(groupLabels)
+    .filter(([v]) => v !== "calzado")
+    .map(([v,l]) =>`<option value="${v}">${l}</option>`).join("");
     if(current && groupLabels[current])select.value=current;
     updateCombineCategorySelect();
 }
