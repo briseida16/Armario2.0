@@ -1812,7 +1812,92 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
             </span>
         </div>
     </div>
-</section>  
+</section>
+  <section id="zapatero" class="view">
+
+    <div class="card hero">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;">
+
+            <div>
+                <h2 class="section-title" style="margin-bottom:4px;">
+                    👟 Mi zapatero
+                </h2>
+
+                <p class="muted" style="margin:0;">
+                    Todo tu calzado, junto y fácil de encontrar.
+                </p>
+            </div>
+
+            <button
+                class="primary-btn"
+                type="button"
+                onclick="openShoeForm()"
+            >
+                ＋ Añadir calzado
+            </button>
+
+        </div>
+    </div>
+
+    <div class="card" id="shoeFormCard" style="display:none;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;">
+
+            <div>
+                <h2 class="section-title" style="margin-bottom:4px;">
+                    👟 Añadir calzado
+                </h2>
+
+                <p class="muted" style="margin:0;">
+                    Guarda todos los detalles de tu calzado.
+                </p>
+            </div>
+
+            <button
+                type="button"
+                class="small-btn"
+                onclick="closeShoeForm()"
+            >
+                ✕ Cerrar
+            </button>
+
+        </div>
+
+        <div class="empty">
+            👟 El formulario de calzado se incorporará aquí.
+        </div>
+    </div>
+
+    <div class="card" style="margin-top:16px;">
+        <div>
+            <h3 class="section-title" style="margin-bottom:4px;">
+                👟 Mi calzado
+            </h3>
+
+            <p class="muted" style="margin:0;">
+                Aquí aparecerá todo tu calzado organizado por categorías.
+            </p>
+        </div>
+
+        <div
+            id="shoeGrid"
+            class="grid"
+            style="margin-top:16px;"
+        >
+        </div>
+
+        <div
+            id="shoeEmpty"
+            class="empty"
+        >
+            👟 Todavía no has añadido calzado.
+            <br>
+            <span style="font-size:.9rem;">
+                Añade tu primer par para empezar.
+            </span>
+        </div>
+    </div>
+
+</section>
   <section id="crearLook" class="view hidden" style="display:none !important;">
 <div class="card" id="createOwnLookCard">
     <h2 class="section-title">🎨 Crea tu propio look</h2>
@@ -2044,6 +2129,88 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
         <h2 class="section-title">Looks favoritos</h2>
         <div id="favoriteLooksGrid" class="grid"></div>
     </div>
+</section>
+  <section id="viajes" class="view">
+
+    <div class="card hero">
+
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;">
+
+            <div>
+                <h2 class="section-title" style="margin-bottom:4px;">
+                    ✈️ Viajes
+                </h2>
+
+                <p class="muted" style="margin:0;">
+                    Prepara tus viajes y organiza tu maleta con BriCloset.
+                </p>
+            </div>
+
+            <button
+                class="primary-btn"
+                type="button"
+                disabled
+            >
+                ＋ Nuevo viaje
+            </button>
+
+        </div>
+
+    </div>
+
+    <div class="card">
+
+        <h3 class="section-title">
+            ✈️ Tu próximo viaje
+        </h3>
+
+        <p class="muted">
+            Aquí podrás crear un viaje, indicar el destino y los días
+            y preparar todo lo que necesitas llevar.
+        </p>
+
+        <div class="grid" style="margin-top:16px;">
+
+            <div class="card" style="margin-bottom:0;">
+                <div style="font-size:1.5rem;">📍</div>
+                <strong>Destino</strong>
+                <div class="muted">Próximamente</div>
+            </div>
+
+            <div class="card" style="margin-bottom:0;">
+                <div style="font-size:1.5rem;">📅</div>
+                <strong>Fechas y días</strong>
+                <div class="muted">Próximamente</div>
+            </div>
+
+            <div class="card" style="margin-bottom:0;">
+                <div style="font-size:1.5rem;">👗</div>
+                <strong>Ropa</strong>
+                <div class="muted">Próximamente</div>
+            </div>
+
+            <div class="card" style="margin-bottom:0;">
+                <div style="font-size:1.5rem;">✨</div>
+                <strong>Looks guardados</strong>
+                <div class="muted">Próximamente</div>
+            </div>
+
+            <div class="card" style="margin-bottom:0;">
+                <div style="font-size:1.5rem;">👟</div>
+                <strong>Calzado</strong>
+                <div class="muted">Próximamente</div>
+            </div>
+
+            <div class="card" style="margin-bottom:0;">
+                <div style="font-size:1.5rem;">🧳</div>
+                <strong>Lista de maleta</strong>
+                <div class="muted">Próximamente</div>
+            </div>
+
+        </div>
+
+    </div>
+
 </section>
   <section id="vinted" class="view">
     <div class="card hero">
