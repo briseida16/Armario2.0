@@ -2824,42 +2824,36 @@ function resetForm() {
         if (el) el.selectedIndex = 0;
     });
 
-    document
-        .querySelectorAll("#temporadaChecks input")
-        .forEach(c => c.checked = false);
+    document.getElementById("grupo").disabled = false;
 
-    const allYear =
-        document.querySelector(
-            '#temporadaChecks input[value="todo_anio"]'
-        );
+    document.getElementById("categoria").innerHTML = "";
+    document.getElementById("occasionChecks").innerHTML = "";
 
-    if (allYear) {
-        allYear.checked = true;
-    }
+    document.querySelectorAll("#temporadaChecks input")
+        .forEach(cb => cb.checked = false);
 
-    document.getElementById("estado").value = "bueno";
+    document.getElementById("temporadaSummary").textContent =
+        "Seleccionar temporadas";
+
     document.getElementById("basico").checked = false;
     document.getElementById("reversible").checked = false;
-    document.getElementById("enVinted").checked = false;
     document.getElementById("disponible").checked = true;
+    document.getElementById("enVinted").checked = false;
+
     document.getElementById("foto").value = "";
-
-    populateCategoryOptions(
-        document.getElementById("grupo").value || "abrigos"
-    );
-
-    setChecks(
-        "occasionChecks",
-        ["diario"]
-    );
 
     document.getElementById("formTitle").textContent =
         garmentFormReturnView === "zapatero"
             ? "Añadir calzado"
             : "Añadir prenda";
 
-    renderRelatedSelect();
-}function readGarmentForm(old={}){return{id:editingGarmentId||uid(),nombre:document.getElementById("nombre").value.trim(),grupo:document.getElementById("grupo").value,categoria:document.getElementById("categoria").value,color:document.getElementById("color").value.trim(),marca:document.getElementById("marca").value.trim(),temporada: getChecks("temporadaChecks"),estado:document.getElementById("estado").value,ocasiones:getChecks("occasionChecks"),talla:document.getElementById("talla").value.trim(),precio:document.getElementById("precio").value,cantidad:Math.max(1,Number(document.getElementById("cantidad").value||1)),basico:document.getElementById("basico").checked,reversible:document.getElementById("reversible").checked,favorito:document.getElementById("favorito").value==="true",disponible:document.getElementById("disponible").checked,en_vinted:document.getElementById("enVinted").checked,comentarios:document.getElementById("comentarios").value.trim(),relacionadas:selectedRelated(),foto:old.foto||placeholderImg,usos:old.usos||0,ultimo_uso:old.ultimo_uso||null,eliminado_en:null,schema_version:APP_DATA_VERSION}}
+    renderRelatedPicker();
+
+    populateCategoryOptions("");
+
+    refreshOccasionChecks();
+}
+function readGarmentForm(old={}){return{id:editingGarmentId||uid(),nombre:document.getElementById("nombre").value.trim(),grupo:document.getElementById("grupo").value,categoria:document.getElementById("categoria").value,color:document.getElementById("color").value.trim(),marca:document.getElementById("marca").value.trim(),temporada: getChecks("temporadaChecks"),estado:document.getElementById("estado").value,ocasiones:getChecks("occasionChecks"),talla:document.getElementById("talla").value.trim(),precio:document.getElementById("precio").value,cantidad:Math.max(1,Number(document.getElementById("cantidad").value||1)),basico:document.getElementById("basico").checked,reversible:document.getElementById("reversible").checked,favorito:document.getElementById("favorito").value==="true",disponible:document.getElementById("disponible").checked,en_vinted:document.getElementById("enVinted").checked,comentarios:document.getElementById("comentarios").value.trim(),relacionadas:selectedRelated(),foto:old.foto||placeholderImg,usos:old.usos||0,ultimo_uso:old.ultimo_uso||null,eliminado_en:null,schema_version:APP_DATA_VERSION}}
 function saveGarment(){const file=document.getElementById("foto").files[0],old=findGarment(editingGarmentId)||{},data=readGarmentForm(old);if(!data.nombre)return toast("Pon al menos un nombre a la prenda.","warn");if(!data.ocasiones.length)return toast("Marca al menos una ocasión.","warn");const finish=finalData=>{if(editingGarmentId){const i=garments.findIndex(g=>g.id===editingGarmentId);if(i!==-1)garments[i]=finalData}else garments.unshift(finalData);persist();resetForm();refreshAll();switchView(garmentFormReturnView);
 toast(
     garmentFormReturnView === "zapatero"
