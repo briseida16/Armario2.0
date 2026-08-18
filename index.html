@@ -3631,51 +3631,160 @@ const sort =
     return data;
 }
 function renderShoeStats(data) {
-    const summary = document.getElementById("shoeSummary");
-    const stats = document.getElementById("shoeStats");
+
+    const summary =
+        document.getElementById("shoeSummary");
+
+    const stats =
+        document.getElementById("shoeStats");
 
     if (!summary || !stats) return;
 
-    const total = data.length;
-    const favorites = data.filter(s => s.favorite).length;
+    const favorites =
+        data.filter(
+            g => !!g.favorito
+        ).length;
 
-    const categories = {};
-    data.forEach(s => {
-        const category = s.category || "Sin categoría";
-        categories[category] = (categories[category] || 0) + 1;
-    });
+    const totalCost =
+        data.reduce(
+            (sum,g) =>
+                sum +
+                (Number(g.precio) || 0) *
+                (Number(g.cantidad) || 1),
+            0
+        );
+
+    const averageCost =
+        data.length
+            ? totalCost / data.length
+            : 0;
+
+    const selectedCategory =
+        document.getElementById("shoeCategoryFilter")?.value || "";
+
+    const selectedFavorite =
+        document.getElementById("shoeFavoriteFilter")?.value || "";
 
     summary.innerHTML = `
-        <div class="summary-box">
-            <strong>${total}</strong>
-            <span>Total</span>
+
+        <div
+            class="summary-box ${
+                selectedCategory === "" &&
+                selectedFavorite !== "true"
+                    ? "active-summary"
+                    : ""
+            }"
+            onclick="
+                document.getElementById('shoeCategoryFilter').value = '';
+                document.getElementById('shoeFavoriteFilter').value = '';
+                renderShoes();
+            "
+        >
+            <div class="summary-number">
+                ${data.length}
+            </div>
+
+            <div class="muted">
+                👟 Total calzado
+            </div>
         </div>
 
-        <div class="summary-box">
-            <strong>${favorites}</strong>
-            <span>❤️ Favoritos</span>
+        <div
+            class="summary-box ${
+                selectedFavorite === "true"
+                    ? "active-summary"
+                    : ""
+            }"
+            onclick="
+                document.getElementById('shoeFavoriteFilter').value = 'true';
+                document.getElementById('shoeCategoryFilter').value = '';
+                renderShoes();
+            "
+        >
+            <div class="summary-number">
+                ${favorites}
+            </div>
+
+            <div class="muted">
+                ❤️ Favoritos
+            </div>
         </div>
+
+        ${
+            (categoryOptions.calzado || [])
+                .map(([category,label]) => {
+
+                    const count =
+                        data.filter(
+                            g =>
+                                g.categoria === category
+                        ).length;
+
+                    return `
+
+                        <div
+                            class="summary-box ${
+                                selectedCategory === category
+                                    ? "active-summary"
+                                    : ""
+                            }"
+                            onclick="
+                                document.getElementById('shoeCategoryFilter').value = '${category}';
+                                document.getElementById('shoeFavoriteFilter').value = '';
+                                renderShoes();
+                            "
+                        >
+
+                            <div class="summary-number">
+                                ${count}
+                            </div>
+
+                            <div class="muted">
+                                ${esc(label)}
+                            </div>
+
+                        </div>
+
+                    `;
+
+                })
+                .join("")
+        }
+
     `;
 
-    stats.innerHTML = Object.entries(categories)
-        .map(([category, count]) => `
-            <div class="summary-box">
-                <strong>${count}</strong>
-                <span>${category}</span>
+    stats.innerHTML = `
+
+        <div class="summary-box">
+
+            <div class="summary-number">
+                ${totalCost.toFixed(2)} €
             </div>
-        `)
-        .join("");
 
-    const boxes = document.querySelectorAll(
-        "#shoeSummary .summary-box, #shoeStats .summary-box"
-    );
+            <div class="muted">
+                💰 Coste total
+            </div>
 
-    boxes.forEach(box => {
-        box.addEventListener("click", () => {
-            boxes.forEach(b => b.classList.remove("active-summary"));
-            box.classList.add("active-summary");
-        });
-    });
+        </div>
+
+        <div class="summary-box">
+
+            <div class="summary-number">
+                ${
+                    data.length
+                        ? averageCost.toFixed(2) + " €"
+                        : "—"
+                }
+            </div>
+
+            <div class="muted">
+                💶 Coste medio por par
+            </div>
+
+        </div>
+
+    `;
+
 }
 function clearShoesFilters() {
 
