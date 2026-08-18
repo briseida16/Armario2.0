@@ -2013,11 +2013,15 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
     <option value="me_queda_grande">📐 Me queda grande</option>
     <option value="esta_roto">💔 Está roto</option>
 </select>
-            <option value="az">Nombre A-Z</option>
-            <option value="reciente">Más recientes primero</option>
-            <option value="usos_desc">Más usados primero</option>
-            <option value="usos_asc">Menos usados primero</option>
-        </select>
+            <select
+    id="shoeSort"
+    onchange="renderShoes()"
+>
+    <option value="az">Nombre A-Z</option>
+    <option value="reciente">Más recientes primero</option>
+    <option value="usos_desc">Más usados primero</option>
+    <option value="usos_asc">Menos usados primero</option>
+</select>
 
     </div>
 
