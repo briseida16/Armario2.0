@@ -1243,6 +1243,16 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
         <option value="desgastado">🪡 Desgastado</option>
     </select>
 </div>
+  <div class="field">
+    <label>Opinión</label>
+    <select id="opinion">
+        <option value="me_gusta">❤️ Me gusta</option>
+        <option value="me_queda_bien">👌 Me queda bien</option>
+        <option value="me_queda_pequeno">📏 Me queda pequeño</option>
+        <option value="me_queda_grande">📐 Me queda grande</option>
+        <option value="esta_roto">💔 Está roto</option>
+    </select>
+</div>
 <div class="field">
     <label>Color</label>
     <input id="color" placeholder="Ej. beige">
@@ -2256,12 +2266,18 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
 </section>
 <section id="favoritos" class="view">
     <div class="card">
-        <h2 class="section-title">Prendas favoritas</h2>
-        <div id="favoritesGrid" class="grid"></div>
-    </div>
-<div class="card" id="favoriteJewelrySection">
+    <h2 class="section-title">👗 Prendas favoritas</h2>
+    <div id="favoritesGrid" class="grid"></div>
+</div>
+
+<div class="card">
     <h2 class="section-title">💎 Joyas favoritas</h2>
     <div id="favoriteJewelryGrid" class="grid"></div>
+</div>
+
+<div class="card">
+    <h2 class="section-title">👟 Calzado favorito</h2>
+    <div id="favoriteShoesGrid" class="grid"></div>
 </div>
     <div class="card">
         <h2 class="section-title">Looks favoritos</h2>
@@ -3583,146 +3599,51 @@ function filteredShoes() {
     return data;
 }
 function renderShoeStats(data) {
-
-    const summary =
-        document.getElementById("shoeSummary");
-
-    const stats =
-        document.getElementById("shoeStats");
+    const summary = document.getElementById("shoeSummary");
+    const stats = document.getElementById("shoeStats");
 
     if (!summary || !stats) return;
 
+    const total = data.length;
+    const favorites = data.filter(s => s.favorite).length;
 
-    const favorites =
-        data.filter(
-            g => !!g.favorito
-        ).length;
-
-
-    const totalCost =
-        data.reduce(
-            (sum,g) =>
-                sum +
-                (Number(g.precio) || 0) *
-                (Number(g.cantidad) || 1),
-            0
-        );
-
-
-    const averageCost =
-        data.length
-            ? totalCost / data.length
-            : 0;
-
+    const categories = {};
+    data.forEach(s => {
+        const category = s.category || "Sin categoría";
+        categories[category] = (categories[category] || 0) + 1;
+    });
 
     summary.innerHTML = `
-
-        <div
-            class="summary-box"
-            onclick="
-                document.getElementById('shoeCategoryFilter').value = '';
-                renderShoes();
-            "
-        >
-            <div class="summary-number">
-                ${data.length}
-            </div>
-
-            <div class="muted">
-                👟 Total calzado
-            </div>
+        <div class="summary-box">
+            <strong>${total}</strong>
+            <span>Total</span>
         </div>
-
-
-        <div
-            class="summary-box"
-            onclick="
-                document.getElementById('shoeFavoriteFilter').value = 'true';
-                renderShoes();
-            "
-        >
-            <div class="summary-number">
-                ${favorites}
-            </div>
-
-            <div class="muted">
-                ❤️ Favoritos
-            </div>
-        </div>
-
-
-        ${
-            (categoryOptions.calzado || [])
-                .map(([category,label]) => {
-
-                    const count =
-                        data.filter(
-                            g =>
-                                g.categoria === category
-                        ).length;
-
-                    return `
-
-                        <div
-                            class="summary-box"
-                            onclick="
-                                document.getElementById('shoeCategoryFilter').value = '${category}';
-                                renderShoes();
-                            "
-                        >
-
-                            <div class="summary-number">
-                                ${count}
-                            </div>
-
-                            <div class="muted">
-                                ${esc(label)}
-                            </div>
-
-                        </div>
-
-                    `;
-
-                })
-                .join("")
-        }
-
-    `;
-
-
-    stats.innerHTML = `
 
         <div class="summary-box">
-
-            <div class="summary-number">
-                ${totalCost.toFixed(2)} €
-            </div>
-
-            <div class="muted">
-                💰 Coste total
-            </div>
-
+            <strong>${favorites}</strong>
+            <span>❤️ Favoritos</span>
         </div>
-
-
-        <div class="summary-box">
-
-            <div class="summary-number">
-                ${
-                    data.length
-                        ? averageCost.toFixed(2) + " €"
-                        : "—"
-                }
-            </div>
-
-            <div class="muted">
-                💶 Coste medio por par
-            </div>
-
-        </div>
-
     `;
 
+    stats.innerHTML = Object.entries(categories)
+        .map(([category, count]) => `
+            <div class="summary-box">
+                <strong>${count}</strong>
+                <span>${category}</span>
+            </div>
+        `)
+        .join("");
+
+    const boxes = document.querySelectorAll(
+        "#shoeSummary .summary-box, #shoeStats .summary-box"
+    );
+
+    boxes.forEach(box => {
+        box.addEventListener("click", () => {
+            boxes.forEach(b => b.classList.remove("active-summary"));
+            box.classList.add("active-summary");
+        });
+    });
 }
 function clearShoesFilters() {
 
@@ -5091,12 +5012,21 @@ function saveQuickLook(){saveLookObject(quickLook,`Look rápido ${savedLooks.len
 function savedLookCard(l,editable=true){const look=idsToLook(l),first=look.abrigo||look.exterior||look.interior||look.inferior||look.vestido||look.calzado||look.bolso||look.accesorios[0],count=[look.abrigo,look.exterior,look.interior,look.inferior,look.vestido,look.calzado,look.bolso].filter(Boolean).length+look.accesorios.length;return`<div class="item-card"><img src="${first?.foto||placeholderImg}" alt="Look"><div class="item-body"><p class="item-name">${esc(l.nombre)}</p><p class="meta">Ocasión: ${esc(fmtOcc(l.ocasion||"-"))}</p><p class="meta">Prendas: ${count}</p>${l.favorito?'<span class="pill">Look favorito</span>':''}${editable?`<div class="button-row" style="margin-top:10px"><button class="small-btn" onclick="loadSavedLook('${l.id}')">Abrir</button><button class="small-btn" onclick="toggleLookFavorite('${l.id}')">${l.favorito?'Quitar ♥':'Favorito ♥'}</button><button class="small-btn danger-btn" onclick="deleteSavedLook('${l.id}')">Eliminar</button></div>`:""}</div></div>`}function loadSavedLook(id){const l=savedLooks.find(x=>x.id===id);if(l){currentLook=idsToLook(l);renderCurrentLook();switchView("crearLook")}}function toggleLookFavorite(id){const l=savedLooks.find(x=>x.id===id);if(l){l.favorito=!l.favorito;persist();refreshAll()}}
 function resetWishForm(){editingWishId=null;["wishNombre","wishMarca","wishPrecio","wishEnlace","wishComentarios"].forEach(id=>document.getElementById(id).value="");document.getElementById("wishPrioridad").value="Alta";document.getElementById("wishFoto").value=""}function saveWish(){const file=document.getElementById("wishFoto").files[0],old=wishlist.find(w=>w.id===editingWishId)||{},data=migrateWish({id:editingWishId||uid(),foto:old.foto,nombre:document.getElementById("wishNombre").value.trim(),marca:document.getElementById("wishMarca").value.trim(),precio:document.getElementById("wishPrecio").value,enlace:document.getElementById("wishEnlace").value.trim(),prioridad:document.getElementById("wishPrioridad").value,comentarios:document.getElementById("wishComentarios").value.trim()});if(!data.nombre)return toast("Pon al menos un nombre en la wishlist.","warn");const finish=w=>{if(editingWishId){const i=wishlist.findIndex(x=>x.id===editingWishId);if(i!==-1)wishlist[i]=w}else wishlist.unshift(w);persist();resetWishForm();refreshAll();toast("Wishlist guardada ✅")};file?compressImage(file).then(url=>{data.foto=url;finish(data)}).catch(()=>finish(data)):finish(data)}function wishToWardrobe(id){const w=wishlist.find(x=>x.id===id);if(!w)return;garments.unshift(migrateGarment({nombre:w.nombre,marca:w.marca,precio:w.precio,comentarios:w.comentarios,foto:w.foto,grupo:"parte_superior",categoria:"camiseta",temporada:"todo_anio",ocasiones:["casual"],cantidad:1,disponible:true}));wishlist=wishlist.filter(x=>x.id!==id);persist();refreshAll();switchView("armario");toast("Añadido al armario ✅")}function deleteWish(id){wishlist=wishlist.filter(w=>w.id!==id);persist();refreshAll()}function renderWishlist(){document.getElementById("wishlistGrid").innerHTML=wishlist.length?wishlist.map(w=>`<div class="item-card"><img src="${w.foto||placeholderImg}" alt="${esc(w.nombre)}"><div class="item-body"><p class="item-name">${esc(w.nombre)}</p>${w.marca?`<p class="meta">Marca: ${esc(w.marca)}</p>`:""}${w.precio?`<p class="meta">Precio: ${esc(w.precio)} €</p>`:""}<p class="meta">Prioridad: ${esc(w.prioridad)}</p>${w.enlace?`<p class="meta"><a href="${esc(w.enlace)}" target="_blank" rel="noopener noreferrer">Enlace de compra</a></p>`:""}${w.comentarios?`<p class="meta">💬 ${esc(w.comentarios)}</p>`:""}<div class="button-row" style="margin-top:10px"><button class="small-btn" onclick="wishToWardrobe('${w.id}')">Añadir al armario</button><button class="small-btn danger-btn" onclick="deleteWish('${w.id}')">Eliminar</button></div></div></div>`).join(""):'<div class="empty">Tu wishlist está vacía.</div>'}
 function renderFavorites() {
+    const favoriteGarments = garments.filter(
+        g => g.favorito && !g.eliminado_en && g.grupo !== "calzado"
+    );
+
+    const favoriteShoes = garments.filter(
+        g => g.favorito && !g.eliminado_en && g.grupo === "calzado"
+    );
+
     document.getElementById("favoritesGrid").innerHTML =
-        garments
-            .filter(g => g.favorito && !g.eliminado_en)
-            .map(garmentCard)
-            .join("") ||
+        favoriteGarments.map(garmentCard).join("") ||
         '<div class="empty">No tienes prendas favoritas todavía.</div>';
+
+    document.getElementById("favoriteShoesGrid").innerHTML =
+        favoriteShoes.map(garmentCard).join("") ||
+        '<div class="empty">No tienes calzado favorito todavía.</div>';
 
     document.getElementById("favoriteLooksGrid").innerHTML =
         savedLooks
@@ -5116,7 +5046,8 @@ function renderFavorites() {
                 .join("") ||
             '<div class="empty">No tienes joyas favoritas todavía.</div>';
     }
-}function renderVinted(){
+}
+  function renderVinted(){
     const active=garments.filter(g=>g.en_vinted&&!g.vendida&&!g.eliminado_en);
     const sold=garments.filter(g=>g.vendida&&!g.eliminado_en);
     document.getElementById("vintedGrid").innerHTML=active.length?active.map(garmentCard).join(""):'<div class="empty">No tienes prendas actualmente en venta.</div>';
