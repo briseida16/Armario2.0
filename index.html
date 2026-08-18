@@ -3192,6 +3192,7 @@ function filteredGarments(){
         if(activeSummaryFilter==="new_tag" && g.estado!=="nuevo_etiqueta")return false;
 if(activeSummaryFilter==="unused" && (g.usos||0)!==0)return false;
 if(activeSummaryFilter==="amortized" && (g.usos||0)<AMORTIZED_USES)return false;
+      if(activeSummaryFilter==="favorites" && !g.favorito)return false;
         const hay=`${g.nombre} ${g.color} ${g.categoria} ${g.marca||""} ${g.comentarios} ${(g.ocasiones||[]).join(" ")}`.toLowerCase();
 
         return (!q||hay.includes(q))
@@ -3232,6 +3233,11 @@ if(activeSummaryFilter==="amortized" && (g.usos||0)<AMORTIZED_USES)return false;
             "filterGroup"
         )?.value || "";
 
+    const selectedFavorite =
+        document.getElementById(
+            "filterFavorite"
+        )?.value || "";
+
     const counts = {};
 
     Object.keys(groupLabels)
@@ -3246,22 +3252,32 @@ if(activeSummaryFilter==="amortized" && (g.usos||0)<AMORTIZED_USES)return false;
             g.grupo &&
             g.grupo !== "calzado"
         ) {
+
             counts[g.grupo] =
                 (counts[g.grupo] || 0) + 1;
+
         }
 
     });
+
+    const favoriteCount =
+        active.filter(
+            g => !!g.favorito
+        ).length;
 
     box.innerHTML = `
 
         <div
             class="summary-box ${
-                selectedGroup === ""
+                selectedGroup === "" &&
+                selectedFavorite === "" &&
+                activeSummaryFilter !== "favorites"
                     ? "active-summary"
                     : ""
             }"
             onclick="applySummaryFilter('')"
         >
+
             <div class="summary-number">
                 ${active.length}
             </div>
@@ -3269,6 +3285,27 @@ if(activeSummaryFilter==="amortized" && (g.usos||0)<AMORTIZED_USES)return false;
             <div class="muted">
                 👗 Total prendas
             </div>
+
+        </div>
+
+        <div
+            class="summary-box ${
+                selectedFavorite === "true" ||
+                activeSummaryFilter === "favorites"
+                    ? "active-summary"
+                    : ""
+            }"
+            onclick="applyWardrobeSpecialFilter('favorites')"
+        >
+
+            <div class="summary-number">
+                ${favoriteCount}
+            </div>
+
+            <div class="muted">
+                ❤️ Favoritas
+            </div>
+
         </div>
 
     ` +
@@ -3312,17 +3349,39 @@ if(activeSummaryFilter==="amortized" && (g.usos||0)<AMORTIZED_USES)return false;
 }
 
 function applyWardrobeSpecialFilter(type){
-    activeSummaryFilter=
-        activeSummaryFilter===type
-            ? ""
-            : type;
+
+    if (type === "favorites") {
+
+        activeSummaryFilter =
+            activeSummaryFilter === "favorites"
+                ? ""
+                : "favorites";
+
+        document.getElementById(
+            "filterFavorite"
+        ).value =
+            activeSummaryFilter === "favorites"
+                ? "true"
+                : "";
+
+    } else {
+
+        activeSummaryFilter =
+            activeSummaryFilter === type
+                ? ""
+                : type;
+
+    }
 
     renderWardrobe();
 
-    document.getElementById("wardrobeGrid")?.scrollIntoView({
-        behavior:"smooth",
-        block:"start"
-    });
+    document
+        .getElementById("wardrobeGrid")
+        ?.scrollIntoView({
+            behavior:"smooth",
+            block:"start"
+        });
+
 }
 
 function renderWardrobeStats(){
@@ -6128,6 +6187,15 @@ function filteredJewelry() {
     /* FILTRO DESDE LOS INDICADORES */
 
     if (
+    activeJewelrySummaryFilter === "favorites"
+) {
+
+    data = data.filter(
+        j => !!j.favorita
+    );
+
+}
+  if (
         activeJewelrySummaryFilter === "anillo" ||
         activeJewelrySummaryFilter === "pendientes" ||
         activeJewelrySummaryFilter === "collar" ||
@@ -6144,6 +6212,7 @@ function filteredJewelry() {
         );
 
     }
+  
 
 
     if (
@@ -6388,6 +6457,8 @@ set(
         jewelryStatTotal:
             "",
 
+        jewelryStatFavorites:
+            "favorites",
         jewelryStatAnillos:
             "anillo",
 
@@ -6430,7 +6501,10 @@ set(
             if (!card) return;
 
             card.style.cursor = "pointer";
-
+card.classList.toggle(
+    "active-summary",
+    activeJewelrySummaryFilter === filter
+);
             card.onclick = () => {
 
                 activeJewelrySummaryFilter =
@@ -6467,16 +6541,22 @@ if (favoriteJewelryCard) {
 
     favoriteJewelryCard.onclick = () => {
 
-        switchView("favoritos");
+        activeJewelrySummaryFilter =
+            activeJewelrySummaryFilter === "favorites"
+                ? ""
+                : "favorites";
+
+        renderJewelry();
 
         document
-            .getElementById("favoriteJewelrySection")
+            .getElementById("jewelryGrid")
             ?.scrollIntoView({
-                behavior: "smooth",
-                block: "start"
+                behavior:"smooth",
+                block:"start"
             });
 
     };
+
 }}
 /* ---------------------------------------------------------
    LIMPIAR FILTROS
