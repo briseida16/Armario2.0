@@ -4335,6 +4335,20 @@ function bestSome(arr,occasion,bold=false,seed=[],max=3){
     return result;
 }
 
+function renderSlot(slot,value,prefix){const el=document.getElementById(`${prefix}_${slot}`);if(!el)return;if(slot==="accesorios"){const items=Array.isArray(value)?value:[];el.innerHTML=`<div class="slot-title">Accesorios ${items.length?`(${items.length})`:""}</div>`+(items.length?items.map((g,i)=>`<div class="related-selected-card"><img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}"><div><strong>${esc(g.nombre)}</strong><div class="muted">${esc(fmtCat(g.categoria))}</div></div>${prefix==="slot"?`<button class="small-btn danger-btn" onclick="removeAccessory(${i})">Quitar</button>`:""}</div>`).join(""):'<div class="muted">Vacío</div>')+(prefix==="slot"?`<button class="small-btn" onclick="openSelector('accesorios')">+ Añadir</button>`:"");return}const isCombineBase=prefix==="combine"&&combineState?.selected?.id===value?.id;
+el.classList.toggle("combine-base-slot",isCombineBase);
+el.innerHTML=value?`<div class="slot-title">${slotTitles[slot]}</div><img src="${value.foto||placeholderImg}" alt="${esc(value.nombre)}"><strong>${esc(value.nombre)}</strong><div class="muted">${esc(fmtCat(value.categoria))} · ${esc(value.color||"-")}</div>${isCombineBase?`<div class="combine-base-label">✨ Prenda elegida</div>`:""}${prefix==="slot"?`<button class="small-btn" onclick="removeFromLook('${slot}')">Quitar</button>`:""}`:`<div class="slot-title">${slotTitles[slot]}</div><div class="muted">Vacío</div>`}
+let combineState={group:null,category:null,selected:null,look:emptyLook()}; let ownCurrentSlot=null;
+let looksManualMode=null;
+let ownLook=emptyLook();
+let looksOwnLook=emptyLook();
+let looksOwnCurrentSlot=null;
+function formatShortDate(value){
+    if(!value)return "";
+    const parts=String(value).split("-");
+    if(parts.length!==3)return esc(value);
+    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+}
 function buildLook(occasion,noCoat,bold=false){
 
     const pool=availablePool(occasion);
@@ -4357,13 +4371,49 @@ function buildLook(occasion,noCoat,bold=false){
             Math.random()<0.35
         );
 
+    /* ABRIGO SEGÚN TEMPERATURA */
     if(!noCoat){
-        look.abrigo=best(
-            by("abrigo"),
-            occasion,
-            bold,
-            []
-        );
+
+        const temperature =
+            weatherState.temperature;
+
+        let coatPool =
+            by("abrigo");
+
+        if(temperature !== null){
+
+            if(temperature >= 25){
+
+                coatPool=[];
+
+            }else if(temperature <= 10){
+
+                const warmCoats =
+                    coatPool.filter(g =>
+                        /abrigo|parka|plumífero|plumifero|plumas|chaqueta|cazadora|borrego|forro/i.test(
+                            `${g.nombre || ""} ${g.categoria || ""}`
+                        )
+                    );
+
+                if(warmCoats.length){
+                    coatPool=warmCoats;
+                }
+
+            }
+
+        }
+
+        if(coatPool.length){
+
+            look.abrigo=best(
+                coatPool,
+                occasion,
+                bold,
+                []
+            );
+
+        }
+
     }
 
     if(useDress){
@@ -4458,21 +4508,7 @@ function buildLook(occasion,noCoat,bold=false){
 
     return look;
 }
-  function renderSlot(slot,value,prefix){const el=document.getElementById(`${prefix}_${slot}`);if(!el)return;if(slot==="accesorios"){const items=Array.isArray(value)?value:[];el.innerHTML=`<div class="slot-title">Accesorios ${items.length?`(${items.length})`:""}</div>`+(items.length?items.map((g,i)=>`<div class="related-selected-card"><img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}"><div><strong>${esc(g.nombre)}</strong><div class="muted">${esc(fmtCat(g.categoria))}</div></div>${prefix==="slot"?`<button class="small-btn danger-btn" onclick="removeAccessory(${i})">Quitar</button>`:""}</div>`).join(""):'<div class="muted">Vacío</div>')+(prefix==="slot"?`<button class="small-btn" onclick="openSelector('accesorios')">+ Añadir</button>`:"");return}const isCombineBase=prefix==="combine"&&combineState?.selected?.id===value?.id;
-el.classList.toggle("combine-base-slot",isCombineBase);
-el.innerHTML=value?`<div class="slot-title">${slotTitles[slot]}</div><img src="${value.foto||placeholderImg}" alt="${esc(value.nombre)}"><strong>${esc(value.nombre)}</strong><div class="muted">${esc(fmtCat(value.categoria))} · ${esc(value.color||"-")}</div>${isCombineBase?`<div class="combine-base-label">✨ Prenda elegida</div>`:""}${prefix==="slot"?`<button class="small-btn" onclick="removeFromLook('${slot}')">Quitar</button>`:""}`:`<div class="slot-title">${slotTitles[slot]}</div><div class="muted">Vacío</div>`}
-let combineState={group:null,category:null,selected:null,look:emptyLook()}; let ownCurrentSlot=null;
-let looksManualMode=null;
-let ownLook=emptyLook();
-let looksOwnLook=emptyLook();
-let looksOwnCurrentSlot=null;
-function formatShortDate(value){
-    if(!value)return "";
-    const parts=String(value).split("-");
-    if(parts.length!==3)return esc(value);
-    return `${parts[2]}/${parts[1]}/${parts[0]}`;
-}
-function renderSavedLooksCarousel(){
+  function renderSavedLooksCarousel(){
     const box=document.getElementById("savedLooksCarousel");
     if(!box)return;
     if(!savedLooks.length){
