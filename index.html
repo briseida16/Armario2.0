@@ -4049,44 +4049,142 @@ function renderShoes() {
 window.clearWardrobeFilters = clearWardrobeFilters;
 function renderTrash(){const box=document.getElementById("trashGrid"),items=garments.filter(g=>g.eliminado_en);box.innerHTML=items.length?items.map(g=>`<div class="item-card"><img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}"><div class="item-body"><p class="item-name">${esc(g.nombre)}</p><p class="meta">Se borrará definitivamente en ${Math.max(0,30-Math.floor((Date.now()-new Date(g.eliminado_en).getTime())/86400000))} día(s)</p><div class="button-row" style="margin-top:10px"><button class="small-btn" onclick="restoreGarment('${g.id}')">Restaurar</button><button class="small-btn danger-btn" onclick="deleteGarmentForever('${g.id}')">Borrar ya</button></div></div></div>`).join(""):'<div class="empty">La papelera está vacía.</div>'}
 function markUsed(id){const g=findGarment(id);if(g){g.usos=(g.usos||0)+1;g.ultimo_uso=new Date().toISOString();persist();refreshAll()}}function toggleFavorite(id){const g=findGarment(id);if(g){g.favorito=!g.favorito;persist();refreshAll()}}function toggleVinted(id){const g=findGarment(id);if(g){g.en_vinted=!g.en_vinted;persist();refreshAll()}}function deleteGarment(id){const g=findGarment(id);if(!g||!confirm(`¿Mover "${g.nombre}" a la papelera? Podrás recuperarla durante 30 días.`))return;g.eliminado_en=new Date().toISOString();persist();refreshAll();toast("Prenda movida a la papelera 🗑️")}function restoreGarment(id){const g=findGarment(id);if(g){g.eliminado_en=null;persist();refreshAll();toast("Prenda restaurada ✅")}}function deleteGarmentForever(id){const g=findGarment(id);if(!g||!confirm(`Esto borrará "${g.nombre}" para siempre. ¿Seguro?`))return;garments=garments.filter(x=>x.id!==id);savedLooks=savedLooks.map(l=>cleanLookIds(l,id));recentLooks=recentLooks.map(l=>cleanLookIds(l,id));persist();refreshAll()}function purgeOldTrash(){const limit=Date.now()-30*24*60*60*1000;garments=garments.filter(g=>!g.eliminado_en||new Date(g.eliminado_en).getTime()>=limit)}function cleanLookIds(l,id){const x={...l};["abrigo","exterior","interior","inferior","vestido","calzado","bolso"].forEach(k=>{if(x[k]===id)x[k]=null});x.accesorios=normalizeIds(x.accesorios).filter(a=>a!==id);return x}
-function outfitSlotsHtml(prefix){return Object.keys(emptyLook()).map(k=>`<div class="slot" id="${prefix}_${k}"></div>`).join("")}function renderOutfitShell(){document.getElementById("manualOutfit").innerHTML=outfitSlotsHtml("slot");document.getElementById("randomOutfit").innerHTML=outfitSlotsHtml("random")}function availablePool(occasion){
-    let pool=garments.filter(g=>
+function outfitSlotsHtml(prefix){return Object.keys(emptyLook()).map(k=>`<div class="slot" id="${prefix}_${k}"></div>`).join("")}function renderOutfitShell(){document.getElementById("manualOutfit").innerHTML=outfitSlotsHtml("slot");document.getElementById("randomOutfit").innerHTML=outfitSlotsHtml("random")}
+function availablePool(occasion){
+
+    let pool=garments.filter(g =>
         g.disponible &&
-        !g.eliminado_en &&
-        (g.ocasiones||[]).includes(occasion)
+        !g.eliminado_en
     );
 
-    if(!pool.length){
-        pool=garments.filter(g=>g.disponible&&!g.eliminado_en);
+    const isHomeLook =
+        occasion === "pijama_estarporcasa" ||
+        occasion === "comodo";
+
+    if(isHomeLook){
+
+        pool=pool.filter(g =>
+            isSleepwear(g) ||
+            normalizeOccasions(g).includes("comodo")
+        );
+
+    }else{
+
+        pool=pool.filter(g =>
+            !isSleepwear(g)
+        );
+
     }
 
-    if(document.getElementById("randomExcludeSleep")?.checked){
-        pool=pool.filter(g=>!isSleepwear(g));
+    const temperature =
+        weatherState.temperature;
+
+    if(temperature !== null){
+
+        pool=pool.filter(g => {
+
+            const text =
+                `${g.grupo || ""} ${g.categoria || ""} ${g.nombre || ""}`
+                    .toLowerCase();
+
+            /* Mucho calor: evitar prendas y calzado claramente invernales */
+            if(temperature >= 30){
+
+                if(
+                    g.grupo === "calzado" &&
+                    [
+                        "bota",
+                        "bota_cowboy",
+                        "botin"
+                    ].includes(g.categoria)
+                ){
+                    return false;
+                }
+
+                if(
+                    /borrego|forro|abrigo|jersey|sudadera|cuello alto|cuello_alto|bufanda/.test(text)
+                ){
+                    return false;
+                }
+
+            }
+
+            /* Mucho frío: evitar prendas y calzado claramente veraniegos */
+            if(temperature <= 5){
+
+                if(
+                    g.grupo === "calzado" &&
+                    [
+                        "sandalias",
+                        "chanclas"
+                    ].includes(g.categoria)
+                ){
+                    return false;
+                }
+
+                if(
+                    /tirante|tirantes|manga_corta|manga corta|sin_mangas|sin mangas|crop|top|bikini|bañador|banador|short|shorts/.test(text)
+                ){
+                    return false;
+                }
+
+            }
+
+            return true;
+
+        });
+
+    }
+
+    /* En looks diarios no permitir calzado de estar por casa */
+    if(!isHomeLook){
+
+        pool=pool.filter(g =>
+            inferSlot(g)!=="calzado" ||
+            g.categoria!=="estar_por_casa"
+        );
+
     }
 
     if(document.getElementById("randomOnlyFavorites")?.checked){
-        pool=pool.filter(g=>g.favorito);
+
+        pool=pool.filter(g =>
+            g.favorito
+        );
+
     }
 
     if(document.getElementById("randomOnlyBasics")?.checked){
-        pool=pool.filter(g=>g.basico);
+
+        pool=pool.filter(g =>
+            g.basico
+        );
+
     }
 
     if(document.getElementById("randomOnlySeason")?.checked){
-        const season=currentSeason();
-        pool=pool.filter(g=>{
-            const seasons=Array.isArray(g.temporada)
-                ? g.temporada
-                : [g.temporada||"todo_anio"];
 
-            return seasons.includes("todo_anio") || seasons.includes(season);
+        const season=currentSeason();
+
+        pool=pool.filter(g => {
+
+            const seasons =
+                Array.isArray(g.temporada)
+                    ? g.temporada
+                    : [g.temporada || "todo_anio"];
+
+            return (
+                seasons.includes("todo_anio") ||
+                seasons.includes(season)
+            );
+
         });
+
     }
 
     return pool;
 }
-
-function scoreItem(g,occasion,bold=false,seed=[]){
+  function scoreItem(g,occasion,bold=false,seed=[]){
     let score=0;
 
     if(g.favorito) score+=bold?0:3;
@@ -4147,30 +4245,59 @@ function rankedCandidates(arr,occasion,bold=false,seed=[]){
         .sort((a,b)=>b.score-a.score);
 }
 
-function pickRandomWeighted(arr,occasion,bold=false,seed=[],maxCandidates=4){
+function pickRandomWeighted(arr,occasion,bold=false,seed=[],maxCandidates=8){
+
     if(!arr.length)return null;
 
-    const ranked=rankedCandidates(arr,occasion,bold,seed)
-        .slice(0,Math.min(maxCandidates,arr.length));
+    const ranked=rankedCandidates(
+        arr,
+        occasion,
+        bold,
+        seed
+    ).slice(
+        0,
+        Math.min(maxCandidates,arr.length)
+    );
 
     const weights=ranked.map((item,index)=>{
-        return Math.max(1, ranked.length-index);
+
+        const scoreBonus=
+            Math.max(0,item.score) * 0.35;
+
+        const varietyBonus=
+            Math.min(item.garment.usos||0,10) * -0.12;
+
+        return Math.max(
+            0.5,
+            1 +
+            scoreBonus +
+            varietyBonus -
+            index * 0.35
+        );
+
     });
 
-    const total=weights.reduce((sum,w)=>sum+w,0);
-    let random=Math.random()*total;
+    const total=
+        weights.reduce(
+            (sum,w)=>sum+w,
+            0
+        );
+
+    let random=
+        Math.random()*total;
 
     for(let i=0;i<ranked.length;i++){
+
         random-=weights[i];
 
         if(random<=0){
             return ranked[i].garment;
         }
+
     }
 
-    return ranked[0].garment;
+    return ranked[ranked.length-1].garment;
 }
-
 function best(arr,occasion,bold=false,seed=[]){
     return pickRandomWeighted(arr,occasion,bold,seed,4);
 }
@@ -4209,6 +4336,7 @@ function bestSome(arr,occasion,bold=false,seed=[],max=3){
 }
 
 function buildLook(occasion,noCoat,bold=false){
+
     const pool=availablePool(occasion);
 
     const bagsAllowed=
@@ -4239,6 +4367,7 @@ function buildLook(occasion,noCoat,bold=false){
     }
 
     if(useDress){
+
         look.exterior=best(
             by("exterior"),
             occasion,
@@ -4252,7 +4381,9 @@ function buildLook(occasion,noCoat,bold=false){
             bold,
             [look.abrigo,look.exterior].filter(Boolean)
         );
+
     }else{
+
         look.exterior=best(
             by("exterior"),
             occasion,
@@ -4267,12 +4398,27 @@ function buildLook(occasion,noCoat,bold=false){
             [look.abrigo,look.exterior].filter(Boolean)
         );
 
-        look.inferior=best(
-            by("inferior"),
-            occasion,
-            bold,
-            [look.abrigo,look.exterior,look.interior].filter(Boolean)
-        );
+        if(look.interior){
+
+            look.inferior=best(
+                by("inferior"),
+                occasion,
+                bold,
+                [
+                    look.abrigo,
+                    look.exterior,
+                    look.interior
+                ].filter(Boolean)
+            );
+
+        }
+
+        if(look.interior && !look.inferior){
+
+            look.interior=null;
+
+        }
+
     }
 
     const clothingSeed=
@@ -4288,30 +4434,31 @@ function buildLook(occasion,noCoat,bold=false){
     );
 
     if(bagsAllowed){
+
         look.bolso=best(
             by("bolso"),
             occasion,
             bold,
-            Object.values(look).filter(
-                x=>x&&!Array.isArray(x)
-            )
+            clothingSeed
         );
+
     }
 
     if(accAllowed){
+
         look.accesorios=bestSome(
             by("accesorios"),
             occasion,
             bold,
-            Object.values(look).filter(
-                x=>x&&!Array.isArray(x)
-            ),
+            clothingSeed,
             3
         );
+
     }
 
-    return look;}
-function renderSlot(slot,value,prefix){const el=document.getElementById(`${prefix}_${slot}`);if(!el)return;if(slot==="accesorios"){const items=Array.isArray(value)?value:[];el.innerHTML=`<div class="slot-title">Accesorios ${items.length?`(${items.length})`:""}</div>`+(items.length?items.map((g,i)=>`<div class="related-selected-card"><img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}"><div><strong>${esc(g.nombre)}</strong><div class="muted">${esc(fmtCat(g.categoria))}</div></div>${prefix==="slot"?`<button class="small-btn danger-btn" onclick="removeAccessory(${i})">Quitar</button>`:""}</div>`).join(""):'<div class="muted">Vacío</div>')+(prefix==="slot"?`<button class="small-btn" onclick="openSelector('accesorios')">+ Añadir</button>`:"");return}const isCombineBase=prefix==="combine"&&combineState?.selected?.id===value?.id;
+    return look;
+}
+  function renderSlot(slot,value,prefix){const el=document.getElementById(`${prefix}_${slot}`);if(!el)return;if(slot==="accesorios"){const items=Array.isArray(value)?value:[];el.innerHTML=`<div class="slot-title">Accesorios ${items.length?`(${items.length})`:""}</div>`+(items.length?items.map((g,i)=>`<div class="related-selected-card"><img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}"><div><strong>${esc(g.nombre)}</strong><div class="muted">${esc(fmtCat(g.categoria))}</div></div>${prefix==="slot"?`<button class="small-btn danger-btn" onclick="removeAccessory(${i})">Quitar</button>`:""}</div>`).join(""):'<div class="muted">Vacío</div>')+(prefix==="slot"?`<button class="small-btn" onclick="openSelector('accesorios')">+ Añadir</button>`:"");return}const isCombineBase=prefix==="combine"&&combineState?.selected?.id===value?.id;
 el.classList.toggle("combine-base-slot",isCombineBase);
 el.innerHTML=value?`<div class="slot-title">${slotTitles[slot]}</div><img src="${value.foto||placeholderImg}" alt="${esc(value.nombre)}"><strong>${esc(value.nombre)}</strong><div class="muted">${esc(fmtCat(value.categoria))} · ${esc(value.color||"-")}</div>${isCombineBase?`<div class="combine-base-label">✨ Prenda elegida</div>`:""}${prefix==="slot"?`<button class="small-btn" onclick="removeFromLook('${slot}')">Quitar</button>`:""}`:`<div class="slot-title">${slotTitles[slot]}</div><div class="muted">Vacío</div>`}
 let combineState={group:null,category:null,selected:null,look:emptyLook()}; let ownCurrentSlot=null;
@@ -5143,7 +5290,54 @@ function ensureDailyQuickLook(){
         }
     }
     generateQuickLook();
-}function generateLook(occasion,bold=false){lastOccasion=occasion;lastBold=bold;randomLook=buildLook(occasion,document.getElementById("randomNoCoat").checked,bold);renderRandomLook()}function repeatLastLook(){generateLook(lastOccasion||"casual",lastBold)}function openSelector(slot){currentSlot=slot;document.getElementById("selectorCard").classList.remove("hidden");const list=garments.filter(g=>g.disponible&&!g.vendida&&!g.eliminado_en&&inferSlot(g)===slot);document.getElementById("selectorGrid").innerHTML=list.length?list.map(g=>`<div class="item-card"><img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}"><div class="item-body"><p class="item-name">${esc(g.nombre)}</p><p class="meta">${esc(fmtCat(g.categoria))}</p><button class="small-btn" onclick="selectGarmentForSlot('${g.id}')">Seleccionar</button></div></div>`).join(""):'<div class="empty">No hay prendas disponibles.</div>'}function selectGarmentForSlot(id){const g=findGarment(id);if(!g||!currentSlot)return;if(currentSlot==="accesorios"){if(!currentLook.accesorios.some(a=>a.id===id))currentLook.accesorios.push(g)}else{if(currentSlot==="vestido"){currentLook.interior=null;currentLook.inferior=null}else if(["interior","inferior"].includes(currentSlot))currentLook.vestido=null;currentLook[currentSlot]=g}renderCurrentLook();document.getElementById("selectorCard").classList.add("hidden")}function removeFromLook(slot){currentLook[slot]=null;renderCurrentLook()}function removeAccessory(i){currentLook.accesorios.splice(i,1);renderCurrentLook()}function clearLook(){currentLook=emptyLook();renderCurrentLook();document.getElementById("selectorCard").classList.add("hidden")}function mapLookToIds(look){return{abrigo:look.abrigo?.id||null,exterior:look.exterior?.id||null,interior:look.interior?.id||null,inferior:look.inferior?.id||null,vestido:look.vestido?.id||null,calzado:look.calzado?.id||null,bolso:look.bolso?.id||null,accesorios:(look.accesorios||[]).map(a=>a.id)}}function idsToLook(l){return{abrigo:findGarment(l.abrigo),exterior:findGarment(l.exterior),interior:findGarment(l.interior),inferior:findGarment(l.inferior),vestido:findGarment(l.vestido),calzado:findGarment(l.calzado),bolso:findGarment(l.bolso),accesorios:normalizeIds(l.accesorios).map(findGarment).filter(Boolean)}}function hasLook(look){return Object.entries(look).some(([k,v])=>k==="accesorios"?(v||[]).length:!!v)}function addUsageFromLook(look){["abrigo","exterior","interior","inferior","vestido","calzado","bolso"].forEach(k=>look[k]?.id&&markUsedSilent(look[k].id));(look.accesorios||[]).forEach(a=>a?.id&&markUsedSilent(a.id))}function markUsedSilent(id){const g=findGarment(id);if(g){g.usos=(g.usos||0)+1;g.ultimo_uso=new Date().toISOString()}}function saveLookObject(look,name,occasion,source){
+}
+function generateLook(occasion,bold=false){
+
+    lastOccasion=occasion;
+    lastBold=bold;
+
+    const previousLook =
+        randomLook
+            ? Object.values(randomLook)
+                .filter(x => x && !Array.isArray(x))
+                .map(x => x.id)
+                .filter(Boolean)
+            : [];
+
+    let newLook;
+
+    for(let i=0;i<5;i++){
+
+        newLook=buildLook(
+            occasion,
+            document.getElementById("randomNoCoat").checked,
+            bold
+        );
+
+        const newIds=
+            Object.values(newLook)
+                .filter(x => x && !Array.isArray(x))
+                .map(x => x.id)
+                .filter(Boolean);
+
+        const repeated=
+            newIds.filter(id =>
+                previousLook.includes(id)
+            ).length;
+
+        if(
+            !previousLook.length ||
+            repeated <= Math.max(1,Math.floor(previousLook.length*0.25))
+        ){
+            break;
+        }
+
+    }
+
+    randomLook=newLook;
+
+    renderRandomLook();
+}  function openSelector(slot){currentSlot=slot;document.getElementById("selectorCard").classList.remove("hidden");const list=garments.filter(g=>g.disponible&&!g.vendida&&!g.eliminado_en&&inferSlot(g)===slot);document.getElementById("selectorGrid").innerHTML=list.length?list.map(g=>`<div class="item-card"><img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}"><div class="item-body"><p class="item-name">${esc(g.nombre)}</p><p class="meta">${esc(fmtCat(g.categoria))}</p><button class="small-btn" onclick="selectGarmentForSlot('${g.id}')">Seleccionar</button></div></div>`).join(""):'<div class="empty">No hay prendas disponibles.</div>'}function selectGarmentForSlot(id){const g=findGarment(id);if(!g||!currentSlot)return;if(currentSlot==="accesorios"){if(!currentLook.accesorios.some(a=>a.id===id))currentLook.accesorios.push(g)}else{if(currentSlot==="vestido"){currentLook.interior=null;currentLook.inferior=null}else if(["interior","inferior"].includes(currentSlot))currentLook.vestido=null;currentLook[currentSlot]=g}renderCurrentLook();document.getElementById("selectorCard").classList.add("hidden")}function removeFromLook(slot){currentLook[slot]=null;renderCurrentLook()}function removeAccessory(i){currentLook.accesorios.splice(i,1);renderCurrentLook()}function clearLook(){currentLook=emptyLook();renderCurrentLook();document.getElementById("selectorCard").classList.add("hidden")}function mapLookToIds(look){return{abrigo:look.abrigo?.id||null,exterior:look.exterior?.id||null,interior:look.interior?.id||null,inferior:look.inferior?.id||null,vestido:look.vestido?.id||null,calzado:look.calzado?.id||null,bolso:look.bolso?.id||null,accesorios:(look.accesorios||[]).map(a=>a.id)}}function idsToLook(l){return{abrigo:findGarment(l.abrigo),exterior:findGarment(l.exterior),interior:findGarment(l.interior),inferior:findGarment(l.inferior),vestido:findGarment(l.vestido),calzado:findGarment(l.calzado),bolso:findGarment(l.bolso),accesorios:normalizeIds(l.accesorios).map(findGarment).filter(Boolean)}}function hasLook(look){return Object.entries(look).some(([k,v])=>k==="accesorios"?(v||[]).length:!!v)}function addUsageFromLook(look){["abrigo","exterior","interior","inferior","vestido","calzado","bolso"].forEach(k=>look[k]?.id&&markUsedSilent(look[k].id));(look.accesorios||[]).forEach(a=>a?.id&&markUsedSilent(a.id))}function markUsedSilent(id){const g=findGarment(id);if(g){g.usos=(g.usos||0)+1;g.ultimo_uso=new Date().toISOString()}}function saveLookObject(look,name,occasion,source){
     if(!hasLook(look))return toast("No hay look para guardar.","warn");
     ownLook={
         abrigo:look.abrigo||null,
@@ -5248,8 +5442,12 @@ document.getElementById("sumGarments").textContent =
 };
 function exportData(){const backup={version:APP_DATA_VERSION,exportado_en:new Date().toISOString(),garments,savedLooks,recentLooks,wishlist};const blob=new Blob([JSON.stringify(backup,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`bricloset-backup-${new Date().toISOString().slice(0,10)}.json`;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url)}function importData(e){const file=e.target.files?.[0];if(!file)return;const r=new FileReader();r.onload=x=>{try{const migrated=migrateBackup(JSON.parse(x.target.result));garments=migrated.garments;savedLooks=migrated.savedLooks;recentLooks=migrated.recentLooks;wishlist=migrated.wishlist;persist();refreshAll();toast("Armario importado correctamente ✅")}catch(err){toast("No he podido importar el archivo.","warn");console.error(err)}finally{e.target.value=""}};r.readAsText(file)}
 
-const weatherState={lat:null,lon:null,place:"Guadalajara"};
-
+const weatherState={
+    lat:null,
+    lon:null,
+    place:"Guadalajara",
+    temperature:null
+};
 function weatherCodeInfo(code){
     const map={0:["☀️","Despejado"],1:["🌤️","Mayormente despejado"],2:["⛅","Parcialmente nublado"],3:["☁️","Nublado"],45:["🌫️","Niebla"],48:["🌫️","Niebla"],51:["🌦️","Llovizna"],53:["🌦️","Llovizna"],55:["🌧️","Llovizna intensa"],61:["🌦️","Lluvia"],63:["🌧️","Lluvia"],65:["🌧️","Lluvia intensa"],71:["🌨️","Nieve"],73:["🌨️","Nieve"],75:["❄️","Nieve intensa"],80:["🌦️","Chubascos"],81:["🌧️","Chubascos"],82:["⛈️","Chubascos fuertes"],95:["⛈️","Tormenta"],96:["⛈️","Tormenta con granizo"],99:["⛈️","Tormenta con granizo"]};
     return map[code]||["🌤️","Tiempo variable"];
@@ -5287,7 +5485,9 @@ async function loadHomeWeather(){
         const data=await r.json();
         const [i,d]=weatherCodeInfo(data.current.weather_code);
         icon.textContent=i;
-        temp.textContent=`${Math.round(data.current.temperature_2m)} °C`;
+        weatherState.temperature =
+    Number(data.current.temperature_2m);
+      temp.textContent=`${Math.round(data.current.temperature_2m)} °C`;
         desc.textContent=`${d} · ${weatherState.place}`;
     }catch(e){
         desc.textContent="No se ha podido consultar el tiempo ahora mismo.";
@@ -5296,36 +5496,89 @@ async function loadHomeWeather(){
 }
 let homeLook={abrigo:null,exterior:null,interior:null,inferior:null,vestido:null,calzado:null,bolso:null,accesorios:[]};
 function buildHomeLook(){
-    const homeOccasions=["pijama_estarporcasa","comodo","casual"];
+
     let pool=garments.filter(g =>
         g.disponible &&
         !g.eliminado_en &&
-        (
-            homeOccasions.some(o=>normalizeOccasions(g).includes(o)) ||
-            String(g.grupo||"").startsWith("dormir_")
-        )
+        normalizeOccasions(g).includes("pijama_estarporcasa")
     );
 
-    const by=s=>pool.filter(g=>inferSlot(g)===s);
+    const by=s =>
+        pool.filter(g=>inferSlot(g)===s);
+
     let look=emptyLook();
 
-    // En casa no queremos abrigo, bolso ni un look "de calle".
-    look.exterior=pickRandomWeighted(by("exterior"),"comodo",false,[],5);
-    look.interior=pickRandomWeighted(by("interior"),"comodo",false,[look.exterior].filter(Boolean),5);
-    look.inferior=pickRandomWeighted(by("inferior"),"comodo",false,[look.exterior,look.interior].filter(Boolean),5);
-    look.vestido=pickRandomWeighted(by("vestido"),"comodo",false,[look.exterior].filter(Boolean),5);
+    // En casa no queremos abrigo, bolso ni un look de calle.
+    look.exterior=pickRandomWeighted(
+        by("exterior"),
+        "comodo",
+        false,
+        [],
+        5
+    );
+
+    look.interior=pickRandomWeighted(
+        by("interior"),
+        "comodo",
+        false,
+        [look.exterior].filter(Boolean),
+        5
+    );
+
+    if(look.interior){
+
+        look.inferior=pickRandomWeighted(
+            by("inferior"),
+            "comodo",
+            false,
+            [
+                look.exterior,
+                look.interior
+            ].filter(Boolean),
+            5
+        );
+
+        if(!look.inferior){
+            look.interior=null;
+        }
+
+    }
+
+    look.vestido=pickRandomWeighted(
+        by("vestido"),
+        "comodo",
+        false,
+        [look.exterior].filter(Boolean),
+        5
+    );
 
     if(look.vestido){
         look.interior=null;
         look.inferior=null;
     }
 
-    const shoes=by("calzado").filter(g=>g.categoria==="estar_por_casa");
-    look.calzado=pickRandomWeighted(shoes,"comodo",false,[look.exterior,look.interior,look.inferior,look.vestido].filter(Boolean),5);
+    const shoes=
+        by("calzado")
+            .filter(g =>
+                normalizeOccasions(g)
+                    .includes("pijama_estarporcasa")
+            );
+
+    look.calzado=pickRandomWeighted(
+        shoes,
+        "comodo",
+        false,
+        [
+            look.exterior,
+            look.interior,
+            look.inferior,
+            look.vestido
+        ].filter(Boolean),
+        5
+    );
 
     return look;
 }
-
 function renderHomeLook(){
     const box=document.getElementById("homeLookResult");
     const actions=document.getElementById("homeLookActions");
