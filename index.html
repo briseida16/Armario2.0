@@ -5478,6 +5478,7 @@ window.toggleMoreMenu = function(event){
        dentro de .tabs: lo colocamos respecto a la ventana.
     */
     panel.style.position = "fixed";
+  panel.style.zIndex = "99999";
 
     const rect = button.getBoundingClientRect();
 
