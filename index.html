@@ -5750,86 +5750,146 @@ window.addEventListener("scroll",updateHeaderOnScroll,{passive:true});
 function refreshAll(){updateSummary();ensureDailyQuickLook();fillFilterOptions();renderRelatedSelect();renderWardrobe();renderShoes();renderJewelry();renderTrash();renderCurrentLook();renderRandomLook();renderQuickLook();renderWishlist();renderFavorites();renderVinted();renderSavedLooksCarousel();renderOccasionButtons();renderCombineGroups();renderLooksManualOutfit();renderOwnLook();renderLooksOwnLook()}function toast(msg,type="ok"){const box=document.getElementById("toastBox");if(!box)return alert(msg);const t=document.createElement("div");t.className=`toast toast-${type}`;t.textContent=msg;box.appendChild(t);requestAnimationFrame(()=>t.classList.add("show"));setTimeout(()=>{t.classList.remove("show");setTimeout(()=>t.remove(),300)},3200)}
 const IDB_NAME="bricloset_mirror_db",IDB_STORE="backups";function idbOpen(){return new Promise((resolve,reject)=>{const req=indexedDB.open(IDB_NAME,1);req.onupgradeneeded=()=>req.result.createObjectStore(IDB_STORE);req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}async function mirrorToIndexedDB(){try{const db=await idbOpen(),tx=db.transaction(IDB_STORE,"readwrite");tx.objectStore(IDB_STORE).put({version:APP_DATA_VERSION,savedLooks,recentLooks,wishlist,guardado_en:new Date().toISOString()},"latest")}catch(e){console.warn("No se pudo espejar en IndexedDB",e)}}async function recoverFromIndexedDB(){try{const db=await idbOpen(),tx=db.transaction(IDB_STORE,"readonly"),req=tx.objectStore(IDB_STORE).get("latest");return new Promise(res=>{req.onsuccess=()=>res(req.result||null);req.onerror=()=>res(null)})}catch(e){return null}}
 window.toggleMoreMenu = function(event){
+
     if(event){
         event.stopPropagation();
     }
 
-    const menu = document.getElementById("moreMenu");
-    const panel = document.getElementById("moreMenuPanel");
-    const button = document.getElementById("moreMenuButton");
+    const menu =
+        document.getElementById("moreMenu");
+
+    const panel =
+        document.getElementById("moreMenuPanel");
+
+    const button =
+        document.getElementById("moreMenuButton");
 
     if(!menu || !panel || !button){
         console.warn("No se encontró el menú Más.");
         return;
     }
 
-    const isOpen = !panel.classList.contains("hidden");
+    const isOpen =
+        !panel.classList.contains("hidden");
 
     if(isOpen){
+
         panel.classList.add("hidden");
+
         menu.classList.remove("open");
-        button.setAttribute("aria-expanded","false");
+
+        button.setAttribute(
+            "aria-expanded",
+            "false"
+        );
+
+        menu.appendChild(panel);
+
         return;
     }
 
-    panel.classList.remove("hidden");
-    menu.classList.add("open");
-    button.setAttribute("aria-expanded","true");
-
-    /* 
-       El contenedor .tabs tiene overflow-x:auto.
-       Por eso el menú no puede depender de position:absolute
-       dentro de .tabs: lo colocamos respecto a la ventana.
+    /*
+     Sacamos el panel de .tabs para evitar
+     que overflow-x:auto lo recorte en móvil/tablet.
     */
+    document.body.appendChild(panel);
+
+    panel.classList.remove("hidden");
+
     panel.style.position = "fixed";
-  panel.style.zIndex = "99999";
+    panel.style.zIndex = "999999";
 
-    const rect = button.getBoundingClientRect();
+    const rect =
+        button.getBoundingClientRect();
 
-    const panelWidth = panel.offsetWidth || 200;
+    const panelWidth =
+        panel.offsetWidth || 200;
+
     const margin = 8;
 
-    let left = rect.right - panelWidth;
+    let left =
+        rect.right - panelWidth;
 
     if(left < margin){
         left = margin;
     }
 
-    if(left + panelWidth > window.innerWidth - margin){
-        left = window.innerWidth - panelWidth - margin;
+    if(
+        left + panelWidth >
+        window.innerWidth - margin
+    ){
+        left =
+            window.innerWidth -
+            panelWidth -
+            margin;
     }
 
-    let top = rect.bottom + margin;
+    let top =
+        rect.bottom + margin;
 
-    const panelHeight = panel.offsetHeight || 250;
+    const panelHeight =
+        panel.offsetHeight || 250;
 
-    if(top + panelHeight > window.innerHeight - margin){
-        top = rect.top - panelHeight - margin;
+    if(
+        top + panelHeight >
+        window.innerHeight - margin
+    ){
+        top =
+            rect.top -
+            panelHeight -
+            margin;
     }
 
     if(top < margin){
         top = margin;
     }
 
-    panel.style.left = `${left}px`;
-    panel.style.top = `${top}px`;
-    panel.style.right = "auto";
+    panel.style.left =
+        `${left}px`;
+
+    panel.style.top =
+        `${top}px`;
+
+    panel.style.right =
+        "auto";
+
+    menu.classList.add("open");
+
+    button.setAttribute(
+        "aria-expanded",
+        "true"
+    );
 };
 
 window.closeMoreMenu = function(){
-    const menu = document.getElementById("moreMenu");
-    const panel = document.getElementById("moreMenuPanel");
-    const button = document.getElementById("moreMenuButton");
+
+    const menu =
+        document.getElementById("moreMenu");
+
+    const panel =
+        document.getElementById("moreMenuPanel");
+
+    const button =
+        document.getElementById("moreMenuButton");
 
     if(!menu || !panel || !button){
         return;
     }
 
     panel.classList.add("hidden");
-    menu.classList.remove("open");
-    button.setAttribute("aria-expanded","false");
-};
 
+    menu.classList.remove("open");
+
+    button.setAttribute(
+        "aria-expanded",
+        "false"
+    );
+
+    if(panel.parentElement !== menu){
+        menu.appendChild(panel);
+    }
+
+};
 window.openMoreView = function(view,button){
     window.closeMoreMenu();
     switchView(view,button);
