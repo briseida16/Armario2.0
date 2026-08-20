@@ -907,6 +907,42 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
 }.calendar-look-options{display:grid;gap:10px;margin-top:18px}.calendar-look-options button{display:grid;grid-template-columns:40px 1fr;column-gap:10px;text-align:left;border:1px solid var(--line,#eadde3);border-radius:16px;background:#fff;padding:13px;cursor:pointer;font:inherit}.calendar-look-options button:hover{background:#fff7fb}.calendar-look-options span{grid-row:1/3;font-size:1.5rem;align-self:center;text-align:center}.calendar-look-options strong{font-weight:900}.calendar-look-options small{color:#8c7180;margin-top:3px}
 .calendar-saved-looks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:16px;max-height:55vh;overflow:auto}.calendar-saved-look{border:1px solid var(--line,#eadde3);border-radius:14px;background:#fff;padding:7px;text-align:left;cursor:pointer;font:inherit}.calendar-saved-look img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:10px}.calendar-saved-look span{display:block;padding:6px 3px 2px}.calendar-saved-look strong,.calendar-saved-look small{display:block}.calendar-saved-look small{color:#8c7180;margin-top:2px}
 @media(max-width:600px){.calendar-day{min-height:66px;padding:5px}.calendar-plan-dot{font-size:.56rem}.calendar-shell,.calendar-detail{padding:12px}.calendar-look-box{padding:20px}.calendar-saved-looks{grid-template-columns:repeat(2,minmax(0,1fr))}}
+#repairRecycleModal{
+    position:fixed;
+    inset:0;
+    z-index:99999;
+}
+
+.repair-recycle-backdrop{
+    position:fixed;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    background:rgba(30,20,30,.35);
+    backdrop-filter:blur(3px);
+}
+
+.repair-recycle-card{
+    width:min(440px,100%);
+    max-height:90vh;
+    overflow:auto;
+    background:#fff;
+    border-radius:20px;
+    padding:22px;
+    box-shadow:0 20px 60px rgba(0,0,0,.22);
+}
+
+.repair-recycle-card h2{
+    margin-top:0;
+}
+
+.repair-recycle-card .button-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+}
 </style></head><body><header><h1>BriCloset ✨</h1><div class="subtitle">🌸 Toda tu ropa en un solo armario virtual, crea looks diferentes y utiliza todo lo que tienes para explotar tu potencial 🌸</div><div class="top-actions"><div class="auth-panel"><button type="button" class="primary-btn" id="loginBtn" onclick="openLoginModal()">
     Iniciar sesión
 </button><div class="auth-user hidden" id="authUserBox" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false"><img class="auth-photo hidden" id="authPhoto" alt="Foto de usuario"><span class="auth-initials hidden" id="authInitials" aria-hidden="true"></span><span class="auth-menu-arrow" aria-hidden="true">▼</span><div class="user-menu hidden" id="userMenu"><button type="button">👤 Mi perfil</button><button type="button" id="logoutBtn">🚪 Cerrar sesión</button></div></div><div class="mini-badge hidden" id="syncStatus">Esperando sesión</div></div></div>
@@ -4180,53 +4216,64 @@ function openRepairRecycleModal(id){
 
     if(!g) return;
 
+    // Evitar que se acumulen varios popups
+    const existing=
+        document.getElementById("repairRecycleModal");
+
+    if(existing){
+        existing.remove();
+    }
+
     const modal=document.createElement("div");
 
     modal.id="repairRecycleModal";
 
-    modal.className="modal-overlay";
-
     modal.innerHTML=`
-        <div class="modal-card">
+        <div class="repair-recycle-backdrop"
+             onclick="closeRepairRecycleModal()">
 
-            <h2>¿Qué quieres hacer con esta prenda?</h2>
+            <div class="repair-recycle-card"
+                 onclick="event.stopPropagation()">
 
-            <p class="muted">
-                Elige qué ha pasado con ella.
-            </p>
+                <h2>¿Qué quieres hacer con esta prenda?</h2>
 
-            <div class="button-column">
+                <p class="muted">
+                    Elige qué ha pasado con ella.
+                </p>
+
+                <div class="button-row">
+
+                    <button
+                        class="small-btn"
+                        onclick="showRecycleOptions('${g.id}')"
+                    >
+                        ♻️ La he reciclado / donado
+                    </button>
+
+                    <button
+                        class="small-btn"
+                        onclick="showRepairOptions('${g.id}')"
+                    >
+                        🛠️ La he arreglado
+                    </button>
+
+                </div>
 
                 <button
                     class="small-btn"
-                    onclick="showRecycleOptions('${g.id}')"
+                    style="margin-top:14px;"
+                    onclick="closeRepairRecycleModal()"
                 >
-                    ♻️ La he reciclado / donado
-                </button>
-
-                <button
-                    class="small-btn"
-                    onclick="showRepairOptions('${g.id}')"
-                >
-                    🛠️ La he arreglado
+                    Cancelar
                 </button>
 
             </div>
-
-            <button
-                class="small-btn"
-                style="margin-top:14px;"
-                onclick="closeRepairRecycleModal()"
-            >
-                Cancelar
-            </button>
 
         </div>
     `;
 
     document.body.appendChild(modal);
-}
-  function deleteGarment(id){const g=findGarment(id);if(!g||!confirm(`¿Mover "${g.nombre}" a la papelera? Podrás recuperarla durante 30 días.`))return;g.eliminado_en=new Date().toISOString();persist();refreshAll();toast("Prenda movida a la papelera 🗑️")}
+}function deleteGarment(id){const g=findGarment(id);if(!g||!confirm(`¿Mover "${g.nombre}" a la papelera? Podrás recuperarla durante 30 días.`))return;g.eliminado_en=new Date().toISOString();persist();refreshAll();toast("Prenda movida a la papelera 🗑️")}
 function closeRepairRecycleModal(){
 
     const modal=
