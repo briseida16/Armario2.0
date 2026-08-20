@@ -3278,12 +3278,19 @@ if (saveGarmentBtn) {
 }
 function readGarmentForm(old={}){return{id:editingGarmentId||uid(),nombre:document.getElementById("nombre").value.trim(),grupo:document.getElementById("grupo").value,categoria:document.getElementById("categoria").value,color:document.getElementById("color").value.trim(),marca:document.getElementById("marca").value.trim(),temporada: getChecks("temporadaChecks"),estado:document.getElementById("estado").value,
 opinion:document.getElementById("opinion").value,
-ocasiones:getChecks("occasionChecks"),talla:document.getElementById("talla").value.trim(),precio:document.getElementById("precio").value,cantidad:Math.max(1,Number(document.getElementById("cantidad").value||1)),basico:document.getElementById("basico").checked,reversible:document.getElementById("reversible").checked,favorito:document.getElementById("favorito").value==="true",disponible:document.getElementById("disponible").checked,en_vinted:document.getElementById("enVinted").checked,comentarios:document.getElementById("comentarios").value.trim(),relacionadas:selectedRelated(),foto:old.foto||placeholderImg,usos:old.usos||0,
+ocasiones:getChecks("occasionChecks"),talla:document.getElementById("talla").value.trim(),precio:document.getElementById("precio").value,cantidad:Math.max(1,Number(document.getElementById("cantidad").value||1)),basico:document.getElementById("basico").checked,reversible:document.getElementById("reversible").checked,favorito:document.getElementById("favorito").value==="true",disponible:document.getElementById("disponible").checked,en_vinted:document.getElementById("enVinted").checked,comentarios:document.getElementById("comentarios").value.trim(),relacionadas:selectedRelated(),foto:old.foto||placeholderImg,
+usos:old.usos||0,
 ultimo_uso:old.ultimo_uso||null,
 creado_en:old.creado_en||new Date().toISOString(),
+
 vendida:old.vendida||false,
+fecha_venta:old.fecha_venta||null,
+precio_venta:old.precio_venta ?? null,
+
 reciclada:old.reciclada||false,
-eliminado_en:null,schema_version:APP_DATA_VERSION}}
+
+eliminado_en:null,
+schema_version:APP_DATA_VERSION}}
 function saveGarment(){const file=document.getElementById("foto").files[0],old=findGarment(editingGarmentId)||{},data=readGarmentForm(old);if(!data.nombre)return toast("Pon al menos un nombre a la prenda.","warn");if(!data.ocasiones.length)return toast("Marca al menos una ocasión.","warn");const finish=finalData=>{if(editingGarmentId){const i=garments.findIndex(g=>g.id===editingGarmentId);if(i!==-1)garments[i]=finalData}else garments.unshift(finalData);persist();resetForm();refreshAll();switchView(garmentFormReturnView);
 toast(
     garmentFormReturnView === "zapatero"
@@ -6114,7 +6121,102 @@ function vintedActiveCard(g){
         </div>
     `;
 }
-  function vintedRepairSuggestionCard(g){
+function vintedSoldCard(g){
+
+    const precioCompra =
+        Number(g.precio);
+
+    const precioVenta =
+        Number(g.precio_venta);
+
+    const usos =
+        Number(g.usos)||0;
+
+    const precioPorUso =
+        precioCompra>0 && usos>0
+            ? precioCompra/usos
+            : null;
+
+    return `
+        <div class="item-card">
+
+            <img
+                src="${g.foto||placeholderImg}"
+                alt="${esc(g.nombre)}"
+            >
+
+            <div class="item-body">
+
+                <p class="item-name">
+                    ${esc(g.nombre)}
+                </p>
+
+                <p class="meta">
+                    ${esc(fmtCat(g.categoria))}
+                </p>
+
+                ${g.marca
+                    ? `<p class="meta">Marca: ${esc(g.marca)}</p>`
+                    : ""
+                }
+
+                ${g.talla
+                    ? `<p class="meta">Talla: ${esc(g.talla)}</p>`
+                    : ""
+                }
+
+                <div class="meta" style="margin-top:8px;">
+                    💳 Compra:
+                    ${
+                        precioCompra>0
+                            ? `${precioCompra.toFixed(2)} €`
+                            : "—"
+                    }
+                </div>
+
+                <div class="meta">
+                    💰 Venta:
+                    ${
+                        Number.isFinite(precioVenta)
+                            ? `${precioVenta.toFixed(2)} €`
+                            : "—"
+                    }
+                </div>
+
+                <div class="meta">
+                    👗 Usos:
+                    ${usos || "—"}
+                </div>
+
+                ${
+                    precioPorUso!==null
+                        ? `
+                            <div class="meta">
+                                📊 Precio por uso:
+                                ${precioPorUso.toFixed(2)} €
+                            </div>
+                          `
+                        : ""
+                }
+
+                ${
+                    g.fecha_venta
+                        ? `
+                            <div class="meta">
+                                📅 Vendida:
+                                ${new Date(g.fecha_venta)
+                                    .toLocaleDateString("es-ES")}
+                            </div>
+                          `
+                        : ""
+                }
+
+            </div>
+
+        </div>
+    `;
+}
+function vintedRepairSuggestionCard(g){
 
     return `
         <div class="item-card">
@@ -6287,7 +6389,7 @@ function vintedActiveCard(g){
 
         soldBox.innerHTML =
             sold.length
-                ? sold.map(garmentCard).join("")
+                ? sold.map(vintedSoldCard).join("")
                 : '<div class="empty">Todavía no tienes prendas marcadas como vendidas.</div>';
 
     }
