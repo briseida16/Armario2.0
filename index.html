@@ -5876,7 +5876,135 @@ function renderFavorites() {
             '<div class="empty">No tienes joyas favoritas todavía.</div>';
     }
 }
-function vintedSuggestionCard(g){
+function openSoldModal(id){
+
+    const g=findGarment(id);
+
+    if(!g) return;
+
+    const existing=
+        document.getElementById("soldModal");
+
+    if(existing){
+        existing.remove();
+    }
+
+    const modal=document.createElement("div");
+
+    modal.id="soldModal";
+
+    modal.innerHTML=`
+        <div class="repair-recycle-backdrop"
+             onclick="closeSoldModal()">
+
+            <div class="repair-recycle-card"
+                 onclick="event.stopPropagation()">
+
+                <h2>💰 ¿Por cuánto lo has vendido?</h2>
+
+                <p class="muted">
+                    Introduce el importe que has recibido.
+                </p>
+
+                <input
+                    id="soldPriceInput"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    inputmode="decimal"
+                    placeholder="0,00 €"
+                    style="
+                        width:100%;
+                        padding:12px;
+                        border:1px solid var(--line);
+                        border-radius:12px;
+                        margin:10px 0;
+                        font:inherit;
+                        box-sizing:border-box;
+                    "
+                >
+
+                <div class="button-row">
+
+                    <button
+                        class="small-btn"
+                        onclick="confirmSoldGarment('${g.id}')"
+                    >
+                        💰 Confirmar venta
+                    </button>
+
+                    <button
+                        class="small-btn"
+                        onclick="closeSoldModal()"
+                    >
+                        Cancelar
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    setTimeout(() => {
+        document.getElementById("soldPriceInput")?.focus();
+    },50);
+}
+ function closeSoldModal(){
+
+    const modal=
+        document.getElementById("soldModal");
+
+    if(modal){
+        modal.remove();
+    }
+
+}
+function confirmSoldGarment(id){
+
+    const g=findGarment(id);
+
+    if(!g) return;
+
+    const input=
+        document.getElementById("soldPriceInput");
+
+    const price=
+        Number(
+            String(input?.value||"")
+                .replace(",",".")
+        );
+
+    if(!Number.isFinite(price) || price<0){
+
+        toast(
+            "Introduce un precio de venta válido.",
+            "warn"
+        );
+
+        return;
+    }
+
+    g.precio_venta=price;
+    g.fecha_venta=new Date().toISOString();
+
+    g.vendida=true;
+    g.en_vinted=false;
+    g.reciclada=false;
+
+    persist();
+
+    closeSoldModal();
+
+    refreshAll();
+
+    toast("Venta registrada 💰");
+
+}
+  function vintedSuggestionCard(g){
 
     return `
         <div class="item-card">
@@ -5930,7 +6058,63 @@ function vintedSuggestionCard(g){
         </div>
     `;
 }
-function vintedRepairSuggestionCard(g){
+function vintedActiveCard(g){
+
+    return `
+        <div class="item-card">
+
+            <img
+                src="${g.foto||placeholderImg}"
+                alt="${esc(g.nombre)}"
+            >
+
+            <div class="item-body">
+
+                <p class="item-name">
+                    ${esc(g.nombre)}
+                </p>
+
+                ${g.marca
+                    ? `<p class="meta">Marca: ${esc(g.marca)}</p>`
+                    : ""
+                }
+
+                ${g.talla
+                    ? `<p class="meta">Talla: ${esc(g.talla)}</p>`
+                    : ""
+                }
+
+                <p class="meta">
+                    ${esc(fmtCat(g.categoria))}
+                </p>
+
+                <div
+                    class="button-row"
+                    style="margin-top:10px"
+                >
+
+                    <button
+                        class="small-btn"
+                        onclick="openSoldModal('${g.id}')"
+                    >
+                        💰 Marcar como vendida
+                    </button>
+
+                    <button
+                        class="small-btn"
+                        onclick="editGarment('${g.id}')"
+                    >
+                        ✏️ Revisar
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+    `;
+}
+  function vintedRepairSuggestionCard(g){
 
     return `
         <div class="item-card">
@@ -8127,7 +8311,9 @@ document
         "change",
         previewJewelPhoto
     );
-  Object.assign(window,{login,register,openLoginModal,closeLoginModal,openJewelForm,closeJewelForm,resetJewelForm,updateJewelGiftField,saveJewel,renderJewelry,filteredJewelry,clearJewelryFilters,editJewel,renderJewelRelatedList,toggleJewelRelated,toggleJewelryFavorite,deleteJewel,logout,toggleRelated,switchView,openShoeForm,renderShoes,filteredShoes,renderShoeStats,clearShoesFilters,fillShoeFilterOptions,populateCategoryOptions,saveGarment,resetForm,renderWardrobe,renderShoes,clearShoesFilters,applySummaryFilter,clearWardrobeFilters,clearWardrobeSpecialFilters,applyWardrobeSpecialFilter,exportData,importData,editGarment,toggleFavorite,toggleVinted,openRepairRecycleModal,
+  Object.assign(window,{login,register,openLoginModal,closeLoginModal,openJewelForm,closeJewelForm,resetJewelForm,updateJewelGiftField,saveJewel,renderJewelry,filteredJewelry,clearJewelryFilters,editJewel,renderJewelRelatedList,toggleJewelRelated,toggleJewelryFavorite,deleteJewel,logout,toggleRelated,switchView,openShoeForm,renderShoes,filteredShoes,renderShoeStats,clearShoesFilters,fillShoeFilterOptions,populateCategoryOptions,saveGarment,resetForm,renderWardrobe,renderShoes,clearShoesFilters,applySummaryFilter,clearWardrobeFilters,clearWardrobeSpecialFilters,applyWardrobeSpecialFilter,exportData,importData,editGarment,toggleFavorite,toggleVinted,openRepairRecycleModal,openSoldModal,
+closeSoldModal,
+confirmSoldGarment,
 closeRepairRecycleModal,
 showRecycleOptions,
 recycleGarment,
