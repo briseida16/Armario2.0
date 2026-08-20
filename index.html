@@ -2582,7 +2582,7 @@ const seasons=[["todo_anio","Todo el año"],["invierno","❄️ Invierno"],["pri
 let garments=[],
     savedLooks=[],
     recentLooks=[],
-    wishlist=[],
+    cuponesObtenidos=0,
     editingGarmentId=null,
     garmentFormReturnView="armario",
     editingWishId=null,
@@ -2877,7 +2877,27 @@ function persistPendingGarmentIds(){storage.set(STORAGE_PENDING_GARMENTS,JSON.st
 // Copia local inmediata del armario. Se hace SIEMPRE, haya o no conexión: es la garantía de que una prenda
 // nunca se pierde aunque Firestore falle, tarde o no exista sesión todavía.
 function persistGarmentsLocally(){try{storage.set(garmentsLocalKey(),JSON.stringify(garments))}catch(e){console.warn("No se pudo guardar el armario localmente",e)}}
-function loadGarmentsLocally(){const scoped=safeParse(storage.get(garmentsLocalKey()),null);if(scoped)return scoped;return safeParse(storage.get(STORAGE_GARMENTS),[])}
+const STORAGE_COUPONS="bricloset_cupones_obtenidos";
+function persistCoupons(){
+
+    try{
+
+        storage.set(
+            STORAGE_COUPONS,
+            String(cuponesObtenidos)
+        );
+
+    }catch(e){
+
+        console.warn(
+            "No se pudieron guardar los cupones",
+            e
+        );
+
+    }
+
+}
+  function loadGarmentsLocally(){const scoped=safeParse(storage.get(garmentsLocalKey()),null);if(scoped)return scoped;return safeParse(storage.get(STORAGE_GARMENTS),[])}
 // Sincroniza el armario con Firestore escribiendo SOLO las prendas que cambiaron desde la última confirmación
 // (comparando contra lastSyncedGarmentSnapshot) y borrando solo las que ya no existen localmente. Esto evita
 // reescribir todo el array en cada guardado (menos riesgo de choque entre dispositivos y de superar el límite
@@ -4113,8 +4133,220 @@ function renderShoes() {
 }window.applySummaryFilter = applySummaryFilter;
 window.clearWardrobeFilters = clearWardrobeFilters;
 function renderTrash(){const box=document.getElementById("trashGrid"),items=garments.filter(g=>g.eliminado_en);box.innerHTML=items.length?items.map(g=>`<div class="item-card"><img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}"><div class="item-body"><p class="item-name">${esc(g.nombre)}</p><p class="meta">Se borrará definitivamente en ${Math.max(0,30-Math.floor((Date.now()-new Date(g.eliminado_en).getTime())/86400000))} día(s)</p><div class="button-row" style="margin-top:10px"><button class="small-btn" onclick="restoreGarment('${g.id}')">Restaurar</button><button class="small-btn danger-btn" onclick="deleteGarmentForever('${g.id}')">Borrar ya</button></div></div></div>`).join(""):'<div class="empty">La papelera está vacía.</div>'}
-function markUsed(id){const g=findGarment(id);if(g){g.usos=(g.usos||0)+1;g.ultimo_uso=new Date().toISOString();persist();refreshAll()}}function toggleFavorite(id){const g=findGarment(id);if(g){g.favorito=!g.favorito;persist();refreshAll()}}function toggleVinted(id){const g=findGarment(id);if(g){g.en_vinted=!g.en_vinted;persist();refreshAll()}}function deleteGarment(id){const g=findGarment(id);if(!g||!confirm(`¿Mover "${g.nombre}" a la papelera? Podrás recuperarla durante 30 días.`))return;g.eliminado_en=new Date().toISOString();persist();refreshAll();toast("Prenda movida a la papelera 🗑️")}function restoreGarment(id){const g=findGarment(id);if(g){g.eliminado_en=null;persist();refreshAll();toast("Prenda restaurada ✅")}}function deleteGarmentForever(id){const g=findGarment(id);if(!g||!confirm(`Esto borrará "${g.nombre}" para siempre. ¿Seguro?`))return;garments=garments.filter(x=>x.id!==id);savedLooks=savedLooks.map(l=>cleanLookIds(l,id));recentLooks=recentLooks.map(l=>cleanLookIds(l,id));persist();refreshAll()}function purgeOldTrash(){const limit=Date.now()-30*24*60*60*1000;garments=garments.filter(g=>!g.eliminado_en||new Date(g.eliminado_en).getTime()>=limit)}function cleanLookIds(l,id){const x={...l};["abrigo","exterior","interior","inferior","vestido","calzado","bolso"].forEach(k=>{if(x[k]===id)x[k]=null});x.accesorios=normalizeIds(x.accesorios).filter(a=>a!==id);return x}
-function outfitSlotsHtml(prefix){return Object.keys(emptyLook()).map(k=>`<div class="slot" id="${prefix}_${k}"></div>`).join("")}function renderOutfitShell(){document.getElementById("manualOutfit").innerHTML=outfitSlotsHtml("slot");document.getElementById("randomOutfit").innerHTML=outfitSlotsHtml("random")}
+function markUsed(id){const g=findGarment(id);if(g){g.usos=(g.usos||0)+1;g.ultimo_uso=new Date().toISOString();persist();refreshAll()}}
+function toggleFavorite(id){const g=findGarment(id);if(g){g.favorito=!g.favorito;persist();refreshAll()}}
+function toggleVinted(id){const g=findGarment(id);if(g){g.en_vinted=!g.en_vinted;persist();refreshAll()}}
+function putGarmentOnVinted(id){
+    const g=findGarment(id);
+    if(!g) return;
+    g.en_vinted=true;
+    g.vendida=false;
+    g.reciclada=false;
+    persist();
+    refreshAll();
+    toast("Prenda añadida a Vinted 🛍️");
+}
+function openRepairRecycleModal(id){
+
+    const g=findGarment(id);
+
+    if(!g) return;
+
+    const modal=document.createElement("div");
+
+    modal.id="repairRecycleModal";
+
+    modal.className="modal-overlay";
+
+    modal.innerHTML=`
+        <div class="modal-card">
+
+            <h2>¿Qué quieres hacer con esta prenda?</h2>
+
+            <p class="muted">
+                Elige qué ha pasado con ella.
+            </p>
+
+            <div class="button-column">
+
+                <button
+                    class="small-btn"
+                    onclick="showRecycleOptions('${g.id}')"
+                >
+                    ♻️ La he reciclado / donado
+                </button>
+
+                <button
+                    class="small-btn"
+                    onclick="showRepairOptions('${g.id}')"
+                >
+                    🛠️ La he arreglado
+                </button>
+
+            </div>
+
+            <button
+                class="small-btn"
+                style="margin-top:14px;"
+                onclick="closeRepairRecycleModal()"
+            >
+                Cancelar
+            </button>
+
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+}
+  function deleteGarment(id){const g=findGarment(id);if(!g||!confirm(`¿Mover "${g.nombre}" a la papelera? Podrás recuperarla durante 30 días.`))return;g.eliminado_en=new Date().toISOString();persist();refreshAll();toast("Prenda movida a la papelera 🗑️")}
+function closeRepairRecycleModal(){
+
+    const modal=
+        document.getElementById("repairRecycleModal");
+
+    if(modal){
+        modal.remove();
+    }
+
+}
+function showRecycleOptions(id){
+
+    const modal=
+        document.getElementById("repairRecycleModal");
+
+    if(!modal) return;
+
+    modal.querySelector(".modal-card").innerHTML=`
+
+        <h2>♻️ ¿Dónde la has llevado?</h2>
+
+        <p class="muted">
+            Cuéntame qué has hecho con la prenda.
+        </p>
+
+        <div class="button-column">
+
+            <button
+                class="small-btn"
+                onclick="recycleGarment('${id}',false)"
+            >
+                ♻️ Contenedor / recogida textil
+            </button>
+
+            <button
+                class="small-btn"
+                onclick="recycleGarment('${id}',true)"
+            >
+                🛍️ Tienda con cupón
+            </button>
+
+        </div>
+
+        <button
+            class="small-btn"
+            style="margin-top:14px;"
+            onclick="closeRepairRecycleModal()"
+        >
+            Cancelar
+        </button>
+
+    `;
+}
+  function recycleGarment(id,gotCoupon=false){
+
+    const g=findGarment(id);
+
+    if(!g) return;
+
+    g.reciclada=true;
+    g.en_vinted=false;
+    g.vendida=false;
+
+    if(gotCoupon){
+
+    cuponesObtenidos++;
+
+}
+
+    persist();
+
+    closeRepairRecycleModal();
+
+    refreshAll();
+
+    toast(
+        gotCoupon
+            ? "Prenda reciclada · +1 cupón 🎟️"
+            : "Prenda reciclada ♻️"
+    );
+
+}
+ function showRepairOptions(id){
+
+    const modal=
+        document.getElementById("repairRecycleModal");
+
+    if(!modal) return;
+
+    modal.querySelector(".modal-card").innerHTML=`
+
+        <h2>🛠️ ¿Qué has hecho con ella?</h2>
+
+        <p class="muted">
+            Si ya está arreglada, puedes actualizar su opinión.
+        </p>
+
+        <div class="button-column">
+
+            <button
+                class="small-btn"
+                onclick="editGarment('${id}');closeRepairRecycleModal();"
+            >
+                ✏️ Editar prenda
+            </button>
+
+            <button
+                class="small-btn"
+                onclick="markGarmentForRepair('${id}')"
+            >
+                🧵 Marcar para arreglar
+            </button>
+
+        </div>
+
+        <button
+            class="small-btn"
+            style="margin-top:14px;"
+            onclick="closeRepairRecycleModal()"
+        >
+            Cancelar
+        </button>
+
+    `;
+}
+ function markGarmentForRepair(id){
+
+    const g=findGarment(id);
+
+    if(!g) return;
+
+    g.pendiente_arreglo=true;
+
+    persist();
+
+    closeRepairRecycleModal();
+
+    refreshAll();
+
+    toast("Prenda marcada para arreglar 🧵");
+
+}
+  function restoreGarment(id){const g=findGarment(id);if(g){g.eliminado_en=null;persist();refreshAll();toast("Prenda restaurada ✅")}}
+  function deleteGarmentForever(id){const g=findGarment(id);if(!g||!confirm(`Esto borrará "${g.nombre}" para siempre. ¿Seguro?`))return;garments=garments.filter(x=>x.id!==id);savedLooks=savedLooks.map(l=>cleanLookIds(l,id));recentLooks=recentLooks.map(l=>cleanLookIds(l,id));persist();refreshAll()}
+  function purgeOldTrash(){const limit=Date.now()-30*24*60*60*1000;garments=garments.filter(g=>!g.eliminado_en||new Date(g.eliminado_en).getTime()>=limit)}
+  function cleanLookIds(l,id){const x={...l};["abrigo","exterior","interior","inferior","vestido","calzado","bolso"].forEach(k=>{if(x[k]===id)x[k]=null});x.accesorios=normalizeIds(x.accesorios).filter(a=>a!==id);return x}
+function outfitSlotsHtml(prefix){return Object.keys(emptyLook()).map(k=>`<div class="slot" id="${prefix}_${k}"></div>`).join("")}
+  function renderOutfitShell(){document.getElementById("manualOutfit").innerHTML=outfitSlotsHtml("slot");document.getElementById("randomOutfit").innerHTML=outfitSlotsHtml("random")}
 function availablePool(occasion){
 
 let pool=garments.filter(g=>
@@ -5507,6 +5739,60 @@ function renderFavorites() {
             '<div class="empty">No tienes joyas favoritas todavía.</div>';
     }
 }
+function vintedSuggestionCard(g){
+
+    return `
+        <div class="item-card">
+
+            <img
+                src="${g.foto||placeholderImg}"
+                alt="${esc(g.nombre)}"
+            >
+
+            <div class="item-body">
+
+                <p class="item-name">
+                    ${esc(g.nombre)}
+                </p>
+
+                ${g.marca
+                    ? `<p class="meta">Marca: ${esc(g.marca)}</p>`
+                    : ""
+                }
+
+                ${g.talla
+                    ? `<p class="meta">Talla: ${esc(g.talla)}</p>`
+                    : ""
+                }
+
+                <p class="meta">
+                    ${esc(fmtCat(g.categoria))}
+                </p>
+
+                <div
+                    class="button-row"
+                    style="margin-top:10px"
+                >
+                    <button
+                        class="small-btn"
+                        onclick="putGarmentOnVinted('${g.id}')"
+                    >
+                        🛍️ Poner en Vinted
+                    </button>
+
+                    <button
+                        class="small-btn"
+                        onclick="editGarment('${g.id}')"
+                    >
+                        ✏️ Revisar
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+    `;
+}
   function renderVinted(){
 
     const active =
@@ -5549,6 +5835,9 @@ function renderFavorites() {
             if(!isPhysicalWardrobeItem(g)){
                 return false;
             }
+                  if(g.en_vinted){
+            return false;
+        }
 
             const referenceDate =
                 g.ultimo_uso ||
@@ -5593,7 +5882,7 @@ function renderFavorites() {
 
         letGoBox.innerHTML =
             letGo.length
-                ? letGo.map(garmentCard).join("")
+                ? letGo.map(vintedSuggestionCard).join("")
                 : '<div class="empty">No hay prendas que encajen en esta sección.</div>';
 
     }
@@ -5605,7 +5894,7 @@ function renderFavorites() {
 
         oldBox.innerHTML =
             old.length
-                ? old.map(garmentCard).join("")
+                ? old.map(vintedSuggestionCard).join("")
                 : '<div class="empty">No hay prendas con más de un año sin uso.</div>';
 
     }
@@ -7589,7 +7878,12 @@ document
         "change",
         previewJewelPhoto
     );
-  Object.assign(window,{login,register,openLoginModal,closeLoginModal,openJewelForm,closeJewelForm,resetJewelForm,updateJewelGiftField,saveJewel,renderJewelry,filteredJewelry,clearJewelryFilters,editJewel,renderJewelRelatedList,toggleJewelRelated,toggleJewelryFavorite,deleteJewel,logout,toggleRelated,switchView,openShoeForm,renderShoes,filteredShoes,renderShoeStats,clearShoesFilters,fillShoeFilterOptions,populateCategoryOptions,saveGarment,resetForm,renderWardrobe,renderShoes,clearShoesFilters,applySummaryFilter,clearWardrobeFilters,clearWardrobeSpecialFilters,applyWardrobeSpecialFilter,exportData,importData,editGarment,toggleFavorite,toggleVinted,deleteGarment,restoreGarment,deleteGarmentForever,markUsed,openSelector,selectGarmentForSlot,removeFromLook,removeAccessory,clearLook,saveCurrentLook,generateQuickLook,saveQuickLook,copyQuickToManual,generateLook,repeatLastLook,saveRandomLook,copyRandomToManual,loadSavedLook,toggleLookFavorite,deleteSavedLook,saveWish,resetWishForm,wishToWardrobe,deleteWish,generateHomeLook,saveHomeLook,dismissHomeLook,renderSavedLooksCarousel,renderOccasionButtons,renderCombineGroups,clearCombineFilters,chooseCombineGroup,backToCombineGroups,chooseCombineCategory,renderCombineGarments,selectCombineGarment,generateCombineLook,saveCombineLook,openLooksManualEditor,renderLooksManualOutfit,populateLooksSelector,renderLooksSelectorCategories,renderLooksSelectorGarments,openLooksManualSelector,selectLooksManualGarment,closeLooksManualSelector,removeLooksManualSlot,removeLooksManualAccessory,cancelLooksManualEditor,saveLooksManualEditor,renderOwnLook,renderOwnSelectorCategories,renderLooksOwnLook,renderLooksOwnSelectorCategories,renderLooksOwnSelectorGarments,openLooksOwnLookSelector,selectLooksOwnGarment,closeLooksOwnLookSelector,saveLooksOwnLook,cancelLooksOwnLook,removeLooksOwnSlot,removeLooksOwnAccessory,renderOwnSelectorGarments,openOwnLookSelector,selectOwnGarment,closeOwnLookSelector,removeOwnSlot,removeOwnAccessory,saveOwnLook,cancelOwnLook,openOwnLookSaveModal,closeOwnLookSaveModal,confirmOwnLookSave,editSavedLook,useSavedLook,chooseSaveLookType,toggleAllGarmentDetails});
+  Object.assign(window,{login,register,openLoginModal,closeLoginModal,openJewelForm,closeJewelForm,resetJewelForm,updateJewelGiftField,saveJewel,renderJewelry,filteredJewelry,clearJewelryFilters,editJewel,renderJewelRelatedList,toggleJewelRelated,toggleJewelryFavorite,deleteJewel,logout,toggleRelated,switchView,openShoeForm,renderShoes,filteredShoes,renderShoeStats,clearShoesFilters,fillShoeFilterOptions,populateCategoryOptions,saveGarment,resetForm,renderWardrobe,renderShoes,clearShoesFilters,applySummaryFilter,clearWardrobeFilters,clearWardrobeSpecialFilters,applyWardrobeSpecialFilter,exportData,importData,editGarment,toggleFavorite,toggleVinted,openRepairRecycleModal,
+closeRepairRecycleModal,
+showRecycleOptions,
+recycleGarment,
+showRepairOptions,
+markGarmentForRepair,putGarmentOnVinted,deleteGarment,restoreGarment,deleteGarmentForever,markUsed,openSelector,selectGarmentForSlot,removeFromLook,removeAccessory,clearLook,saveCurrentLook,generateQuickLook,saveQuickLook,copyQuickToManual,generateLook,repeatLastLook,saveRandomLook,copyRandomToManual,loadSavedLook,toggleLookFavorite,deleteSavedLook,saveWish,resetWishForm,wishToWardrobe,deleteWish,generateHomeLook,saveHomeLook,dismissHomeLook,renderSavedLooksCarousel,renderOccasionButtons,renderCombineGroups,clearCombineFilters,chooseCombineGroup,backToCombineGroups,chooseCombineCategory,renderCombineGarments,selectCombineGarment,generateCombineLook,saveCombineLook,openLooksManualEditor,renderLooksManualOutfit,populateLooksSelector,renderLooksSelectorCategories,renderLooksSelectorGarments,openLooksManualSelector,selectLooksManualGarment,closeLooksManualSelector,removeLooksManualSlot,removeLooksManualAccessory,cancelLooksManualEditor,saveLooksManualEditor,renderOwnLook,renderOwnSelectorCategories,renderLooksOwnLook,renderLooksOwnSelectorCategories,renderLooksOwnSelectorGarments,openLooksOwnLookSelector,selectLooksOwnGarment,closeLooksOwnLookSelector,saveLooksOwnLook,cancelLooksOwnLook,removeLooksOwnSlot,removeLooksOwnAccessory,renderOwnSelectorGarments,openOwnLookSelector,selectOwnGarment,closeOwnLookSelector,removeOwnSlot,removeOwnAccessory,saveOwnLook,cancelOwnLook,openOwnLookSaveModal,closeOwnLookSaveModal,confirmOwnLookSave,editSavedLook,useSavedLook,chooseSaveLookType,toggleAllGarmentDetails});
 try{loadData();populateStaticSelects();resetForm();resetWishForm();refreshAll();loadHomeWeather();document.getElementById("authUserBox")?.addEventListener("click",e=>{if(e.target.closest(".user-menu"))return;toggleUserMenu()});document.getElementById("authUserBox")?.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();toggleUserMenu()}else if(e.key==="Escape")closeUserMenu()});document.addEventListener("click",e=>{const box=document.getElementById("authUserBox");if(box&&!box.contains(e.target))closeUserMenu()});document.getElementById("logoutBtn")?.addEventListener("click",e=>{e.stopPropagation();closeUserMenu();logout()});onAuthStateChanged(auth,user=>{updateAuthUi(user);if(user){
     loadWardrobeFromFirestore(user);
     jewelry =
