@@ -2411,6 +2411,53 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
         <h2 class="section-title">🛍️ En venta</h2>
         <div id="vintedGrid" class="grid"></div>
     </div>
+    <div class="card" style="margin-top:16px;">
+    <h2 class="section-title">
+        💭 ¿Por qué no la dejas ir?
+    </h2>
+
+    <p class="muted">
+        Si no te gusta o no te queda bien, quizá sea hora de darle una segunda vida.
+    </p>
+
+    <div
+        id="vintedLetGoGrid"
+        class="grid"
+        style="margin-top:16px;"
+    ></div>
+</div>
+
+<div class="card" style="margin-top:16px;">
+    <h2 class="section-title">
+        ⏳ Hace más de un año...
+    </h2>
+
+    <p class="muted">
+        Hace más de un año que no te pones estas prendas. ¿Por qué no las vendes?
+    </p>
+
+    <div
+        id="vintedOldGrid"
+        class="grid"
+        style="margin-top:16px;"
+    ></div>
+</div>
+
+<div class="card" style="margin-top:16px;">
+    <h2 class="section-title">
+        🛠️ ¿Las arreglamos o las dejamos ir?
+    </h2>
+
+    <p class="muted">
+        Tienes prendas rotas o que necesitan un arreglo. Si no las vas a reparar, quizá sea hora de darles una segunda vida.
+    </p>
+
+    <div
+        id="vintedRepairGrid"
+        class="grid"
+        style="margin-top:16px;"
+    ></div>
+</div>
     <div class="card">
         <h2 class="section-title">✅ Vendidas</h2>
         <div id="vintedSoldGrid" class="grid"></div>
@@ -3083,7 +3130,12 @@ if (saveGarmentBtn) {
 }
 function readGarmentForm(old={}){return{id:editingGarmentId||uid(),nombre:document.getElementById("nombre").value.trim(),grupo:document.getElementById("grupo").value,categoria:document.getElementById("categoria").value,color:document.getElementById("color").value.trim(),marca:document.getElementById("marca").value.trim(),temporada: getChecks("temporadaChecks"),estado:document.getElementById("estado").value,
 opinion:document.getElementById("opinion").value,
-ocasiones:getChecks("occasionChecks"),talla:document.getElementById("talla").value.trim(),precio:document.getElementById("precio").value,cantidad:Math.max(1,Number(document.getElementById("cantidad").value||1)),basico:document.getElementById("basico").checked,reversible:document.getElementById("reversible").checked,favorito:document.getElementById("favorito").value==="true",disponible:document.getElementById("disponible").checked,en_vinted:document.getElementById("enVinted").checked,comentarios:document.getElementById("comentarios").value.trim(),relacionadas:selectedRelated(),foto:old.foto||placeholderImg,usos:old.usos||0,ultimo_uso:old.ultimo_uso||null,eliminado_en:null,schema_version:APP_DATA_VERSION}}
+ocasiones:getChecks("occasionChecks"),talla:document.getElementById("talla").value.trim(),precio:document.getElementById("precio").value,cantidad:Math.max(1,Number(document.getElementById("cantidad").value||1)),basico:document.getElementById("basico").checked,reversible:document.getElementById("reversible").checked,favorito:document.getElementById("favorito").value==="true",disponible:document.getElementById("disponible").checked,en_vinted:document.getElementById("enVinted").checked,comentarios:document.getElementById("comentarios").value.trim(),relacionadas:selectedRelated(),foto:old.foto||placeholderImg,usos:old.usos||0,
+ultimo_uso:old.ultimo_uso||null,
+creado_en:old.creado_en||new Date().toISOString(),
+vendida:old.vendida||false,
+reciclada:old.reciclada||false,
+eliminado_en:null,schema_version:APP_DATA_VERSION}}
 function saveGarment(){const file=document.getElementById("foto").files[0],old=findGarment(editingGarmentId)||{},data=readGarmentForm(old);if(!data.nombre)return toast("Pon al menos un nombre a la prenda.","warn");if(!data.ocasiones.length)return toast("Marca al menos una ocasión.","warn");const finish=finalData=>{if(editingGarmentId){const i=garments.findIndex(g=>g.id===editingGarmentId);if(i!==-1)garments[i]=finalData}else garments.unshift(finalData);persist();resetForm();refreshAll();switchView(garmentFormReturnView);
 toast(
     garmentFormReturnView === "zapatero"
@@ -3232,7 +3284,19 @@ function garmentCard(g){
 }
 function filtersActive(){return["searchInput","filterGroup","filterCategory","filterOccasion","filterFavorite","filterBrand","filterSeason","filterSize"].some(id=>document.getElementById(id)?.value)}
   function fillFilterOptions(){const active=garments.filter(g=>!g.eliminado_en),cur={};["filterGroup","filterCategory","filterOccasion","filterBrand","filterSeason","filterSize"].forEach(id=>cur[id]=document.getElementById(id)?.value||"");document.getElementById("filterGroup").innerHTML='<option value="">Todos los grupos</option>'+Object.entries(groupLabels).map(([v,l])=>`<option value="${v}" ${v===cur.filterGroup?"selected":""}>${l}</option>`).join("");document.getElementById("filterCategory").innerHTML='<option value="">Todas las categorías</option>'+Object.values(categoryOptions).flat().map(([v,l])=>`<option value="${v}" ${v===cur.filterCategory?"selected":""}>${l}</option>`).join("");document.getElementById("filterOccasion").innerHTML='<option value="">Todas las ocasiones</option>'+occasions.map(([v,l])=>`<option value="${v}" ${v===cur.filterOccasion?"selected":""}>${l}</option>`).join("");document.getElementById("filterSeason").innerHTML='<option value="">Todas las temporadas</option>'+seasons.map(([v,l])=>`<option value="${v}" ${v===cur.filterSeason?"selected":""}>${l}</option>`).join("");const brands=[...new Set(active.map(g=>g.marca).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"es")),sizes=[...new Set(active.map(g=>g.talla).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"es",{numeric:true}));document.getElementById("filterBrand").innerHTML='<option value="">Todas las marcas</option>'+brands.map(b=>`<option value="${esc(b)}" ${b===cur.filterBrand?"selected":""}>${esc(b)}</option>`).join("");document.getElementById("filterSize").innerHTML='<option value="">Todas las tallas</option>'+sizes.map(s=>`<option value="${esc(s)}" ${s===cur.filterSize?"selected":""}>${esc(s)}</option>`).join("")}
-function filteredGarments(){
+function isPhysicalWardrobeItem(g){
+
+    if(!g) return false;
+
+    if(g.eliminado_en) return false;
+
+    if(g.vendida === true) return false;
+
+    if(g.reciclada === true) return false;
+
+    return true;
+}
+  function filteredGarments(){
     const q=document.getElementById("searchInput").value.trim().toLowerCase();
     const group=document.getElementById("filterGroup").value;
     const cat=document.getElementById("filterCategory").value;
@@ -3245,9 +3309,9 @@ const opinion=document.getElementById("filterOpinion")?.value || "";
 const sort=document.getElementById("sortWardrobe").value;
 
     let data=garments.filter(g=>{
-        if(g.eliminado_en)return false;
-      if(g.grupo==="calzado")return false;
-        if(activeSummaryFilter==="new_tag" && g.estado!=="nuevo_etiqueta")return false;
+    if(!isPhysicalWardrobeItem(g))return false;
+    if(g.grupo==="calzado")return false;
+    if(activeSummaryFilter==="new_tag" && g.estado!=="nuevo_etiqueta")return false;
 if(activeSummaryFilter==="unused" && (g.usos||0)!==0)return false;
 if(activeSummaryFilter==="amortized" && (g.usos||0)<AMORTIZED_USES)return false;
       if(activeSummaryFilter==="favorites" && !g.favorito)return false;
@@ -3571,13 +3635,9 @@ const opinion =
 const sort =
     document.getElementById("shoeSort")
         ?.value || "az";
-
-
-    let data = garments.filter(g => {
-
-        if (g.grupo !== "calzado") return false;
-        if (g.eliminado_en) return false;
-
+let data = garments.filter(g => {
+    if (g.grupo !== "calzado") return false;
+    if (!isPhysicalWardrobeItem(g)) return false;
         const hay =
             `${g.nombre || ""}
              ${g.color || ""}
@@ -4057,10 +4117,10 @@ function markUsed(id){const g=findGarment(id);if(g){g.usos=(g.usos||0)+1;g.ultim
 function outfitSlotsHtml(prefix){return Object.keys(emptyLook()).map(k=>`<div class="slot" id="${prefix}_${k}"></div>`).join("")}function renderOutfitShell(){document.getElementById("manualOutfit").innerHTML=outfitSlotsHtml("slot");document.getElementById("randomOutfit").innerHTML=outfitSlotsHtml("random")}
 function availablePool(occasion){
 
-    let pool=garments.filter(g =>
-        g.disponible &&
-        !g.eliminado_en
-    );
+let pool=garments.filter(g=>
+    g.disponible &&
+    isPhysicalWardrobeItem(g)
+);
 
     const isHomeLook =
         occasion === "pijama_estarporcasa" ||
@@ -5448,11 +5508,129 @@ function renderFavorites() {
     }
 }
   function renderVinted(){
-    const active=garments.filter(g=>g.en_vinted&&!g.vendida&&!g.eliminado_en);
-    const sold=garments.filter(g=>g.vendida&&!g.eliminado_en);
-    document.getElementById("vintedGrid").innerHTML=active.length?active.map(garmentCard).join(""):'<div class="empty">No tienes prendas actualmente en venta.</div>';
-    const soldBox=document.getElementById("vintedSoldGrid");
-    if(soldBox) soldBox.innerHTML=sold.length?sold.map(garmentCard).join(""):'<div class="empty">Todavía no tienes prendas marcadas como vendidas.</div>';
+
+    const active =
+        garments.filter(g =>
+            g.en_vinted &&
+            !g.vendida &&
+            !g.reciclada &&
+            !g.eliminado_en
+        );
+
+    const sold =
+        garments.filter(g =>
+            g.vendida &&
+            !g.reciclada &&
+            !g.eliminado_en
+        );
+
+    const letGoOpinions = [
+        "no_me_gusta",
+        "me_queda_mal",
+        "me_queda_pequeno",
+        "me_queda_grande"
+    ];
+
+    const letGo =
+        garments.filter(g =>
+            isPhysicalWardrobeItem(g) &&
+            letGoOpinions.includes(g.opinion)
+        );
+
+    const now =
+        Date.now();
+
+    const old =
+        garments.filter(g => {
+
+            if(!isPhysicalWardrobeItem(g)){
+                return false;
+            }
+
+            const referenceDate =
+                g.ultimo_uso ||
+                g.creado_en;
+
+            if(!referenceDate){
+                return false;
+            }
+
+            const date =
+                new Date(referenceDate).getTime();
+
+            if(Number.isNaN(date)){
+                return false;
+            }
+
+            const days =
+                (now - date) /
+                (1000 * 60 * 60 * 24);
+
+            return days >= 360;
+        });
+
+    const repair =
+        garments.filter(g =>
+            isPhysicalWardrobeItem(g) &&
+            (
+                g.opinion === "esta_roto" ||
+                g.opinion === "necesita_arreglo"
+            )
+        );
+
+    document.getElementById("vintedGrid").innerHTML =
+        active.length
+            ? active.map(garmentCard).join("")
+            : '<div class="empty">No tienes prendas actualmente en venta.</div>';
+
+    const letGoBox =
+        document.getElementById("vintedLetGoGrid");
+
+    if(letGoBox){
+
+        letGoBox.innerHTML =
+            letGo.length
+                ? letGo.map(garmentCard).join("")
+                : '<div class="empty">No hay prendas que encajen en esta sección.</div>';
+
+    }
+
+    const oldBox =
+        document.getElementById("vintedOldGrid");
+
+    if(oldBox){
+
+        oldBox.innerHTML =
+            old.length
+                ? old.map(garmentCard).join("")
+                : '<div class="empty">No hay prendas con más de un año sin uso.</div>';
+
+    }
+
+    const repairBox =
+        document.getElementById("vintedRepairGrid");
+
+    if(repairBox){
+
+        repairBox.innerHTML =
+            repair.length
+                ? repair.map(garmentCard).join("")
+                : '<div class="empty">No tienes prendas rotas o pendientes de arreglo.</div>';
+
+    }
+
+    const soldBox =
+        document.getElementById("vintedSoldGrid");
+
+    if(soldBox){
+
+        soldBox.innerHTML =
+            sold.length
+                ? sold.map(garmentCard).join("")
+                : '<div class="empty">Todavía no tienes prendas marcadas como vendidas.</div>';
+
+    }
+
 }
 function updateSummary(){
     const active=garments.filter(g=>!g.eliminado_en);
