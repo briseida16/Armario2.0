@@ -1099,7 +1099,38 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
     <div class="muted">En Vinted</div>
 </div>
 </div>
-<div class="summary-row">
+<div
+    class="summary-box"
+    onclick="switchView('vinted')"
+>
+    <div
+        class="summary-number"
+        id="sumMoneyRecovered"
+    >
+        0,00 €
+    </div>
+
+    <div class="muted">
+        💰 Dinero recuperado
+    </div>
+</div>
+
+<div
+    class="summary-box"
+    onclick="switchView('vinted')"
+>
+    <div
+        class="summary-number"
+        id="sumCoupons"
+    >
+        0
+    </div>
+
+    <div class="muted">
+        🎟️ Cupones obtenidos
+    </div>
+</div>
+  <div class="summary-row">
     <div class="summary-box">
         <div class="summary-number" id="sumAverageCostUse">—</div>
         <div class="muted">💰 Coste medio por uso de mi armario</div>
@@ -2442,6 +2473,39 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
         <h2 class="section-title">🛍️ Mi Vinted</h2>
         <p class="muted">Gestiona desde aquí las prendas que tienes anunciadas y las que ya has vendido.</p>
         <a class="btn-link" href="https://www.vinted.es/member/24042028" target="_blank" rel="noopener noreferrer">Abrir mi perfil de Vinted</a>
+    <div
+    id="vintedIndicators"
+    class="summary-row"
+    style="margin-top:16px;"
+>
+
+    <div class="summary-box">
+        <div
+            class="summary-number"
+            id="vintedMoneyRecovered"
+        >
+            0,00 €
+        </div>
+
+        <div class="muted">
+            💰 Dinero recuperado
+        </div>
+    </div>
+
+    <div class="summary-box">
+        <div
+            class="summary-number"
+            id="vintedCoupons"
+        >
+            0
+        </div>
+
+        <div class="muted">
+            🎟️ Cupones obtenidos
+        </div>
+    </div>
+
+</div>
     </div>
     <div class="card">
         <h2 class="section-title">🛍️ En venta</h2>
@@ -4339,7 +4403,7 @@ modal.querySelector(".repair-recycle-card").innerHTML=`
     if(gotCoupon){
 
     cuponesObtenidos++;
-
+persistCoupons();
 }
 
     persist();
@@ -5866,7 +5930,55 @@ function vintedSuggestionCard(g){
         </div>
     `;
 }
-  function renderVinted(){
+function vintedRepairSuggestionCard(g){
+
+    return `
+        <div class="item-card">
+
+            <img
+                src="${g.foto||placeholderImg}"
+                alt="${esc(g.nombre)}"
+            >
+
+            <div class="item-body">
+
+                <p class="item-name">
+                    ${esc(g.nombre)}
+                </p>
+
+                ${g.marca
+                    ? `<p class="meta">Marca: ${esc(g.marca)}</p>`
+                    : ""
+                }
+
+                ${g.talla
+                    ? `<p class="meta">Talla: ${esc(g.talla)}</p>`
+                    : ""
+                }
+
+                <p class="meta">
+                    ${esc(fmtCat(g.categoria))}
+                </p>
+
+                <div
+                    class="button-row"
+                    style="margin-top:10px"
+                >
+
+                    <button
+                        class="small-btn"
+                        onclick="openRepairRecycleModal('${g.id}')"
+                    >
+                        🛠️ ¿Qué hago con ella?
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+    `;
+}  function renderVinted(){
 
     const active =
         garments.filter(g =>
@@ -6045,6 +6157,70 @@ function vintedRepairSuggestionCard(g){
 
         </div>
     `;
+}
+ function updateVintedIndicators(){
+
+    const moneyRecovered =
+        garments
+            .filter(g =>
+                g.vendida &&
+                !g.reciclada &&
+                !g.eliminado_en
+            )
+            .reduce(
+                (sum,g) =>
+                    sum + (Number(g.precio_venta)||0),
+                0
+            );
+
+    const moneyText =
+        moneyRecovered.toLocaleString(
+            "es-ES",
+            {
+                minimumFractionDigits:2,
+                maximumFractionDigits:2
+            }
+        ) + " €";
+
+    const moneyBox =
+        document.getElementById(
+            "vintedMoneyRecovered"
+        );
+
+    if(moneyBox){
+        moneyBox.textContent=moneyText;
+    }
+
+    const coupons =
+        Number(cuponesObtenidos)||0;
+
+    const couponBox =
+        document.getElementById(
+            "vintedCoupons"
+        );
+
+    if(couponBox){
+        couponBox.textContent=coupons;
+    }
+
+    const homeMoneyBox =
+        document.getElementById(
+            "sumMoneyRecovered"
+        );
+
+    if(homeMoneyBox){
+        homeMoneyBox.textContent=moneyText;
+    }
+
+    const homeCouponBox =
+        document.getElementById(
+            "sumCoupons"
+        );
+
+    if(homeCouponBox){
+        homeCouponBox.textContent=coupons;
+    }
+
 }
   function updateSummary(){
     const active=garments.filter(g=>!g.eliminado_en);
@@ -6347,7 +6523,7 @@ document.addEventListener("click",e=>{
 function updateHeaderOnScroll(){document.querySelector("header")?.classList.toggle("compact",window.scrollY>20);}
 window.addEventListener("scroll",updateHeaderOnScroll,{passive:true});
 
-function refreshAll(){updateSummary();ensureDailyQuickLook();fillFilterOptions();renderRelatedSelect();renderWardrobe();renderShoes();renderJewelry();renderTrash();renderCurrentLook();renderRandomLook();renderQuickLook();renderWishlist();renderFavorites();renderVinted();renderSavedLooksCarousel();renderOccasionButtons();renderCombineGroups();renderLooksManualOutfit();renderOwnLook();renderLooksOwnLook()}function toast(msg,type="ok"){const box=document.getElementById("toastBox");if(!box)return alert(msg);const t=document.createElement("div");t.className=`toast toast-${type}`;t.textContent=msg;box.appendChild(t);requestAnimationFrame(()=>t.classList.add("show"));setTimeout(()=>{t.classList.remove("show");setTimeout(()=>t.remove(),300)},3200)}
+function refreshAll(){updateSummary();updateVintedIndicators();ensureDailyQuickLook();fillFilterOptions();renderRelatedSelect();renderWardrobe();renderShoes();renderJewelry();renderTrash();renderCurrentLook();renderRandomLook();renderQuickLook();renderWishlist();renderFavorites();renderVinted();renderSavedLooksCarousel();renderOccasionButtons();renderCombineGroups();renderLooksManualOutfit();renderOwnLook();renderLooksOwnLook()}function toast(msg,type="ok"){const box=document.getElementById("toastBox");if(!box)return alert(msg);const t=document.createElement("div");t.className=`toast toast-${type}`;t.textContent=msg;box.appendChild(t);requestAnimationFrame(()=>t.classList.add("show"));setTimeout(()=>{t.classList.remove("show");setTimeout(()=>t.remove(),300)},3200)}
 const IDB_NAME="bricloset_mirror_db",IDB_STORE="backups";function idbOpen(){return new Promise((resolve,reject)=>{const req=indexedDB.open(IDB_NAME,1);req.onupgradeneeded=()=>req.result.createObjectStore(IDB_STORE);req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}async function mirrorToIndexedDB(){try{const db=await idbOpen(),tx=db.transaction(IDB_STORE,"readwrite");tx.objectStore(IDB_STORE).put({version:APP_DATA_VERSION,savedLooks,recentLooks,wishlist,guardado_en:new Date().toISOString()},"latest")}catch(e){console.warn("No se pudo espejar en IndexedDB",e)}}async function recoverFromIndexedDB(){try{const db=await idbOpen(),tx=db.transaction(IDB_STORE,"readonly"),req=tx.objectStore(IDB_STORE).get("latest");return new Promise(res=>{req.onsuccess=()=>res(req.result||null);req.onerror=()=>res(null)})}catch(e){return null}}
 window.toggleMoreMenu = function(event){
 
