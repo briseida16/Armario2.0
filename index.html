@@ -6042,29 +6042,30 @@ function confirmSoldGarment(id){
                 </p>
 
                 <div
-                    class="button-row"
-                    style="margin-top:10px"
-                >
-                    <button
-                        class="small-btn"
-                        onclick="putGarmentOnVinted('${g.id}')"
-                    >
-                        🛍️ Poner en Vinted
-                    </button>
+    class="button-row"
+    style="margin-top:10px"
+>
+    <button
+        class="small-btn"
+        onclick="putGarmentOnVinted('${g.id}')"
+    >
+        🛍️ Poner en Vinted
+    </button>
 
-                    <button
-                        class="small-btn"
-                        onclick="editGarment('${g.id}')"
-                    >
-                        ✏️ Revisar
-                    </button>
-                </div>
+    <button
+        class="small-btn"
+        onclick="editGarment('${g.id}')"
+    >
+        ✏️ Revisar
+    </button>
 
-            </div>
-
-        </div>
-    `;
-}
+    <button
+        class="small-btn"
+        onclick="openRepairRecycleModal('${g.id}')"
+    >
+        🤔 ¿Qué hago con ella?
+    </button>
+</div>
 function vintedActiveCard(g){
 
     return `
@@ -6274,7 +6275,19 @@ function vintedRepairSuggestionCard(g){
 
         </div>
     `;
-}  function renderVinted(){
+}  
+  function canAppearInLetGo(g){
+
+    if(!g) return false;
+
+    if(g.en_vinted) return false;
+    if(g.vendida) return false;
+    if(g.reciclada) return false;
+    if(g.eliminado_en) return false;
+
+    return true;
+}
+  function renderVinted(){
 
     const active =
         garments.filter(g =>
@@ -6298,12 +6311,10 @@ function vintedRepairSuggestionCard(g){
         "me_queda_grande"
     ];
 
-   const letGo =
+  const letGo =
     garments.filter(g =>
+        canAppearInLetGo(g) &&
         isPhysicalWardrobeItem(g) &&
-        !g.en_vinted &&
-        !g.vendida &&
-        !g.reciclada &&
         letGoOpinions.includes(g.opinion)
     );
 
@@ -6311,14 +6322,37 @@ function vintedRepairSuggestionCard(g){
         Date.now();
 
     const old =
-        garments.filter(g => {
+    garments.filter(g => {
 
-            if(!isPhysicalWardrobeItem(g)){
-                return false;
-            }
-                  if(g.en_vinted){
+        if(!canAppearInLetGo(g)){
             return false;
         }
+
+        if(!isPhysicalWardrobeItem(g)){
+            return false;
+        }
+
+        const referenceDate =
+            g.ultimo_uso ||
+            g.creado_en;
+
+        if(!referenceDate){
+            return false;
+        }
+
+        const date =
+            new Date(referenceDate).getTime();
+
+        if(Number.isNaN(date)){
+            return false;
+        }
+
+        const days =
+            (now - date) /
+            (1000 * 60 * 60 * 24);
+
+        return days >= 360;
+    });
 
             const referenceDate =
                 g.ultimo_uso ||
@@ -6343,13 +6377,14 @@ function vintedRepairSuggestionCard(g){
         });
 
     const repair =
-        garments.filter(g =>
-            isPhysicalWardrobeItem(g) &&
-            (
-                g.opinion === "esta_roto" ||
-                g.opinion === "necesita_arreglo"
-            )
-        );
+    garments.filter(g =>
+        canAppearInLetGo(g) &&
+        isPhysicalWardrobeItem(g) &&
+        (
+            g.opinion === "esta_roto" ||
+            g.opinion === "necesita_arreglo"
+        )
+    );
 
     document.getElementById("vintedGrid").innerHTML =
         active.length
