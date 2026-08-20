@@ -1180,16 +1180,17 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
     <option value="">Todas las tallas</option>
 </select>
 
-<select
-    id="filterOpinion"
-    onchange="renderWardrobe()"
->
+<select id="filterOpinion" onchange="renderWardrobe()">
     <option value="">Todas las opiniones</option>
     <option value="me_gusta">❤️ Me gusta</option>
     <option value="me_queda_bien">👌 Me queda bien</option>
+    <option value="no_me_gusta">👎 No me gusta</option>
+    <option value="me_queda_mal">😕 Me queda mal</option>
     <option value="me_queda_pequeno">📏 Me queda pequeño</option>
     <option value="me_queda_grande">📐 Me queda grande</option>
     <option value="esta_roto">💔 Está roto</option>
+    <option value="necesita_arreglo">🛠️ Necesita un arreglo</option>
+    <option value="sin_opinion">🤷 Sin opinión</option>
 </select>
 
 <select
@@ -1262,12 +1263,16 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
   <div class="field">
     <label>Opinión</label>
     <select id="opinion">
-        <option value="me_gusta">❤️ Me gusta</option>
-        <option value="me_queda_bien">👌 Me queda bien</option>
-        <option value="me_queda_pequeno">📏 Me queda pequeño</option>
-        <option value="me_queda_grande">📐 Me queda grande</option>
-        <option value="esta_roto">💔 Está roto</option>
-    </select>
+    <option value="me_gusta">❤️ Me gusta</option>
+    <option value="me_queda_bien">👌 Me queda bien</option>
+    <option value="no_me_gusta">👎 No me gusta</option>
+    <option value="me_queda_mal">😕 Me queda mal</option>
+    <option value="me_queda_pequeno">📏 Me queda pequeño</option>
+    <option value="me_queda_grande">📐 Me queda grande</option>
+    <option value="esta_roto">💔 Está roto</option>
+    <option value="necesita_arreglo">🛠️ Necesita un arreglo</option>
+    <option value="sin_opinion">🤷 Sin opinión</option>
+</select>
 </div>
 <div class="field">
     <label>Color</label>
@@ -2006,16 +2011,19 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
             <option value="">Todas las tallas</option>
         </select>
 
-        <select
+       <select
     id="shoeOpinionFilter"
-    onchange="renderShoes()"
->
+    onchange="renderShoes()">
     <option value="">Todas las opiniones</option>
     <option value="me_gusta">❤️ Me gusta</option>
     <option value="me_queda_bien">👌 Me queda bien</option>
+    <option value="no_me_gusta">👎 No me gusta</option>
+    <option value="me_queda_mal">😕 Me queda mal</option>
     <option value="me_queda_pequeno">📏 Me queda pequeño</option>
     <option value="me_queda_grande">📐 Me queda grande</option>
     <option value="esta_roto">💔 Está roto</option>
+    <option value="necesita_arreglo">🛠️ Necesita un arreglo</option>
+    <option value="sin_opinion">🤷 Sin opinión</option>
 </select>
             <select
     id="shoeSort"
