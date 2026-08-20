@@ -5531,11 +5531,14 @@ function renderFavorites() {
         "me_queda_grande"
     ];
 
-    const letGo =
-        garments.filter(g =>
-            isPhysicalWardrobeItem(g) &&
-            letGoOpinions.includes(g.opinion)
-        );
+   const letGo =
+    garments.filter(g =>
+        isPhysicalWardrobeItem(g) &&
+        !g.en_vinted &&
+        !g.vendida &&
+        !g.reciclada &&
+        letGoOpinions.includes(g.opinion)
+    );
 
     const now =
         Date.now();
