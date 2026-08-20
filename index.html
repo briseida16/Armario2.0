@@ -6241,7 +6241,7 @@ function vintedActiveCard(g){
 
     document.getElementById("vintedGrid").innerHTML =
         active.length
-            ? active.map(garmentCard).join("")
+            ? active.map(vintedActiveCard).join("")
             : '<div class="empty">No tienes prendas actualmente en venta.</div>';
 
     const letGoBox =
