@@ -6109,55 +6109,6 @@ function vintedRepairSuggestionCard(g){
     }
 
 }
-function vintedRepairSuggestionCard(g){
-
-    return `
-        <div class="item-card">
-
-            <img
-                src="${g.foto||placeholderImg}"
-                alt="${esc(g.nombre)}"
-            >
-
-            <div class="item-body">
-
-                <p class="item-name">
-                    ${esc(g.nombre)}
-                </p>
-
-                ${g.marca
-                    ? `<p class="meta">Marca: ${esc(g.marca)}</p>`
-                    : ""
-                }
-
-                ${g.talla
-                    ? `<p class="meta">Talla: ${esc(g.talla)}</p>`
-                    : ""
-                }
-
-                <p class="meta">
-                    ${esc(fmtCat(g.categoria))}
-                </p>
-
-                <div
-                    class="button-row"
-                    style="margin-top:10px;"
-                >
-
-                    <button
-                        class="small-btn"
-                        onclick="openRepairRecycleModal('${g.id}')"
-                    >
-                        🛠️ ¿Qué hago con ella?
-                    </button>
-
-                </div>
-
-            </div>
-
-        </div>
-    `;
-}
  function updateVintedIndicators(){
 
     const moneyRecovered =
