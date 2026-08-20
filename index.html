@@ -3015,8 +3015,35 @@ function persist(){
     garmentsSyncChain=garmentsSyncChain.then(()=>saveWardrobeToFirestore());
     return garmentsSyncChain;
 }
-function loadData(){garments=[];savedLooks=safeParse(storage.get(STORAGE_LOOKS),[]);recentLooks=safeParse(storage.get(STORAGE_RECENT),[]);wishlist=safeParse(storage.get(STORAGE_WISHLIST),[]).map(migrateWish)}
-function openLoginModal() {
+function loadData(){
+
+    garments=[];
+
+    savedLooks=
+        safeParse(
+            storage.get(STORAGE_LOOKS),
+            []
+        );
+
+    recentLooks=
+        safeParse(
+            storage.get(STORAGE_RECENT),
+            []
+        );
+
+    wishlist=
+        safeParse(
+            storage.get(STORAGE_WISHLIST),
+            []
+        ).map(migrateWish);
+
+    cuponesObtenidos=
+        Number(
+            storage.get(STORAGE_COUPONS) || 0
+        );
+
+}
+  function openLoginModal() {
     document.getElementById("loginModal").classList.remove("hidden");
 }
 function closeLoginModal() {
@@ -5906,7 +5933,7 @@ function vintedSuggestionCard(g){
 
         repairBox.innerHTML =
             repair.length
-                ? repair.map(garmentCard).join("")
+                ? repair.map(vintedRepairSuggestionCard).join("")
                 : '<div class="empty">No tienes prendas rotas o pendientes de arreglo.</div>';
 
     }
@@ -5924,7 +5951,56 @@ function vintedSuggestionCard(g){
     }
 
 }
-function updateSummary(){
+function vintedRepairSuggestionCard(g){
+
+    return `
+        <div class="item-card">
+
+            <img
+                src="${g.foto||placeholderImg}"
+                alt="${esc(g.nombre)}"
+            >
+
+            <div class="item-body">
+
+                <p class="item-name">
+                    ${esc(g.nombre)}
+                </p>
+
+                ${g.marca
+                    ? `<p class="meta">Marca: ${esc(g.marca)}</p>`
+                    : ""
+                }
+
+                ${g.talla
+                    ? `<p class="meta">Talla: ${esc(g.talla)}</p>`
+                    : ""
+                }
+
+                <p class="meta">
+                    ${esc(fmtCat(g.categoria))}
+                </p>
+
+                <div
+                    class="button-row"
+                    style="margin-top:10px;"
+                >
+
+                    <button
+                        class="small-btn"
+                        onclick="openRepairRecycleModal('${g.id}')"
+                    >
+                        🛠️ ¿Qué hago con ella?
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+    `;
+}
+  function updateSummary(){
     const active=garments.filter(g=>!g.eliminado_en);
 document.getElementById("sumGarments").textContent =
     active.filter(g => g.grupo !== "calzado").length;    
