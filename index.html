@@ -3108,8 +3108,16 @@ try{
   db = getFirestore(firebaseApp);
 }
 let currentUser=null,wardrobeLoaded=false,pendingWardrobeSave=false;
-const APP_DATA_VERSION=4,placeholderImg="data:image/svg+xml;utf8,"+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500"><rect width="100%" height="100%" fill="#efe7eb"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#9b8691" font-size="24" font-family="Arial">Sin imagen</text></svg>`);const storage={memory:{},get(k){try{return localStorage.getItem(k)}catch(e){return this.memory[k]??null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){this.memory[k]=v}}};const STORAGE_LOOKS="looks_bricloset_24",const STORAGE_TRIP_CHECKLIST_TEMPLATES =
-    "trip_checklist_templates_bricloset_1";STORAGE_RECENT="recent_bricloset_24",STORAGE_WISHLIST="wishlist_bricloset_30",STORAGE_GARMENTS="garments_bricloset_1",STORAGE_PENDING_GARMENTS="garments_pending_bricloset_1";STORAGE_TRIPS="bricloset_trips_1";STORAGE_TRIP_CHECKLIST_TEMPLATES=
+const APP_DATA_VERSION=4,
+  placeholderImg="data:image/svg+xml;utf8,"+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500"><rect width="100%" height="100%" fill="#efe7eb"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#9b8691" font-size="24" font-family="Arial">Sin imagen</text></svg>`);
+  const storage={memory:{},get(k){try{return localStorage.getItem(k)}catch(e){return this.memory[k]??null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){this.memory[k]=v}}};
+const STORAGE_LOOKS = "looks_bricloset_24";
+const STORAGE_RECENT = "recent_bricloset_24";
+const STORAGE_WISHLIST = "wishlist_bricloset_30";
+const STORAGE_GARMENTS = "garments_bricloset_1";
+const STORAGE_PENDING_GARMENTS = "garments_pending_bricloset_1";
+const STORAGE_TRIPS = "bricloset_trips_1";
+const STORAGE_TRIP_CHECKLIST_TEMPLATES =
     "trip_checklist_templates_bricloset_1";
 // --- Estado de sincronización de prendas con Firestore ---
 // pendingGarmentIds: ids de prendas con cambios que todavía no se han confirmado en Firestore.
