@@ -6370,32 +6370,40 @@ function confirmSoldGarment(id){
                 </p>
 
                 <div
-    class="button-row"
-    style="margin-top:10px"
->
-    <button
-        class="small-btn"
-        onclick="putGarmentOnVinted('${g.id}')"
-    >
-        🛍️ Poner en Vinted
-    </button>
+                    class="button-row"
+                    style="margin-top:10px"
+                >
 
-    <button
-        class="small-btn"
-        onclick="editGarment('${g.id}')"
-    >
-        ✏️ Revisar
-    </button>
+                    <button
+                        class="small-btn"
+                        onclick="putGarmentOnVinted('${g.id}')"
+                    >
+                        🛍️ Poner en Vinted
+                    </button>
 
-    <button
-        class="small-btn"
-        onclick="openRepairRecycleModal('${g.id}')"
-    >
-        🤔 ¿Qué hago con ella?
-    </button>
-</div>
+                    <button
+                        class="small-btn"
+                        onclick="editGarment('${g.id}')"
+                    >
+                        ✏️ Revisar
+                    </button>
+
+                    <button
+                        class="small-btn"
+                        onclick="openRepairRecycleModal('${g.id}')"
+                    >
+                        🤔 ¿Qué hago con ella?
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+    `;
+}
+
 function vintedActiveCard(g){
-
     return `
         <div class="item-card">
 
