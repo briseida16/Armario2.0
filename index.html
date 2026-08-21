@@ -4209,7 +4209,6 @@ if(suitcase){
 
     `;
 }
-
     const itinerary =
         document.getElementById("tripItinerary");
 
@@ -4337,7 +4336,7 @@ if(checklist){
         }
 
     `;
-}
+}}
 function openTripItineraryModal(){
 
     if(!currentTripId){
@@ -11713,13 +11712,10 @@ Object.assign(window,{renderCalendarOwnLook,openCalendarOwnLookSelector,closeCal
                     placeholder="Ej. MAD → DPS"
                 >
             </div>
-
-
             <div class="field">
                 <label for="tripStatus">
                     Estado
                 </label>
-
                 <select id="tripStatus">
 
                     <option value="planificando">
@@ -12163,7 +12159,6 @@ Object.assign(window,{renderCalendarOwnLook,openCalendarOwnLookSelector,closeCal
     class="modal hidden"
     onclick="if(event.target===this) closeTripChecklistTemplates()"
 >
-
     <div class="modal-card">
 
         <div class="modal-head">
