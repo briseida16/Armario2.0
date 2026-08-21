@@ -5545,8 +5545,6 @@ function openTripChecklistTemplates(){
         modal.classList.remove("hidden");
     }
 }
-
-
 function closeTripChecklistTemplates(){
 
     const modal =
@@ -5557,6 +5555,7 @@ function closeTripChecklistTemplates(){
     if(modal){
         modal.classList.add("hidden");
     }
+
 }
     function loadGarmentsLocally(){const scoped=safeParse(storage.get(garmentsLocalKey()),null);if(scoped)return scoped;return safeParse(storage.get(STORAGE_GARMENTS),[])}
 // Sincroniza el armario con Firestore escribiendo SOLO las prendas que cambiaron desde la última confirmación
