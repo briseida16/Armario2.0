@@ -11556,7 +11556,38 @@ function renderCalendarPage(){
  detail.innerHTML=`<div class="calendar-detail-title">📅 ${dateLabel}</div>${ps.length?ps.map(p=>`<div class="calendar-plan-card"><div>${p.time?`<span class="plan-time">${calEsc(p.time)}</span> · `:`<span class="plan-time">Todo el día</span> · `}<b>${calEsc(p.name)}</b></div>${p.context?`<div class="calendar-empty">${calEsc(p.context)}</div>`:""}
 <button type="button" class="calendar-delete-plan" onclick="calendarEditPlan('${p.id}')">✏️ Editar plan</button><button type="button" class="calendar-delete-plan" onclick="calendarDeletePlan('${p.id}')">🗑️ Eliminar plan</button>${calendarCompactLookHtml(p)}<button type="button" class="calendar-create-look" onclick="calendarOpenLookCreator('${p.id}')">✨ Crear un look</button></div>`).join(""):`<div class="calendar-empty">No tienes planes para este día. Puedes añadir uno con el botón de arriba ✨</div>`}`;
 }
-Object.assign(window,{renderCalendarOwnLook,openCalendarOwnLookSelector,closeCalendarOwnLookSelector,renderCalendarOwnSelectorCategories,renderCalendarOwnSelectorGarments,selectCalendarOwnGarment,removeCalendarOwnSlot,removeCalendarOwnAccessory,cancelCalendarOwnLook,calendarShiftMonth,calendarSelectDate,calendarOpenPlanModal,calendarOpenNewPlanModal,calendarEditPlan,calendarClosePlanModal,calendarSavePlan,calendarDeletePlan,calendarOpenLookFlow,calendarCloseLookFlow,calendarCancelLookFlow,calendarAssignSavedLook,calendarChooseSavedLook,calendarOpenCreatorModal,calendarChooseCreateLook,calendarChooseProposedLook,calendarEditProposal,calendarSaveProposal,calendarSaveOwnLook,calendarCancelCreator,calendarOpenLookCreator,calendarViewAssignedLook,calendarEditAssignedLook,calendarReuseAssignedLook,calendarRemoveAssignedLook,calendarPrepareReuse,calendarCreateReusePlan,calendarConfirmReuse,assignLookToCalendarPlan,saveLookToCalendar,renderCalendarPage});
+Object.assign(window,{renderCalendarOwnLook,openCalendarOwnLookSelector,closeCalendarOwnLookSelector,renderCalendarOwnSelectorCategories,renderCalendarOwnSelectorGarments,selectCalendarOwnGarment,removeCalendarOwnSlot,removeCalendarOwnAccessory,cancelCalendarOwnLook,calendarShiftMonth,calendarSelectDate,calendarOpenPlanModal,calendarOpenNewPlanModal,calendarEditPlan,calendarClosePlanModal,calendarSavePlan,calendarDeletePlan,calendarOpenLookFlow,calendarCloseLookFlow,calendarCancelLookFlow,calendarAssignSavedLook,calendarChooseSavedLook,calendarOpenCreatorModal,calendarChooseCreateLook,calendarChooseProposedLook,calendarEditProposal,calendarSaveProposal,calendarSaveOwnLook,calendarCancelCreator,calendarOpenLookCreator,calendarViewAssignedLook,calendarEditAssignedLook,calendarReuseAssignedLook,calendarRemoveAssignedLook,calendarPrepareReuse,calendarCreateReusePlan,calendarConfirmReuse,assignLookToCalendarPlan,saveLookToCalendar, renderTrips,
+    openTripModal,
+    closeTripModal,
+    saveTrip,
+    editTrip,
+    deleteTrip,
+    openTripDetail,
+    backToTrips,
+
+    openTripSuitcase,
+    tripSuitcaseCard,
+    toggleTripSuitcaseGarment,
+    refreshTripSuitcaseSelection,
+    saveTripSuitcase,
+    openTripLookModal,
+    closeTripLookModal,
+    saveTripLook,
+    tripLookCard,
+    openTripItineraryModal,
+    closeTripItineraryModal,
+    saveTripItineraryItem,
+    tripItineraryCard,
+    openTripChecklistModal,
+    closeTripChecklistModal,
+    saveTripChecklistItem,
+    tripChecklistCard,
+    toggleTripChecklistItem,
+    loadTripChecklistTemplates,
+    persistTripChecklistTemplates,
+    applyTripChecklistTemplate,
+    openTripChecklistTemplates,
+    closeTripChecklistTemplates,renderCalendarPage});
 </script>
 <section id="calendar" class="view">
   <div id="calendarPage">
