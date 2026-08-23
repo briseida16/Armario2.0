@@ -4209,6 +4209,7 @@ if(suitcase){
 
     `;
 }
+
     const itinerary =
         document.getElementById("tripItinerary");
 
@@ -4336,7 +4337,7 @@ if(checklist){
         }
 
     `;
-}}
+}
 function openTripItineraryModal(){
 
     if(!currentTripId){
@@ -5544,6 +5545,8 @@ function openTripChecklistTemplates(){
         modal.classList.remove("hidden");
     }
 }
+
+
 function closeTripChecklistTemplates(){
 
     const modal =
@@ -5554,7 +5557,6 @@ function closeTripChecklistTemplates(){
     if(modal){
         modal.classList.add("hidden");
     }
-
 }
     function loadGarmentsLocally(){const scoped=safeParse(storage.get(garmentsLocalKey()),null);if(scoped)return scoped;return safeParse(storage.get(STORAGE_GARMENTS),[])}
 // Sincroniza el armario con Firestore escribiendo SOLO las prendas que cambiaron desde la última confirmación
@@ -10796,9 +10798,7 @@ function renderJewelry() {
         !document.getElementById("jewelryHandmadeFilter")?.value &&
         !activeJewelrySummaryFilter
     ) {
-
         grid.className = "category-layout";
-
         grid.innerHTML =
             Object.entries(jewelryTypeLabels)
                 .map(([type, label]) => {
@@ -10918,7 +10918,6 @@ function editJewel(id) {
     }
 
     updateJewelGiftField();
-
     const preview =
         document.getElementById("jewelPhotoPreview");
     if (preview) {
@@ -10933,7 +10932,6 @@ function editJewel(id) {
         } else {
 
             preview.innerHTML = "";
-
         }
     }
     openJewelForm(id);
@@ -10948,7 +10946,6 @@ function toggleJewelryFavorite(id) {
         jewelry.find(
             j => j.id === id
         );
-
     if (!jewel) return;
 jewelRelatedIds =
     Array.isArray(jewel.relacionadas)
@@ -10956,7 +10953,6 @@ jewelRelatedIds =
         : [];
     jewel.favorita =
         !jewel.favorita;
-
     jewel.actualizado_en =
         new Date().toISOString();
    persistJewelryLocally();
@@ -10965,17 +10961,13 @@ renderJewelry(); }
 /* ---------------------------------------------------------
    ELIMINAR
 --------------------------------------------------------- */
-
 function deleteJewel(id) {
-
     const jewel = jewelry.find(function(j) {
         return j.id === id;
     });
-
     if (!jewel) {
         return;
     }
-
     const message =
         "¿Quieres eliminar \"" +
         (jewel.nombre || "esta joya") +
@@ -11008,43 +11000,7 @@ closeRepairRecycleModal,
 showRecycleOptions,
 recycleGarment,
 showRepairOptions,
-markGarmentForRepair,putGarmentOnVinted,deleteGarment,restoreGarment,deleteGarmentForever,markUsed,openSelector,selectGarmentForSlot,removeFromLook,removeAccessory,clearLook,saveCurrentLook,generateQuickLook,saveQuickLook,copyQuickToManual,generateLook,repeatLastLook,saveRandomLook,copyRandomToManual,loadSavedLook,toggleLookFavorite,deleteSavedLook,saveWish,resetWishForm,wishToWardrobe,deleteWish,generateHomeLook,saveHomeLook,dismissHomeLook,renderSavedLooksCarousel,renderOccasionButtons,renderCombineGroups,clearCombineFilters,chooseCombineGroup,backToCombineGroups,chooseCombineCategory,renderCombineGarments,selectCombineGarment,generateCombineLook,saveCombineLook,openLooksManualEditor,renderLooksManualOutfit,populateLooksSelector,renderLooksSelectorCategories,renderLooksSelectorGarments,openLooksManualSelector,selectLooksManualGarment,closeLooksManualSelector,removeLooksManualSlot,removeLooksManualAccessory,cancelLooksManualEditor,saveLooksManualEditor,renderOwnLook,renderOwnSelectorCategories,renderLooksOwnLook,renderLooksOwnSelectorCategories,renderLooksOwnSelectorGarments,openLooksOwnLookSelector,selectLooksOwnGarment,closeLooksOwnLookSelector,saveLooksOwnLook,cancelLooksOwnLook,removeLooksOwnSlot,removeLooksOwnAccessory,renderOwnSelectorGarments,openOwnLookSelector,selectOwnGarment,closeOwnLookSelector,removeOwnSlot,removeOwnAccessory,saveOwnLook,cancelOwnLook,openOwnLookSaveModal,closeOwnLookSaveModal,confirmOwnLookSave,editSavedLook,useSavedLook,chooseSaveLookType,toggleAllGarmentDetails,
-renderTrips,
-openTripModal,
-closeTripModal,
-saveTrip,
-editTrip,
-deleteTrip,
-openTripDetail,
-backToTrips,
-
-openTripSuitcase,
-tripSuitcaseCard,
-toggleTripSuitcaseItem,
-refreshTripSuitcaseSelection,
-saveTripSuitcase,
-
-openTripLookModal,
-closeTripLookModal,
-saveTripLook,
-tripLookCard,
-
-openTripItineraryModal,
-closeTripItineraryModal,
-saveTripItineraryItem,
-tripItineraryCard,
-
-openTripChecklistModal,
-closeTripChecklistModal,
-saveTripChecklistItem,
-tripChecklistCard,
-toggleTripChecklistItem,
-
-loadTripChecklistTemplates,
-persistTripChecklistTemplates,
-applyTripChecklistTemplate,
-openTripChecklistTemplates,
-closeTripChecklistTemplates});
+markGarmentForRepair,putGarmentOnVinted,deleteGarment,restoreGarment,deleteGarmentForever,markUsed,openSelector,selectGarmentForSlot,removeFromLook,removeAccessory,clearLook,saveCurrentLook,generateQuickLook,saveQuickLook,copyQuickToManual,generateLook,repeatLastLook,saveRandomLook,copyRandomToManual,loadSavedLook,toggleLookFavorite,deleteSavedLook,saveWish,resetWishForm,wishToWardrobe,deleteWish,generateHomeLook,saveHomeLook,dismissHomeLook,renderSavedLooksCarousel,renderOccasionButtons,renderCombineGroups,clearCombineFilters,chooseCombineGroup,backToCombineGroups,chooseCombineCategory,renderCombineGarments,selectCombineGarment,generateCombineLook,saveCombineLook,openLooksManualEditor,renderLooksManualOutfit,populateLooksSelector,renderLooksSelectorCategories,renderLooksSelectorGarments,openLooksManualSelector,selectLooksManualGarment,closeLooksManualSelector,removeLooksManualSlot,removeLooksManualAccessory,cancelLooksManualEditor,saveLooksManualEditor,renderOwnLook,renderOwnSelectorCategories,renderLooksOwnLook,renderLooksOwnSelectorCategories,renderLooksOwnSelectorGarments,openLooksOwnLookSelector,selectLooksOwnGarment,closeLooksOwnLookSelector,saveLooksOwnLook,cancelLooksOwnLook,removeLooksOwnSlot,removeLooksOwnAccessory,renderOwnSelectorGarments,openOwnLookSelector,selectOwnGarment,closeOwnLookSelector,removeOwnSlot,removeOwnAccessory,saveOwnLook,cancelOwnLook,openOwnLookSaveModal,closeOwnLookSaveModal,confirmOwnLookSave,editSavedLook,useSavedLook,chooseSaveLookType,toggleAllGarmentDetails});
 try{loadData();populateStaticSelects();loadTripChecklistTemplates();resetForm();resetWishForm();refreshAll();loadHomeWeather();loadTrips();
     renderTrips();
     document.getElementById("authUserBox")?.addEventListener("click",e=>{if(e.target.closest(".user-menu"))return;toggleUserMenu()});document.getElementById("authUserBox")?.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();toggleUserMenu()}else if(e.key==="Escape")closeUserMenu()});document.addEventListener("click",e=>{const box=document.getElementById("authUserBox");if(box&&!box.contains(e.target))closeUserMenu()});document.getElementById("logoutBtn")?.addEventListener("click",e=>{e.stopPropagation();closeUserMenu();logout()});onAuthStateChanged(auth,user=>{updateAuthUi(user);if(user){
@@ -11147,7 +11103,6 @@ function cancelCalendarOwnLook(){calendarOwnLook=emptyLook();closeCalendarOwnLoo
 
 // ---- Calendario: planes y flujo de looks ----
 var calendarViewDate=new Date(),calendarSelectedDate=new Date();
-
 var calendarPlans=(function(){
   try{
     var raw=localStorage.getItem("bricloset_calendar_plans");
@@ -11158,7 +11113,6 @@ var calendarPlans=(function(){
     return [];
   }
 })();
-
 async function syncCalendarPlansWithFirestore(){
     if(!currentUser) return;
 
@@ -11202,7 +11156,6 @@ async function syncCalendarPlansWithFirestore(){
         console.error("Error sincronizando calendario:",error);
     }
 }
-
 async function saveCalendarPlansToFirestore(){
     if(!currentUser) return;
 
@@ -11270,7 +11223,6 @@ function calendarLookToDisplay(look){
     if(typeof value==="object")return value;
     return findGarment(value);
   };
-
   return {
     abrigo:resolveGarment(look.abrigo),
     exterior:resolveGarment(look.exterior),
@@ -11470,7 +11422,8 @@ function calendarCancelCreator(){
   calendarRestoreCreatorCard();
 
   renderCalendarOwnLook();
-}function calendarOpenLookCreator(id){calendarOpenLookFlow(id)}function calendarRemoveAssignedLook(planId,lookId){
+}
+    function calendarOpenLookCreator(id){calendarOpenLookFlow(id)}function calendarRemoveAssignedLook(planId,lookId){
   const plan=calendarPlans.find(p=>p.id===planId);
   if(!plan)return;
 
@@ -11748,10 +11701,13 @@ Object.assign(window,{renderCalendarOwnLook,openCalendarOwnLookSelector,closeCal
                     placeholder="Ej. MAD → DPS"
                 >
             </div>
+
+
             <div class="field">
                 <label for="tripStatus">
                     Estado
                 </label>
+
                 <select id="tripStatus">
 
                     <option value="planificando">
@@ -11808,9 +11764,7 @@ Object.assign(window,{renderCalendarOwnLook,openCalendarOwnLookSelector,closeCal
     class="modal hidden"
     onclick="if(event.target===this) closeTripSuitcase()"
 >
-
     <div class="modal-card">
-
         <div class="modal-head">
 
             <div>
@@ -12195,6 +12149,7 @@ Object.assign(window,{renderCalendarOwnLook,openCalendarOwnLookSelector,closeCal
     class="modal hidden"
     onclick="if(event.target===this) closeTripChecklistTemplates()"
 >
+
     <div class="modal-card">
 
         <div class="modal-head">
