@@ -60,11 +60,59 @@ function finishCalendarLookAssignment(lookId){
     margin:0;
     text-align:center;
 }
-.login-modal-content input{
-    width:100%;
-    padding:12px;
-    border:1px solid #e3d4dc;
-    border-radius:14px;
+.login-modal-content input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #e3d4dc;
+    border-radius: 14px;
+    box-sizing: border-box; /* Evita que el input se desborde */
+}
+
+/* --- NUEVOS ESTILOS PARA LA ANIMACIÓN Y BOTONES DEL MODAL --- */
+@keyframes popup {
+    from {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.login-modal-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.btn-primary {
+    background: #d98fb3;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-primary:hover {
+    background: #b06a8c;
+}
+
+.btn-secondary {
+    background: transparent;
+    color: #b06a8c;
+    border: 1px solid #e3d4dc;
+    padding: 12px;
+    border-radius: 14px;
+    cursor: pointer;
+}
+
+.btn-secondary:hover {
+    background: #fdf8fa;
 }
 .password-field{
     position:relative;
@@ -3022,36 +3070,24 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
 </section>
 
 <section id="papelera" class="view"><div class="card"><h2 class="section-title">Papelera</h2><p class="muted">Las prendas eliminadas se guardan aquí 30 días antes de borrarse para siempre.</p></div><div id="trashGrid" class="grid"></div></section><div class="footer-space"></div></main>
-    <div id="loginModal" class="hidden">
-  <div class="login-modal-content">
-    <h2>Bienvenida a BriCloset ✨</h2>
-    <input
-      type="email"
-      id="loginEmail"
-      placeholder="Correo electrónico"
-    >
-    <div class="password-field">
-    <input
-      type="password"
-      id="loginPassword"
-      placeholder="Contraseña"
-      autocomplete="current-password"
-    >
-    <button type="button" class="password-toggle" id="toggleLoginPassword" aria-label="Mostrar contraseña" title="Mostrar contraseña">👁️</button>
-  </div>
-    <div class="button-row">
-      <button class="primary-btn" onclick="login()">
-        Entrar
-      </button>
-      <button class="ghost-btn" onclick="register()">
-        Crear cuenta
-      </button>
-      <button class="ghost-btn" onclick="closeLoginModal()">
-        Cancelar
-      </button>
+   <div id="loginModal" class="hidden">
+    <div class="login-modal-content">
+        <h2>Bienvenida a BriCloset ✨</h2>
+        
+        <form id="loginForm" onsubmit="event.preventDefault();">
+            <div style="display: flex; flex-direction: column; gap: 15px;">
+                <input type="email" placeholder="Correo electrónico" required>
+                <input type="password" placeholder="Contraseña" required>
+            </div>
+            
+            <div class="login-modal-actions">
+                <button type="submit" class="btn-primary">Entrar</button>
+                <button type="button" class="btn-secondary" onclick="document.getElementById('loginModal').classList.add('hidden')">Cancelar</button>
+            </div>
+        </form>
     </div>
-  </div>
 </div>
+
     <div id="toastBox"></div>
 <button id="subnavFloatingBtn" class="looks-floating-menu-btn" type="button" aria-label="Abrir subnavegación" aria-expanded="false">☰</button>
 <div id="subnavFloatingMenu" class="looks-floating-menu" aria-hidden="true"></div>
@@ -5703,9 +5739,13 @@ function loadData(){
         );
 
 }
-  function openLoginModal() {
-    document.getElementById("loginModal").classList.remove("hidden");
+ function openLoginModal() {
+    const modal = document.getElementById('loginModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+    }
 }
+
 function closeLoginModal() {
     document.getElementById("loginModal").classList.add("hidden");
 }
@@ -5759,9 +5799,7 @@ function openShoeForm() {
     garmentFormReturnView = "zapatero";
     editingGarmentId = null;
     relatedSelectedIds = [];
-
     resetForm();
-
     const group = document.getElementById("grupo");
 
     if (group) {
