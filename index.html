@@ -3104,8 +3104,7 @@ let db;
 try{
   db = initializeFirestore(firebaseApp,{localCache:persistentLocalCache({tabManager:persistentMultipleTabManager()})});
 }catch(e){
-  console.warn("No se pudo activar la persistencia offline de Firestore, se usará solo memoria.",e);
-  db = getFirestore(firebaseApp);
+console.warn("No se pudo activar la persistencia offline de Firestore, se usará solo memoria.",e);  db = getFirestore(firebaseApp);
 }
 let currentUser=null,wardrobeLoaded=false,pendingWardrobeSave=false;
 const APP_DATA_VERSION=4,
