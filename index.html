@@ -1359,7 +1359,93 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
     flex-wrap:wrap;
     gap:8px;
 }
-</style></head><body><header><h1>BriCloset ✨</h1><div class="subtitle">🌸 Toda tu ropa en un solo armario virtual, crea looks diferentes y utiliza todo lo que tienes para explotar tu potencial 🌸</div><div class="top-actions"><div class="auth-panel"><button type="button" class="primary-btn" id="loginBtn" onclick="openLoginModal()">
+</style>
+<style id="travel-modal-fix">
+.modal{
+    position:fixed;
+    inset:0;
+    z-index:99999;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    background:rgba(35,20,28,.45);
+    backdrop-filter:blur(5px);
+    overflow-y:auto;
+}
+
+.modal.hidden{
+    display:none !important;
+}
+
+.modal-card{
+    position:relative;
+    width:min(820px,100%);
+    max-height:calc(100vh - 40px);
+    overflow-y:auto;
+    padding:24px;
+    background:#fff7fb;
+    border:1px solid var(--line);
+    border-radius:24px;
+    box-shadow:0 20px 60px rgba(63,46,58,.28);
+    animation:travelModalPopup .2s ease-out;
+}
+
+.modal-card .section-title{
+    margin:0 0 8px;
+}
+
+.modal-head{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:16px;
+    margin-bottom:20px;
+}
+
+.modal-head > div{
+    min-width:0;
+}
+
+.modal-head button{
+    flex:0 0 auto;
+}
+
+@keyframes travelModalPopup{
+    from{
+        opacity:0;
+        transform:translateY(10px) scale(.97);
+    }
+
+    to{
+        opacity:1;
+        transform:translateY(0) scale(1);
+    }
+}
+
+@media(max-width:680px){
+    .modal{
+        align-items:flex-start;
+        padding:10px;
+    }
+
+    .modal-card{
+        width:100%;
+        max-height:calc(100vh - 20px);
+        padding:16px;
+        border-radius:20px;
+    }
+
+    .modal-head{
+        gap:10px;
+    }
+
+    .modal-card .form-grid{
+        grid-template-columns:1fr;
+    }
+}
+</style>
+</head><body><header><h1>BriCloset ✨</h1><div class="subtitle">🌸 Toda tu ropa en un solo armario virtual, crea looks diferentes y utiliza todo lo que tienes para explotar tu potencial 🌸</div><div class="top-actions"><div class="auth-panel"><button type="button" class="primary-btn" id="loginBtn" onclick="openLoginModal()">
     Iniciar sesión
 </button><div class="auth-user hidden" id="authUserBox" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false"><img class="auth-photo hidden" id="authPhoto" alt="Foto de usuario"><span class="auth-initials hidden" id="authInitials" aria-hidden="true"></span><span class="auth-menu-arrow" aria-hidden="true">▼</span><div class="user-menu hidden" id="userMenu"><button type="button">👤 Mi perfil</button><button type="button" id="logoutBtn">🚪 Cerrar sesión</button></div></div><div class="mini-badge hidden" id="syncStatus">Esperando sesión</div></div></div>
   <div class="tabs">
@@ -3106,6 +3192,7 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
 </section>
 
 <section id="papelera" class="view"><div class="card"><h2 class="section-title">Papelera</h2><p class="muted">Las prendas eliminadas se guardan aquí 30 días antes de borrarse para siempre.</p></div><div id="trashGrid" class="grid"></div></section><div class="footer-space"></div></main>
+
    <div id="loginModal" class="hidden">
     <div class="login-modal-content">
         <h2>Bienvenida a BriCloset ✨</h2>
