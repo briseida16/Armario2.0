@@ -1445,41 +1445,88 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
     }
 }
 .trip-suitcase-group{
+    display:block;
     grid-column:1/-1;
+    margin-bottom:12px;
     border:1px solid var(--line);
-    border-radius:18px;
+    border-radius:16px;
     background:#fff;
     overflow:hidden;
 }
 
-.trip-suitcase-group + .trip-suitcase-group{
-    margin-top:10px;
-}
-
-.trip-suitcase-group summary{
+.trip-suitcase-group > summary,
+.trip-suitcase-category > summary{
     cursor:pointer;
-    padding:14px 16px;
+    padding:12px 14px;
     font-weight:900;
     list-style:none;
 }
 
-.trip-suitcase-group summary::-webkit-details-marker{
+.trip-suitcase-group > summary{
+    background:#fff7fa;
+}
+
+.trip-suitcase-category{
+    margin:8px;
+    border:1px solid var(--line);
+    border-radius:12px;
+    overflow:hidden;
+}
+
+.trip-suitcase-category > summary{
+    background:#fff;
+}
+
+.trip-suitcase-category .grid{
+    padding:10px;
+}
+
+.trip-suitcase-group summary::-webkit-details-marker,
+.trip-suitcase-category summary::-webkit-details-marker{
     display:none;
 }
-
-.trip-suitcase-group summary::after{
-    content:"＋";
-    float:right;
-    color:var(--primary-dark);
+</style>
+<style>
+    #relatedOptions{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:10px;
+    max-height:420px;
+    overflow-y:auto;
 }
 
-.trip-suitcase-group[open] summary::after{
-    content:"−";
+.related-option{
+    min-width:0;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:10px;
+    border:1px solid var(--line);
+    border-radius:14px;
+    background:#fff;
+    cursor:pointer;
+    box-sizing:border-box;
 }
 
-.trip-suitcase-group-grid{
-    padding:12px;
-    border-top:1px solid var(--line);
+.related-option img{
+    width:52px;
+    height:52px;
+    flex:0 0 52px;
+    object-fit:cover;
+    border-radius:10px;
+}
+
+.related-option.selected{
+    border-color:#d58ab0;
+    background:#fff5fa;
+}
+
+@media(max-width:680px){
+
+    #relatedOptions{
+        grid-template-columns:1fr;
+    }
+
 }
 </style>
 </head><body><header><h1>BriCloset ✨</h1><div class="subtitle">🌸 Toda tu ropa en un solo armario virtual, crea looks diferentes y utiliza todo lo que tienes para explotar tu potencial 🌸</div><div class="top-actions"><div class="auth-panel"><button type="button" class="primary-btn" id="loginBtn" onclick="openLoginModal()">
@@ -1947,7 +1994,24 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
    <div id="occasionChecks" class="check-grid"></div></div><div class="field" style="grid-column:1/-1"><label>Opciones</label><div class="check-grid">
 <label><input id="disponible" type="checkbox" checked> Disponible</label>
 <label><input id="enVinted" type="checkbox"> En venta</label>
-</div></div><div class="field" style="grid-column:1/-1"><label>Comentarios</label><textarea id="comentarios" placeholder="Ej. combina muy bien con dorado..."></textarea></div><div class="field" style="grid-column:1/-1"><label>Relacionar con prendas existentes</label><div class="related-picker"><div id="relatedSelectedPreview" class="related-selected"></div><div id="relatedOptions" class="related-options"></div></div><p class="muted" style="margin:0">Toca una o varias prendas para relacionarlas.</p></div></div><div class="button-row" style="margin-top:14px"><button
+</div></div><div class="field" style="grid-column:1/-1"><label>Comentarios</label><textarea id="comentarios" placeholder="Ej. combina muy bien con dorado..."></textarea></div><div class="field" style="grid-column:1/-1"><label>Relacionar con prendas existentes</label><div class="related-picker"><div id="relatedSelectedPreview" class="related-selected"></div>
+<input
+    id="relatedSearch"
+    type="search"
+    placeholder="🔎 Buscar prenda por nombre..."
+    oninput="renderRelatedSelect()"
+    style="
+        width:100%;
+        box-sizing:border-box;
+        margin-bottom:10px;
+        padding:10px 12px;
+        border:1px solid var(--line);
+        border-radius:12px;
+        background:#fff;
+        font:inherit;
+    "
+>
+<div id="relatedOptions" class="related-options"></div></div><p class="muted" style="margin:0">Toca una o varias prendas para relacionarlas.</p></div></div><div class="button-row" style="margin-top:14px"><button
     id="saveGarmentBtn"
     class="primary-btn"
     onclick="saveGarment()"
@@ -1959,6 +2023,50 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
 <style>
 #crearLook.view{
     display:none !important;
+}
+</style>
+<style>
+    .trip-suitcase-group{
+    margin-bottom:12px;
+    border:1px solid var(--line);
+    border-radius:16px;
+    background:#fff;
+    overflow:hidden;
+}
+
+.trip-suitcase-group > summary,
+.trip-suitcase-category > summary{
+    cursor:pointer;
+    padding:12px 14px;
+    font-weight:900;
+    list-style:none;
+}
+
+.trip-suitcase-group > summary{
+    background:#fff7fa;
+}
+
+.trip-suitcase-category{
+    margin:8px;
+    border:1px solid var(--line);
+    border-radius:12px;
+    overflow:hidden;
+}
+
+.trip-suitcase-category > summary{
+    background:#fff;
+}
+
+.trip-suitcase-category .grid{
+    padding:10px;
+}
+
+.trip-suitcase-group summary::-webkit-details-marker,
+.trip-suitcase-category summary::-webkit-details-marker{
+    display:none;
+}
+.trip-actions{
+    margin-top:16px;
 }
 </style>
 <section id="joyero" class="view">
@@ -2944,7 +3052,39 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
             >
                 ＋ Nuevo viaje
             </button>
+<div class="card" style="margin-top:16px;">
 
+    <div
+        style="
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            gap:12px;
+            flex-wrap:wrap;
+        "
+    >
+
+        <div>
+            <h2 class="section-title">
+                📋 Plantillas de viaje
+            </h2>
+
+            <p class="muted">
+                Guarda y reutiliza tus checklists habituales.
+            </p>
+        </div>
+
+        <button
+            type="button"
+            class="primary-btn"
+            onclick="openTripChecklistTemplates()"
+        >
+            📋 Ver plantillas
+        </button>
+
+    </div>
+
+</div>
         </div>
 
     </div>
@@ -2989,7 +3129,45 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
         ></div>
 
     </div>
+<div
+    class="card"
+    style="margin-top:16px;"
+>
 
+    <div
+        style="
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            gap:12px;
+            flex-wrap:wrap;
+        "
+    >
+
+        <div>
+
+            <h2 class="section-title">
+                📋 Plantillas
+            </h2>
+
+            <p class="muted">
+                Guarda checklists para reutilizarlas
+                en tus viajes.
+            </p>
+
+        </div>
+
+        <button
+            type="button"
+            class="primary-btn"
+            onclick="openTripChecklistTemplates()"
+        >
+            📋 Ver plantillas
+        </button>
+
+    </div>
+
+</div>
 </section>
   <section id="viajeDetalle" class="view hidden">
 
@@ -3098,7 +3276,10 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
             id="tripLooksGrid"
             class="future-grid"
         ></div>
-
+<div
+    id="tripCalendarLooks"
+    style="margin-top:16px;"
+></div>
     </div>
 
 
@@ -4366,6 +4547,122 @@ function tripSuitcasePackedCard(g){
         </div>
     `;
 }
+function renderTripCalendarLooks(trip){
+
+    if(!trip){
+        return "";
+    }
+
+    const start =
+        trip.fechaInicio;
+
+    const end =
+        trip.fechaFin || trip.fechaInicio;
+
+    const plans =
+        Array.isArray(calendarPlans)
+            ? calendarPlans.filter(plan => {
+
+                if(!plan?.date){
+                    return false;
+                }
+
+                return (
+                    plan.date >= start &&
+                    plan.date <= end &&
+                    Array.isArray(plan.lookIds) &&
+                    plan.lookIds.length
+                );
+
+            })
+            : [];
+
+    if(!plans.length){
+        return "";
+    }
+
+    const items = [];
+
+    plans.forEach(plan => {
+
+        const looks =
+            Array.isArray(plan.lookItems)
+                ? plan.lookItems
+                : [];
+
+        looks.forEach(look => {
+
+            items.push({
+
+                plan,
+                look
+
+            });
+
+        });
+
+    });
+
+    if(!items.length){
+        return "";
+    }
+
+    return `
+
+        <div
+            class="card"
+            style="margin-top:16px;"
+        >
+
+            <h2 class="section-title">
+                📅 Looks propuestos para el viaje
+            </h2>
+
+            <p class="muted">
+                Estos looks están preparados en el
+                Calendario para los días de este viaje.
+            </p>
+
+            <div class="future-grid">
+
+                ${
+                    items.map(({plan,look}) => `
+
+                        <div class="future-card">
+
+                            <strong>
+                                📅 ${formatTripDate(plan.date)}
+                            </strong>
+
+                            <div style="margin-top:6px;">
+                                ✨
+                                ${esc(
+                                    look.nombre ||
+                                    plan.name ||
+                                    "Look"
+                                )}
+                            </div>
+
+                            <div class="muted">
+                                ${esc(
+                                    fmtOcc(
+                                        look.ocasion ||
+                                        plan.context ||
+                                        "viaje"
+                                    )
+                                )}
+                            </div>
+
+                        </div>
+
+                    `).join("")
+                }
+
+            </div>
+
+        </div>
+    `;
+}
   function renderTripDetail(trip){
 
     if(!trip){
@@ -4604,7 +4901,15 @@ if(suitcase){
 
     `;
 }
+const tripCalendarLooks =
+    document.getElementById("tripCalendarLooks");
 
+if(tripCalendarLooks){
+
+    tripCalendarLooks.innerHTML =
+        renderTripCalendarLooks(trip);
+
+}
     const itinerary =
         document.getElementById("tripItinerary");
 
@@ -5029,6 +5334,118 @@ let tripChecklistTemplates = [
     }
 
 ];
+function renderTripSuitcasePicker(){
+
+    const picker =
+        document.getElementById("tripSuitcasePicker");
+
+    if(!picker){
+        return;
+    }
+
+    const availableGarments =
+        garments.filter(g =>
+            isPhysicalWardrobeItem(g)
+        );
+
+    if(!availableGarments.length){
+
+        picker.innerHTML = `
+            <div
+                class="empty"
+                style="grid-column:1/-1;"
+            >
+                👗 No tienes prendas disponibles
+                para añadir a esta maleta.
+            </div>
+        `;
+
+        return;
+    }
+
+    const groupsHtml =
+        Object.entries(groupLabels)
+            .map(([groupId, groupLabel]) => {
+
+                const groupGarments =
+                    availableGarments.filter(
+                        g => g.grupo === groupId
+                    );
+
+                if(!groupGarments.length){
+                    return "";
+                }
+
+                const categories =
+                    [...new Set(
+                        groupGarments
+                            .map(g => g.categoria)
+                            .filter(Boolean)
+                    )];
+
+                return `
+                    <details
+                        class="trip-suitcase-group"
+                    >
+
+                        <summary>
+                            ${esc(groupLabel)}
+                            <span class="muted">
+                                (${groupGarments.length})
+                            </span>
+                        </summary>
+
+                        <div class="trip-suitcase-categories">
+
+                            ${
+                                categories.map(category => {
+
+                                    const categoryGarments =
+                                        groupGarments.filter(
+                                            g =>
+                                                g.categoria === category
+                                        );
+
+                                    return `
+                                        <details
+                                            class="trip-suitcase-category"
+                                        >
+
+                                            <summary>
+                                                ${esc(
+                                                    fmtCat(category)
+                                                )}
+                                                <span class="muted">
+                                                    (${categoryGarments.length})
+                                                </span>
+                                            </summary>
+
+                                            <div class="grid">
+
+                                                ${
+                                                    categoryGarments
+                                                        .map(tripSuitcaseCard)
+                                                        .join("")
+                                                }
+
+                                            </div>
+
+                                        </details>
+                                    `;
+
+                                }).join("")
+                            }
+
+                        </div>
+
+                    </details>
+                `;
+
+            })
+            .join("");
+
+    picker.innerHTML = groupsHtml;
+}
 function openTripSuitcase(){
 
     if(!currentTripId){
@@ -5062,32 +5479,7 @@ function openTripSuitcase(){
      * ni eliminadas.
      */
 
-    const availableGarments =
-        garments.filter(g =>
-            isPhysicalWardrobeItem(g)
-        );
-
-
-    if(!availableGarments.length){
-
-        picker.innerHTML = `
-            <div
-                class="empty"
-                style="grid-column:1/-1;"
-            >
-                👗 No tienes prendas disponibles
-                para añadir a esta maleta.
-            </div>
-        `;
-
-    }else{
-
-        picker.innerHTML =
-            availableGarments
-                .map(tripSuitcaseCard)
-                .join("");
-    }
-
+   renderTripSuitcasePicker();
 
     const modal =
         document.getElementById("tripSuitcaseModal");
@@ -5211,24 +5603,9 @@ function removeTripSuitcaseGarment(id){
 
 function refreshTripSuitcaseSelection(){
 
-    const picker =
-        document.getElementById("tripSuitcasePicker");
+    renderTripSuitcasePicker();
 
-    if(!picker){
-        return;
-    }
-
-    const availableGarments =
-        garments.filter(g =>
-            isPhysicalWardrobeItem(g)
-        );
-
-    picker.innerHTML =
-        availableGarments
-            .map(tripSuitcaseCard)
-            .join("");
 }
-
 
 function saveTripSuitcase(){
 
@@ -5288,6 +5665,10 @@ function closeTripSuitcase(){
     tripSuitcaseSelection = [];
 }
 let editingTripLookId = null;
+let tripLookMode = null;
+let tripLookEvent = "";
+let tripLookDate = "";
+let tripLookDraft = emptyLook();
 
 let tripLookSelection = {
     exterior: "",
@@ -5300,58 +5681,314 @@ let tripLookSelection = {
     accesorios: []
 };
 function openTripLookModal(lookId = null){
+
     if(!currentTripId){
         return;
     }
 
-    const trip = trips.find(t => t.id === currentTripId);
+    const trip =
+        trips.find(t => t.id === currentTripId);
 
     if(!trip){
         return;
     }
 
-    const look = lookId
-        ? trip.looks?.find(item => item.id === lookId)
-        : null;
+    const look =
+        lookId
+            ? trip.looks?.find(
+                item => item.id === lookId
+            )
+            : null;
 
-    editingTripLookId = lookId || null;
+    editingTripLookId =
+        lookId || null;
 
-    tripLookSelection = {
-        exterior: look?.prendas?.exterior || "",
-        interior: look?.prendas?.interior || "",
-        inferior: look?.prendas?.inferior || "",
-        vestido: look?.prendas?.vestido || "",
-        abrigo: look?.prendas?.abrigo || "",
-        calzado: look?.prendas?.calzado || "",
-        bolso: look?.prendas?.bolso || "",
-        accesorios: Array.isArray(look?.prendas?.accesorios)
-            ? [...look.prendas.accesorios]
-            : []
-    };
+    tripLookMode =
+        look ? "edit" : null;
 
-    document.getElementById("tripLookName").value =
-        look?.nombre || "";
+    tripLookDate =
+        look?.fecha || "";
 
-    document.getElementById("tripLookOccasion").value =
-        look?.ocasion || "viaje";
+    const modal =
+        document.getElementById("tripLookModal");
 
-    const title = document.querySelector(
-        "#tripLookModal .section-title"
-    );
-
-    if(title){
-        title.textContent = look
-            ? "✏️ Editar look del viaje"
-            : "✨ Nuevo look del viaje";
+    if(!modal){
+        return;
     }
 
-    renderTripLookSelectors();
+    if(look){
 
-    document
-        .getElementById("tripLookModal")
-        ?.classList.remove("hidden");
+        renderTripLookEditor(look);
+
+    }else{
+
+        renderTripLookChooser();
+
+    }
+
+    modal.classList.remove("hidden");
 }
+function renderTripLookChooser(){
 
+    const modal =
+        document.getElementById("tripLookModal");
+
+    if(!modal){
+        return;
+    }
+
+    const card =
+        modal.querySelector(".modal-card");
+
+    if(!card){
+        return;
+    }
+
+    card.innerHTML = `
+
+        <div class="modal-head">
+
+            <div>
+
+                <h2 class="section-title">
+                    ✨ Añadir look al viaje
+                </h2>
+
+                <p class="muted">
+                    Elige cómo quieres preparar este look.
+                </p>
+
+            </div>
+
+            <button
+                type="button"
+                class="ghost-btn"
+                onclick="closeTripLookModal()"
+            >
+                ✕
+            </button>
+
+        </div>
+
+        <div class="calendar-look-options">
+
+            <button
+                type="button"
+                onclick="tripChooseSavedLook()"
+            >
+                <span>💾</span>
+                <strong>Elegir un look guardado</strong>
+                <small>
+                    Usa un look que ya tienes preparado.
+                </small>
+            </button>
+
+            <button
+                type="button"
+                onclick="tripChooseCreateLook()"
+            >
+                <span>🎨</span>
+                <strong>Crear un look</strong>
+                <small>
+                    Elige las prendas tú misma.
+                </small>
+            </button>
+
+            <button
+                type="button"
+                onclick="tripChooseProposedLook()"
+            >
+                <span>✨</span>
+                <strong>Proponerme un look</strong>
+                <small>
+                    BriCloset prepara una propuesta.
+                </small>
+            </button>
+
+        </div>
+
+    `;
+}
+function renderTripLookEditor(look = null){
+
+    const modal =
+        document.getElementById("tripLookModal");
+
+    if(!modal){
+        return;
+    }
+
+    const card =
+        modal.querySelector(".modal-card");
+
+    if(!card){
+        return;
+    }
+
+    card.innerHTML = `
+        <div class="modal-head">
+
+            <div>
+                <h2 class="section-title">
+                    ${look
+                        ? "✏️ Editar look del viaje"
+                        : "🎨 Crear look"
+                    }
+                </h2>
+
+                <p class="muted">
+                    Prepara el look y, si quieres,
+                    asígnalo a un día del viaje.
+                </p>
+            </div>
+
+            <button
+                type="button"
+                class="ghost-btn"
+                onclick="closeTripLookModal()"
+            >
+                ✕
+            </button>
+
+        </div>
+
+        <div class="form-grid">
+
+            <div class="field">
+
+                <label>
+                    Nombre del look
+                </label>
+
+                <input
+                    id="tripLookName"
+                    type="text"
+                    value="${esc(look?.nombre || "")}"
+                    placeholder="Ej. Cena en Ubud"
+                >
+
+            </div>
+
+            <div class="field">
+
+                <label>
+                    Evento / ocasión
+                </label>
+
+                <select id="tripLookOccasion">
+
+                    ${occasions.map(([value,label]) => `
+                        <option
+                            value="${value}"
+                            ${
+                                (look?.ocasion || "viaje")
+                                    === value
+                                    ? "selected"
+                                    : ""
+                            }
+                        >
+                            ${label}
+                        </option>
+                    `).join("")}
+
+                </select>
+
+            </div>
+
+            <div class="field">
+
+                <label>
+                    📅 Fecha
+                    <span class="muted">
+                        (opcional)
+                    </span>
+                </label>
+
+                <input
+                    id="tripLookDate"
+                    type="date"
+                    value="${esc(look?.fecha || "")}"
+                >
+
+            </div>
+
+        </div>
+
+        <div
+            id="tripLookGarmentSelectors"
+            style="margin-top:18px;"
+        ></div>
+
+        <div
+            class="button-row"
+            style="
+                justify-content:flex-end;
+                margin-top:18px;
+            "
+        >
+
+            <button
+                type="button"
+                class="ghost-btn"
+                onclick="closeTripLookModal()"
+            >
+                Cancelar
+            </button>
+
+            <button
+                type="button"
+                class="primary-btn"
+                onclick="saveTripLook()"
+            >
+                💾 Guardar look
+            </button>
+
+        </div>
+    `;
+
+    renderTripLookSelectors();
+}
+function tripChooseProposedLook(){
+
+    const occasion =
+        "viaje";
+
+    const proposal =
+        buildLook(
+            occasion,
+            false,
+            false
+        );
+
+    if(!hasLook(proposal)){
+
+        toast(
+            "No hay prendas suficientes para crear un look.",
+            "warn"
+        );
+
+        return;
+    }
+
+    tripLookMode = "proposed";
+    tripLookDraft = proposal;
+
+    renderTripLookSaveStep();
+}
+function tripRegenerateProposedLook(){
+
+    const proposal =
+        buildLook(
+            "viaje",
+            false,
+            false
+        );
+
+    if(hasLook(proposal)){
+        tripLookDraft = proposal;
+        renderTripLookSaveStep();
+    }
+}
 function tripLookGarmentsForSlot(slot){
     return garments.filter(g =>
         isPhysicalWardrobeItem(g) &&
@@ -5544,7 +6181,10 @@ function saveTripLook(){
     const ocasion = document
         .getElementById("tripLookOccasion")
         .value;
-
+const fecha =
+    document
+        .getElementById("tripLookDate")
+        ?.value || "";
     if(!nombre){
         alert("Pon un nombre para el look.");
         return;
@@ -5558,6 +6198,7 @@ function saveTripLook(){
         id: editingTripLookId || `triplook_${Date.now()}`,
         nombre,
         ocasion,
+        fecha: fecha || null,
         prendas: {
             exterior: tripLookSelection.exterior || null,
             interior: tripLookSelection.interior || null,
@@ -5595,17 +6236,79 @@ function saveTripLook(){
     trip.actualizado_en = new Date().toISOString();
 
     persistTrips();
-    renderTripDetail(trip);
-    closeTripLookModal();
+renderTripDetail(trip);
+closeTripLookModal();
 
-    editingTripLookId = null;
+if(fecha){
+
+    saveTripLookToCalendar(
+        lookData,
+        fecha,
+        ocasion
+    );
+}
+
+editingTripLookId = null;
 
     if(typeof toast === "function"){
         toast("Look guardado dentro del viaje ✨");
     }    
 }
 
+function saveTripLookToCalendar(
+    lookData,
+    fecha,
+    ocasion
+){
 
+    if(!lookData || !fecha){
+        return;
+    }
+
+    let plan =
+        calendarPlans.find(
+            p => p.date === fecha
+        );
+
+    if(!plan){
+
+        plan = {
+
+            id:
+                "plan_" +
+                Date.now(),
+
+            date: fecha,
+
+            time: "",
+
+            name:
+                lookData.nombre ||
+                "Look del viaje",
+
+            context:
+                ocasion || "viaje",
+
+            lookIds: [],
+
+            lookItems: []
+
+        };
+
+        calendarPlans.push(plan);
+
+    }
+
+    calendarAssignLookToPlan(
+        lookData,
+        plan,
+        {
+            skipConfirm:true
+        }
+    );
+
+    calendarPersistPlans();
+}
 function tripLookCard(look){
     const garmentsInLook = tripLookIds(look)
         .map(id => garments.find(g => g.id === id))
@@ -5851,6 +6554,13 @@ function tripChecklistCard(item){
 
         </div>
     `;
+    <button
+    type="button"
+    class="small-btn danger-btn"
+    onclick="deleteTripChecklistItem('${item.id}')"
+>
+    🗑️
+</button>
 }
 
 
@@ -5888,7 +6598,33 @@ function toggleTripChecklistItem(itemId){
 
     renderTripDetail(trip);
 }
-  function renderTrips(){
+function deleteTripChecklistItem(id){
+
+    if(!currentTripId || !id){
+        return;
+    }
+
+    const trip =
+        trips.find(t => t.id === currentTripId);
+
+    if(!trip || !Array.isArray(trip.checklist)){
+        return;
+    }
+
+    trip.checklist =
+        trip.checklist.filter(
+            item => item.id !== id
+        );
+
+    trip.actualizado_en =
+        new Date().toISOString();
+
+    persistTrips();
+    renderTripDetail(trip);
+
+    toast("Elemento eliminado de la checklist 🗑️");
+}  
+function renderTrips(){
 
     const grid =
         document.getElementById("tripsGrid");
@@ -6296,9 +7032,6 @@ function deleteTripChecklistTemplate(templateId){
     toast("Plantilla eliminada 🗑️");
 }
 function openTripChecklistTemplates(){
-    if(!currentTripId){
-        return;
-    }
 
     const grid = document.getElementById(
         "tripChecklistTemplatesGrid"
@@ -6603,7 +7336,100 @@ if (temporadaSelect) {
         .join("");
 };document.getElementById("occasionChecks").innerHTML=occasions.map(([v,l])=>`<label><input type="checkbox" value="${v}"> ${l}</label>`).join("");document.getElementById("occasionButtons").innerHTML=occasions.map(([v,l])=>`<button class="occasion-btn" onclick="generateLook('${v}',false)">${l}</button>`).join("");document.getElementById("futureGrid").innerHTML=futureModules.map(m=>`<div class="future-card">${m}<div class="muted">Preparado para ampliar</div></div>`).join("");renderOutfitShell();populateCategoryOptions("abrigos");renderRelatedSelect()}
 function populateCategoryOptions(group,selected=""){const s=document.getElementById("categoria");s.innerHTML=(categoryOptions[group]||[]).map(([v,l])=>`<option value="${v}" ${v===selected?"selected":""}>${l}</option>`).join("")}function findGarment(id){return garments.find(g=>g.id===id)||null}function selectedRelated(){return relatedSelectedIds}
-function renderRelatedSelect(){const optionsBox=document.getElementById("relatedOptions"),previewBox=document.getElementById("relatedSelectedPreview");if(!optionsBox||!previewBox)return;const available=garments.filter(g=>g.id!==editingGarmentId&&!g.eliminado_en);optionsBox.innerHTML=available.length?available.map(g=>`<div class="related-option ${relatedSelectedIds.includes(g.id)?"selected":""}" onclick="toggleRelated('${g.id}')"><img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}"><div><div class="related-name">${esc(g.nombre)}</div><div class="related-meta">${esc(fmtCat(g.categoria))} · ${esc(g.color||"-")}</div></div></div>`).join(""):'<div class="empty">Aún no tienes prendas para relacionar.</div>';const selected=relatedSelectedIds.map(findGarment).filter(Boolean);previewBox.innerHTML=selected.length?selected.map(g=>`<div class="related-selected-card"><img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}"><div><div class="related-name">${esc(g.nombre)}</div><div class="related-meta">${esc(fmtCat(g.categoria))}</div></div><button class="related-remove" onclick="toggleRelated('${g.id}')">×</button></div>`).join(""):'<div class="muted">No has seleccionado prendas relacionadas.</div>'}function toggleRelated(id){relatedSelectedIds=relatedSelectedIds.includes(id)?relatedSelectedIds.filter(x=>x!==id):[...relatedSelectedIds,id];renderRelatedSelect()}
+function renderRelatedSelect(){
+
+    const optionsBox =
+        document.getElementById("relatedOptions");
+
+    const previewBox =
+        document.getElementById("relatedSelectedPreview");
+
+    if(!optionsBox || !previewBox){
+        return;
+    }
+
+    const search =
+        document.getElementById("relatedSearch")
+            ?.value
+            .trim()
+            .toLowerCase() || "";
+
+    const available =
+        garments.filter(g => {
+
+            if(!g || g.id === editingGarmentId){
+                return false;
+            }
+
+            if(g.eliminado_en){
+                return false;
+            }
+
+            if(!search){
+                return true;
+            }
+
+            return String(g.nombre || "")
+                .toLowerCase()
+                .includes(search);
+
+        });
+
+    optionsBox.innerHTML =
+        available.length
+            ? available.map(g => `
+                <div
+                    class="related-option ${
+                        relatedSelectedIds.includes(g.id)
+                            ? "selected"
+                            : ""
+                    }"
+                    onclick="toggleRelated('${g.id}')"
+                >
+
+                    <img
+                        src="${g.foto || placeholderImg}"
+                        alt="${esc(g.nombre || "Prenda")}"
+                    >
+
+                    <div style="min-width:0;">
+
+                        <strong>
+                            ${esc(g.nombre || "Prenda")}
+                        </strong>
+
+                        <div class="muted">
+                            ${esc(fmtCat(g.categoria || ""))}
+                        </div>
+
+                    </div>
+
+                </div>
+            `).join("")
+            : `
+                <div class="empty">
+                    No hay prendas que coincidan con la búsqueda.
+                </div>
+            `;
+
+
+    previewBox.innerHTML =
+        relatedSelectedIds.length
+            ? relatedSelectedIds
+                .map(id => findGarment(id))
+                .filter(Boolean)
+                .map(g => `
+                    <span class="pill">
+                        ${esc(g.nombre || "Prenda")}
+                    </span>
+                `)
+                .join(" ")
+            : `
+                <span class="muted">
+                    No hay prendas relacionadas seleccionadas.
+                </span>
+            `;
+}
 function resetForm() {
     editingGarmentId = null;
     relatedSelectedIds = [];
@@ -12515,19 +13341,29 @@ useWeatherLocation,
     backToTrips,
 
     // Maleta
-    openTripSuitcase,
-    closeTripSuitcase,
-    tripSuitcaseCard,
-    toggleTripSuitcaseItem,
-    toggleTripSuitcaseGarment,
-    refreshTripSuitcaseSelection,
-    saveTripSuitcase,
+openTripSuitcase,
+closeTripSuitcase,
+tripSuitcaseCard,
+toggleTripSuitcaseItem,
+toggleTripSuitcaseGarment,
+removeTripSuitcaseGarment,
+refreshTripSuitcaseSelection,
+saveTripSuitcase,
+renderTripSuitcasePicker,
 
     // Looks del viaje
-    openTripLookModal,
-    closeTripLookModal,
-    saveTripLook,
-    tripLookCard,
+openTripLookModal,
+closeTripLookModal,
+saveTripLook,
+tripLookCard,
+deleteTripLook,
+toggleTripLookAccessory,
+renderTripLookChooser,
+renderTripLookEditor,
+tripChooseSavedLook,
+tripChooseCreateLook,
+tripChooseProposedLook,
+
 
     // Itinerario
     openTripItineraryModal,
@@ -12536,11 +13372,12 @@ useWeatherLocation,
     tripItineraryCard,
 
     // Checklist
-    openTripChecklistModal,
-    closeTripChecklistModal,
-    saveTripChecklistItem,
-    tripChecklistCard,
-    toggleTripChecklistItem,
+   openTripChecklistModal,
+closeTripChecklistModal,
+saveTripChecklistItem,
+tripChecklistCard,
+toggleTripChecklistItem,
+deleteTripChecklistItem,
 
 // Plantillas de checklist
 loadTripChecklistTemplates,
@@ -12980,6 +13817,165 @@ deleteTripChecklistTemplate
                 onclick="saveTripChecklistItem()"
             >
                 ＋ Añadir
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+<!-- MODAL PLANTILLAS DE CHECKLIST -->
+<div
+    id="tripChecklistTemplatesModal"
+    class="modal hidden"
+    onclick="if(event.target===this) closeTripChecklistTemplates()"
+>
+
+    <div class="modal-card">
+
+        <div class="modal-head">
+
+            <div>
+
+                <h2 class="section-title">
+                    📋 Plantillas de checklist
+                </h2>
+
+                <p class="muted">
+                    Guarda checklists para reutilizarlas
+                    en tus viajes.
+                </p>
+
+            </div>
+
+            <button
+                type="button"
+                class="ghost-btn"
+                onclick="closeTripChecklistTemplates()"
+            >
+                ✕
+            </button>
+
+        </div>
+
+        <div
+            class="button-row"
+            style="
+                justify-content:flex-end;
+                margin-bottom:16px;
+            "
+        >
+
+            <button
+                type="button"
+                class="primary-btn"
+                onclick="openTripChecklistTemplateEditor()"
+            >
+                ＋ Nueva plantilla
+            </button>
+
+        </div>
+
+        <div
+            id="tripChecklistTemplatesGrid"
+            class="future-grid"
+        ></div>
+
+    </div>
+
+</div>
+<!-- MODAL CREAR / EDITAR PLANTILLA -->
+<div
+    id="tripChecklistTemplateEditorModal"
+    class="modal hidden"
+    onclick="if(event.target===this) closeTripChecklistTemplateEditor()"
+>
+
+    <div class="modal-card">
+
+        <div class="modal-head">
+
+            <div>
+
+                <h2 class="section-title">
+                    📋 Nueva plantilla
+                </h2>
+
+                <p class="muted">
+                    Crea una checklist que puedas
+                    reutilizar en tus viajes.
+                </p>
+
+            </div>
+
+            <button
+                type="button"
+                class="ghost-btn"
+                onclick="closeTripChecklistTemplateEditor()"
+            >
+                ✕
+            </button>
+
+        </div>
+
+        <div class="form-grid">
+
+            <div class="field">
+
+                <label for="tripChecklistTemplateName">
+                    Nombre de la plantilla
+                </label>
+
+                <input
+                    id="tripChecklistTemplateName"
+                    type="text"
+                    placeholder="Ej. Viaje internacional"
+                >
+
+            </div>
+
+            <div class="field">
+
+                <label for="tripChecklistTemplateItems">
+                    Elementos
+                </label>
+
+                <textarea
+                    id="tripChecklistTemplateItems"
+                    rows="8"
+                    placeholder="Pasaporte&#10;Cargador&#10;Neceser&#10;Medicamentos&#10;Ropa interior"
+                ></textarea>
+
+                <small class="muted">
+                    Escribe un elemento por línea.
+                </small>
+
+            </div>
+
+        </div>
+
+        <div
+            class="button-row"
+            style="
+                justify-content:flex-end;
+                margin-top:18px;
+            "
+        >
+
+            <button
+                type="button"
+                class="ghost-btn"
+                onclick="closeTripChecklistTemplateEditor()"
+            >
+                Cancelar
+            </button>
+
+            <button
+                type="button"
+                class="primary-btn"
+                onclick="saveTripChecklistTemplate()"
+            >
+                💾 Guardar plantilla
             </button>
 
         </div>
