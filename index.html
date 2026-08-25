@@ -7337,6 +7337,14 @@ if (temporadaSelect) {
         .join("");
 };document.getElementById("occasionChecks").innerHTML=occasions.map(([v,l])=>`<label><input type="checkbox" value="${v}"> ${l}</label>`).join("");document.getElementById("occasionButtons").innerHTML=occasions.map(([v,l])=>`<button class="occasion-btn" onclick="generateLook('${v}',false)">${l}</button>`).join("");document.getElementById("futureGrid").innerHTML=futureModules.map(m=>`<div class="future-card">${m}<div class="muted">Preparado para ampliar</div></div>`).join("");renderOutfitShell();populateCategoryOptions("abrigos");renderRelatedSelect()}
 function populateCategoryOptions(group,selected=""){const s=document.getElementById("categoria");s.innerHTML=(categoryOptions[group]||[]).map(([v,l])=>`<option value="${v}" ${v===selected?"selected":""}>${l}</option>`).join("")}function findGarment(id){return garments.find(g=>g.id===id)||null}function selectedRelated(){return relatedSelectedIds}
+function toggleRelated(id){
+    if(!id)return;
+    relatedSelectedIds=relatedSelectedIds.includes(id)
+        ? relatedSelectedIds.filter(relatedId=>relatedId!==id)
+        : [...relatedSelectedIds,id];
+    renderRelatedSelect();
+}
+window.toggleRelated=toggleRelated;
 function renderRelatedSelect(){
 
     const optionsBox =
@@ -7385,7 +7393,7 @@ function renderRelatedSelect(){
                             ? "selected"
                             : ""
                     }"
-                    onclick="toggleRelated('${g.id}')"
+                    onclick="window.toggleRelated('${g.id}')"
                 >
 
                     <img
