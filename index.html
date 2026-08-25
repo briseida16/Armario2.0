@@ -274,7 +274,7 @@ input{
 .item-body{padding:10px}
 .item-name{font-size:.9rem}
 .meta{font-size:.78rem}
-.pill{font-size:.7rem;padding:4px 7px;margin-top:6px;margin-right:4px}
+.usage-badge{display:inline-flex;align-items:center;white-space:nowrap;font-size:.72rem;line-height:1;padding:5px 8px;border-radius:999px;border:1px solid rgba(0,0,0,.08);background:rgba(255,255,255,.8);font-weight:600}.usage-new{opacity:.82}.usage-light{opacity:.9}.usage-active{opacity:.95}.usage-heavy{font-weight:700}.pill{font-size:.7rem;padding:4px 7px;margin-top:6px;margin-right:4px}
 .item-card .button-row{gap:6px}
 .item-card .small-btn{padding:7px 8px;font-size:.82rem}
 }
@@ -3081,13 +3081,23 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
                 </p>
             </div>
 
-            <button
-                class="primary-btn"
-                type="button"
-                onclick="openTripModal()"
-            >
-                ＋ Nuevo viaje
-            </button>
+            <div class="button-row" style="margin-left:auto;">
+                <button
+                    class="ghost-btn"
+                    type="button"
+                    onclick="openTripChecklistTemplates()"
+                >
+                    📋 Plantillas de checklist
+                </button>
+
+                <button
+                    class="primary-btn"
+                    type="button"
+                    onclick="openTripModal()"
+                >
+                    ＋ Nuevo viaje
+                </button>
+            </div>
         </div>
 
     </div>
@@ -3132,15 +3142,6 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
         ></div>
 
     </div>
-<div class="card" style="margin-top:16px;">
-    <div class="button-row" style="justify-content:space-between;align-items:center;">
-        <div>
-            <h2 class="section-title" style="margin-bottom:4px;">📋 Plantillas de checklist</h2>
-            <p class="muted" style="margin:0;">Guarda checklists para reutilizarlas en tus viajes.</p>
-        </div>
-        <button type="button" class="primary-btn" onclick="openTripChecklistTemplates()">📋 Ver plantillas</button>
-    </div>
-</div>
 </section>
   <section id="viajeDetalle" class="view hidden">
 
@@ -5259,6 +5260,8 @@ function backToTrips(){
 }
 /* PLANTILLAS CHECKLIST */
 
+let editingTripChecklistTemplateId = null;
+
 let tripChecklistTemplates = [
 
     {
@@ -6311,41 +6314,55 @@ editingTripLookId = null;
     }    
 }
 
-function removeTripLookFromCalendar(tripId,tripLookId,lookData=null){
+function removeTripLookFromCalendar(tripId,tripLookId,lookData=null,{persistChanges=true,render=true}={}){
     let changed=false;
     calendarPlans=calendarPlans.filter(plan=>{
         if(plan?.sourceType!=="trip-look"||plan.sourceTripId!==tripId||plan.sourceTripLookId!==tripLookId)return true;
         changed=true;
         return false;
     });
-    if(changed){
-        calendarPersistPlans();
-        renderCalendarPage();
-    }
+    if(changed && persistChanges)calendarPersistPlans();
+    if(changed && render)renderCalendarPage();
+    return changed;
 }
 function syncTripLookCalendar(trip,lookData,previousLook=null){
     if(!trip||!lookData)return;
-    removeTripLookFromCalendar(trip.id,lookData.id,previousLook);
-    if(!lookData.fecha)return;
-    const plan={
-        id:`triplook_plan_${trip.id}_${lookData.id}`,
-        sourceType:"trip-look",
-        sourceTripId:trip.id,
-        sourceTripLookId:lookData.id,
-        date:lookData.fecha,
-        time:"",
-        name:lookData.nombre||"Look del viaje",
-        context:lookData.ocasion||"viaje",
-        lookIds:[],
-        lookItems:[]
-    };
-    const existing=calendarPlans.find(p=>p.id===plan.id);
-    const target=existing||plan;
-    if(!existing)calendarPlans.push(target);
-    calendarAssignLookToPlan(lookData,target,{skipConfirm:true});
+
+    // There is exactly one calendar plan for a trip look with a date.
+    removeTripLookFromCalendar(trip.id,lookData.id,previousLook,{persistChanges:false,render:false});
+    if(!lookData.fecha){
+        calendarPersistPlans();
+        renderCalendarPage();
+        return;
+    }
+
+    const planId=`triplook_plan_${trip.id}_${lookData.id}`;
+    let target=calendarPlans.find(p=>p.id===planId);
+    if(!target){
+        target={
+            id:planId,
+            sourceType:"trip-look",
+            sourceTripId:trip.id,
+            sourceTripLookId:lookData.id,
+            date:lookData.fecha,
+            time:"",
+            name:lookData.nombre||"Look del viaje",
+            context:lookData.ocasion||"viaje",
+            lookIds:[],
+            lookItems:[]
+        };
+        calendarPlans.push(target);
+    }
+
+    target.sourceType="trip-look";
+    target.sourceTripId=trip.id;
+    target.sourceTripLookId=lookData.id;
+    target.date=lookData.fecha;
     target.name=lookData.nombre||"Look del viaje";
     target.context=lookData.ocasion||"viaje";
-    target.date=lookData.fecha;
+    target.lookIds=[];
+    target.lookItems=[];
+    calendarAssignLookToPlan(lookData,target,{skipConfirm:true});
     calendarPersistPlans();
     renderCalendarPage();
 }
@@ -6880,92 +6897,52 @@ function loadTrips(){
 
     }
 }
-    function applyTripChecklistTemplate(templateId){
-
+function applyTripChecklistTemplate(templateId){
     if(!currentTripId){
-        return;
+        toast("Abre primero un viaje para usar una plantilla.","warn");
+        return false;
     }
 
-    const trip =
-        trips.find(t => t.id === currentTripId);
-
+    const trip=trips.find(t=>t.id===currentTripId);
     if(!trip){
-        return;
+        toast("No se ha encontrado el viaje actual.","warn");
+        return false;
     }
 
-    const template =
-        tripChecklistTemplates.find(
-            t => t.id === templateId
-        );
-
+    const template=tripChecklistTemplates.find(t=>t.id===templateId);
     if(!template){
-        return;
+        toast("No se ha encontrado la plantilla.","warn");
+        return false;
     }
 
-    if(!Array.isArray(trip.checklist)){
-        trip.checklist = [];
-    }
+    if(!Array.isArray(trip.checklist))trip.checklist=[];
+    const existingNames=new Set(
+        trip.checklist.map(item=>String(item?.nombre||"").trim().toLowerCase()).filter(Boolean)
+    );
+    let added=0;
 
-    const existingNames =
-        new Set(
-            trip.checklist.map(item =>
-                String(item.nombre || "")
-                    .trim()
-                    .toLowerCase()
-            )
-        );
-
-    template.items.forEach(nombre => {
-
-        const normalized =
-            String(nombre)
-                .trim()
-                .toLowerCase();
-
-        if(existingNames.has(normalized)){
-            return;
-        }
-
+    template.items.forEach(nombre=>{
+        const clean=String(nombre||"").trim();
+        const normalized=clean.toLowerCase();
+        if(!clean || existingNames.has(normalized))return;
         trip.checklist.push({
-
-            id:
-                "check_" +
-                Date.now() +
-                "_" +
-                Math.random()
-                    .toString(36)
-                    .slice(2,7),
-
-            nombre,
-
+            id:"check_"+Date.now()+"_"+Math.random().toString(36).slice(2,7),
+            nombre:clean,
             completado:false,
-
-            creado_en:
-                new Date().toISOString()
-
+            creado_en:new Date().toISOString()
         });
-
         existingNames.add(normalized);
-
+        added++;
     });
 
-    trip.actualizado_en =
-        new Date().toISOString();
-
+    trip.actualizado_en=new Date().toISOString();
     persistTrips();
-
     renderTripDetail(trip);
-
-    if(typeof toast === "function"){
-
-        toast(
-            "Checklist añadida ☑️"
-        );
-
-    }
-
-let editingTripChecklistTemplateId = null;
+    closeTripChecklistTemplates();
+    toast(added ? `Plantilla aplicada: ${added} elemento${added===1?"":"s"} añadido${added===1?"":"s"} ☑️` : "La plantilla no tenía elementos nuevos.", added ? "ok" : "warn");
+    return true;
 }
+
 function openTripChecklistTemplateEditor(templateId = null){
     const template = templateId
         ? tripChecklistTemplates.find(
@@ -7055,29 +7032,29 @@ function saveTripChecklistTemplate(){
         return;
     }
 
+    const editingId=editingTripChecklistTemplateId;
     const template = {
-        id:
-            editingTripChecklistTemplateId ||
-            `template_${Date.now()}`,
+        id: editingId || `template_${Date.now()}_${Math.random().toString(36).slice(2,8)}`,
         nombre,
         items
     };
 
-    const index = tripChecklistTemplates.findIndex(
-        item => item.id === template.id
-    );
+    const index = editingId
+        ? tripChecklistTemplates.findIndex(item => item.id === editingId)
+        : -1;
 
-    if(index >= 0){
-        tripChecklistTemplates[index] = template;
-    }else{
-        tripChecklistTemplates.push(template);
+    if(editingId && index<0){
+        toast("No se ha encontrado la plantilla que estabas editando.","warn");
+        return;
     }
+
+    if(index>=0)tripChecklistTemplates[index]=template;
+    else tripChecklistTemplates.push(template);
 
     persistTripChecklistTemplates();
     closeTripChecklistTemplateEditor();
     openTripChecklistTemplates();
-
-    toast("Plantilla guardada 📋");
+    toast(index>=0 ? "Plantilla actualizada 📋" : "Plantilla creada 📋");
 }
 
 function deleteTripChecklistTemplate(templateId){
@@ -7130,7 +7107,7 @@ function openTripChecklistTemplates(){
                     <button
                         type="button"
                         class="primary-btn"
-                        onclick="applyTripChecklistTemplate('${String(template.id).replace(/\\/g,'\\\\').replace(/'/g,"\\'")}'); closeTripChecklistTemplates();"
+                        onclick="applyTripChecklistTemplate('${String(template.id).replace(/\\/g,'\\\\').replace(/'/g,"\\'")}')"
                     >
                         Usar
                     </button>
@@ -7435,7 +7412,7 @@ function renderRelatedSelect(){
 
     const search = relatedFilterMode==="search"
         ? (document.getElementById("relatedSearch")?.value||"").trim().toLowerCase()
-        : "";
+        : null;
 
     const available =
         garments.filter(g => {
@@ -7448,9 +7425,8 @@ function renderRelatedSelect(){
                 return false;
             }
 
-            if(!search){
-                return true;
-            }
+            if(relatedFilterMode!=="search")return true;
+            if(!search)return false;
 
             return String(g.nombre || "")
                 .toLowerCase()
@@ -7605,6 +7581,17 @@ function toggleAllGarmentDetails(){
             :"Ver información de todas las prendas";
     });
 }
+function getGarmentUsageBadge(g){
+    const uses=Math.max(0,Number(g?.usos)||0);
+    if(uses<=0)return {label:"✨ Sin estrenar",className:"usage-badge usage-new"};
+    if(uses<=2)return {label:"🌸 Poco usada",className:"usage-badge usage-light"};
+    if(uses<=9)return {label:"👗 En uso",className:"usage-badge usage-active"};
+    return {label:"🔥 Muy usada",className:"usage-badge usage-heavy"};
+}
+function garmentUsageBadgeHtml(g){
+    const badge=getGarmentUsageBadge(g);
+    return `<span class="${badge.className}" title="${esc(`${Number(g?.usos)||0} ${(Number(g?.usos)||0)===1?"uso":"usos"}`)}">${badge.label}</span>`;
+}
 function garmentCard(g){
     const rel=(g.relacionadas||[])
         .map(id=>findGarment(id)?.nombre)
@@ -7616,8 +7603,9 @@ function garmentCard(g){
     <div class="item-card">
         <img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}">
         <div class="item-body">
-            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
                 <p class="item-name" style="margin:0">${esc(g.nombre)}</p>
+                ${garmentUsageBadgeHtml(g)}
                 <button
                     class="small-btn"
                     type="button"
@@ -7741,29 +7729,74 @@ function filtersActive(){
         "filterOpinion"
     ].some(id => document.getElementById(id)?.value);
 }  
+function getWardrobeFilterCategoryOptions(groupValue=""){
+    const group=String(groupValue||"");
+    if(!group){
+        return Object.values(categoryOptions)
+            .flat()
+            .filter(Array.isArray);
+    }
+    return Array.isArray(categoryOptions[group])
+        ? categoryOptions[group]
+        : [];
+}
 function renderWardrobeCategoryFilter(selected=""){
     const group=document.getElementById("filterGroup")?.value||"";
     const category=document.getElementById("filterCategory");
-    if(!category)return;
-    const options=group ? (categoryOptions[group]||[]) : Object.values(categoryOptions).flat();
-    const valid=options.some(([value])=>value===selected);
+    if(!category)return "";
+
+    const uniqueOptions=[];
+    const seen=new Set();
+    getWardrobeFilterCategoryOptions(group).forEach(option=>{
+        if(!Array.isArray(option))return;
+        const value=String(option[0]||"");
+        const label=String(option[1]||value);
+        if(!value || seen.has(value))return;
+        seen.add(value);
+        uniqueOptions.push([value,label]);
+    });
+
+    const valid=uniqueOptions.some(([value])=>value===String(selected||""));
+    const activeValue=valid ? String(selected) : "";
+
     category.innerHTML='<option value="">Todas las categorías</option>'+
-        options.map(([value,label])=>`<option value="${esc(value)}" ${value===(valid?selected:"")?"selected":""}>${esc(label)}</option>`).join("");
+        uniqueOptions.map(([value,label])=>
+            `<option value="${esc(value)}" ${value===activeValue?"selected":""}>${esc(label)}</option>`
+        ).join("");
+
+    category.value=activeValue;
+    return activeValue;
 }
 function handleWardrobeGroupFilterChange(){
-    renderWardrobeCategoryFilter("");
+    const category=document.getElementById("filterCategory");
+    const previousCategory=category?.value||"";
+    renderWardrobeCategoryFilter(previousCategory);
     renderWardrobe();
 }
 function fillFilterOptions(){
     const active=garments.filter(g=>!g.eliminado_en),cur={};
     ["filterGroup","filterCategory","filterOccasion","filterBrand","filterSeason","filterSize"].forEach(id=>cur[id]=document.getElementById(id)?.value||"");
-    document.getElementById("filterGroup").innerHTML='<option value="">Todos los grupos</option>'+Object.entries(groupLabels).map(([v,l])=>`<option value="${v}" ${v===cur.filterGroup?"selected":""}>${l}</option>`).join("");
+
+    const groupSelect=document.getElementById("filterGroup");
+    if(groupSelect){
+        groupSelect.innerHTML='<option value="">Todos los grupos</option>'+
+            Object.entries(groupLabels).map(([v,l])=>
+                `<option value="${esc(v)}" ${v===cur.filterGroup?"selected":""}>${esc(l)}</option>`
+            ).join("");
+    }
+
+    // filterCategory has one and only one source of truth: the currently selected group.
     renderWardrobeCategoryFilter(cur.filterCategory);
-    document.getElementById("filterOccasion").innerHTML='<option value="">Todas las ocasiones</option>'+occasions.map(([v,l])=>`<option value="${v}" ${v===cur.filterOccasion?"selected":""}>${l}</option>`).join("");
-    document.getElementById("filterSeason").innerHTML='<option value="">Todas las temporadas</option>'+seasons.map(([v,l])=>`<option value="${v}" ${v===cur.filterSeason?"selected":""}>${l}</option>`).join("");
+
+    const occasionSelect=document.getElementById("filterOccasion");
+    if(occasionSelect)occasionSelect.innerHTML='<option value="">Todas las ocasiones</option>'+occasions.map(([v,l])=>`<option value="${esc(v)}" ${v===cur.filterOccasion?"selected":""}>${esc(l)}</option>`).join("");
+    const seasonSelect=document.getElementById("filterSeason");
+    if(seasonSelect)seasonSelect.innerHTML='<option value="">Todas las temporadas</option>'+seasons.map(([v,l])=>`<option value="${esc(v)}" ${v===cur.filterSeason?"selected":""}>${esc(l)}</option>`).join("");
     const brands=[...new Set(active.map(g=>g.marca).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"es")),sizes=[...new Set(active.map(g=>g.talla).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"es",{numeric:true}));
-    document.getElementById("filterBrand").innerHTML='<option value="">Todas las marcas</option>'+brands.map(b=>`<option value="${esc(b)}" ${b===cur.filterBrand?"selected":""}>${esc(b)}</option>`).join("");
-    document.getElementById("filterSize").innerHTML='<option value="">Todas las tallas</option>'+sizes.map(s=>`<option value="${esc(s)}" ${s===cur.filterSize?"selected":""}>${esc(s)}</option>`).join("");
+    const brandSelect=document.getElementById("filterBrand");
+    if(brandSelect)brandSelect.innerHTML='<option value="">Todas las marcas</option>'+brands.map(b=>`<option value="${esc(b)}" ${b===cur.filterBrand?"selected":""}>${esc(b)}</option>`).join("");
+    const sizeSelect=document.getElementById("filterSize");
+    if(sizeSelect)sizeSelect.innerHTML='<option value="">Todas las tallas</option>'+sizes.map(s=>`<option value="${esc(s)}" ${s===cur.filterSize?"selected":""}>${esc(s)}</option>`).join("");
 }
 function isPhysicalWardrobeItem(g){
 
@@ -7780,7 +7813,12 @@ function isPhysicalWardrobeItem(g){
   function filteredGarments(){
     const q=document.getElementById("searchInput").value.trim().toLowerCase();
     const group=document.getElementById("filterGroup").value;
-    const cat=document.getElementById("filterCategory").value;
+    const catSelect=document.getElementById("filterCategory");
+    const cat=catSelect?.value||"";
+    const validCategoryValues=new Set(
+        getWardrobeFilterCategoryOptions(group).map(option=>Array.isArray(option)?option[0]:null).filter(Boolean)
+    );
+    const effectiveCat=cat && validCategoryValues.has(cat) ? cat : "";
     const occ=document.getElementById("filterOccasion").value;
     const fav=document.getElementById("filterFavorite").value;
     const brand=document.getElementById("filterBrand").value;
@@ -7800,7 +7838,7 @@ if(activeSummaryFilter==="amortized" && (g.usos||0)<AMORTIZED_USES)return false;
 
         return (!q||hay.includes(q))
             && (!group||g.grupo===group)
-            && (!cat||g.categoria===cat)
+            && (!effectiveCat||g.categoria===effectiveCat)
             && (!occ||(g.ocasiones||[]).includes(occ))
             && (fav===""||String(!!g.favorito)===fav)
             && (!brand||g.marca===brand)
@@ -10204,8 +10242,12 @@ function syncCalendarUsage(){
     normalizeCalendarPlans();
     const nowKey=getTodayKey();
     const contributions=new Map();
+
     (Array.isArray(calendarPlans)?calendarPlans:[]).forEach(plan=>{
-        if(!plan?.date||plan.date>nowKey)return;
+        if(!plan?.id || !plan?.date || plan.date>nowKey)return;
+
+        // Cada look dentro de un plan representa una utilización real.
+        // El mismo look solo puede aparecer una vez gracias a normalizeCalendarPlans().
         (Array.isArray(plan.lookItems)?plan.lookItems:[]).forEach(look=>{
             const ids=new Set();
             ["abrigo","exterior","interior","inferior","vestido","calzado","bolso"].forEach(k=>{
@@ -10213,17 +10255,24 @@ function syncCalendarUsage(){
                 const id=typeof value==="object"?value?.id:value;
                 if(id)ids.add(id);
             });
-            (look?.accesorios||[]).forEach(value=>{
+            (Array.isArray(look?.accesorios)?look.accesorios:[]).forEach(value=>{
                 const id=typeof value==="object"?value?.id:value;
                 if(id)ids.add(id);
             });
             ids.forEach(id=>contributions.set(id,(contributions.get(id)||0)+1));
         });
     });
+
     garments.forEach(g=>{
         if(!g)return;
-        if(g.usosManuales===undefined||g.usosManuales===null)g.usosManuales=Number(g.usos||0);
-        g.usos=Number(g.usosManuales||0)+(contributions.get(g.id)||0);
+        if(g.usosManuales===undefined||g.usosManuales===null){
+            // Preserve existing data as the manual baseline on first encounter.
+            g.usosManuales=Number(g.usos||0);
+        }
+        const manual=Number(g.usosManuales)||0;
+        const derived=contributions.get(g.id)||0;
+        // Derived usage is recalculated from the calendar. It is never incremented here.
+        g.usos=manual+derived;
     });
 }function saveLookObject(look,name,occasion,source){
     if(!hasLook(look))return toast("No hay look para guardar.","warn");
@@ -13857,123 +13906,13 @@ deleteTripChecklistTemplate
     </div>
 
 </div>
-  <!-- MODAL NUEVO LOOK DE VIAJE -->
+  <!-- MODAL LOOK DE VIAJE -->
 <div
     id="tripLookModal"
     class="modal hidden"
     onclick="if(event.target===this) closeTripLookModal()"
 >
-
-    <div class="modal-card">
-
-        <div class="modal-head">
-
-            <div>
-                <h2 class="section-title">
-                    ✨ Nuevo look del viaje
-                </h2>
-
-                <p class="muted">
-                    Guarda un look para una ocasión concreta.
-                </p>
-            </div>
-
-            <button
-                type="button"
-                class="ghost-btn"
-                onclick="closeTripLookModal()"
-            >
-                ✕
-            </button>
-
-        </div>
-
-
-        <div class="form-grid">
-
-            <div class="field">
-
-                <label for="tripLookName">
-                    Nombre del look
-                </label>
-
-                <input
-                    id="tripLookName"
-                    type="text"
-                    placeholder="Ej. Cena en Ubud"
-                >
-
-            </div>
-
-
-            <div class="field">
-
-                <label for="tripLookOccasion">
-                    Ocasión
-                </label>
-
-                <select id="tripLookOccasion">
-
-                    <option value="viaje">
-                        ✈️ Viaje
-                    </option>
-
-                    <option value="dia">
-                        👗 Día
-                    </option>
-
-                    <option value="cena">
-                        🍷 Cena
-                    </option>
-
-                    <option value="excursion">
-                        🥾 Excursión
-                    </option>
-
-                    <option value="playa">
-                        🏖️ Playa
-                    </option>
-
-                    <option value="noche">
-                        🌙 Noche
-                    </option>
-
-                    <option value="otro">
-                        ✨ Otro
-                    </option>
-
-                </select>
-
-            </div>
-
-        </div>
-
-
-        <div
-            class="button-row"
-            style="justify-content:flex-end;margin-top:18px;"
-        >
-
-            <button
-                type="button"
-                class="ghost-btn"
-                onclick="closeTripLookModal()"
-            >
-                Cancelar
-            </button>
-
-            <button
-                type="button"
-                class="primary-btn"
-                onclick="saveTripLook()"
-            >
-                💾 Guardar look
-            </button>
-
-        </div>
-
-    </div>
-
+    <div class="modal-card"></div>
 </div>
   <!-- MODAL CHECKLIST DEL VIAJE -->
 <div
