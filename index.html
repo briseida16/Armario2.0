@@ -403,7 +403,8 @@ input{
     border-radius:16px;
     background:#fff;
     padding:10px;
-    display:flex;
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
     gap:10px;
 }
 
@@ -1491,8 +1492,8 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
     display:grid;
     grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
     gap:10px;
-    max-height:420px;
-    overflow-y:auto;
+        width:100%;
+        overflow:visible;
 }
 
 .related-option{
@@ -1994,12 +1995,12 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
    <div id="occasionChecks" class="check-grid"></div></div><div class="field" style="grid-column:1/-1"><label>Opciones</label><div class="check-grid">
 <label><input id="disponible" type="checkbox" checked> Disponible</label>
 <label><input id="enVinted" type="checkbox"> En venta</label>
-</div></div><div class="field" style="grid-column:1/-1"><label>Comentarios</label><textarea id="comentarios" placeholder="Ej. combina muy bien con dorado..."></textarea></div><div class="field" style="grid-column:1/-1"><label>Relacionar con prendas existentes</label><div class="related-picker"><div id="relatedSelectedPreview" class="related-selected"></div>
+</div></div><div class="field" style="grid-column:1/-1"><label>Comentarios</label><textarea id="comentarios" placeholder="Ej. combina muy bien con dorado..."></textarea></div><div class="field" style="grid-column:1/-1"><label>Relacionar con prendas existentes</label><div class="related-picker">
 <input
     id="relatedSearch"
     type="search"
     placeholder="🔎 Buscar prenda por nombre..."
-    oninput="renderRelatedSelect()"
+    oninput="window.renderRelatedSelect()"
     style="
         width:100%;
         box-sizing:border-box;
@@ -2011,6 +2012,7 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
         font:inherit;
     "
 >
+<div id="relatedSelectedPreview" class="related-selected"></div>
 <div id="relatedOptions" class="related-options"></div></div><p class="muted" style="margin:0">Toca una o varias prendas para relacionarlas.</p></div></div><div class="button-row" style="margin-top:14px"><button
     id="saveGarmentBtn"
     class="primary-btn"
@@ -7439,6 +7441,7 @@ function renderRelatedSelect(){
                 </span>
             `;
 }
+window.renderRelatedSelect=renderRelatedSelect;
 function resetForm() {
     editingGarmentId = null;
     relatedSelectedIds = [];
