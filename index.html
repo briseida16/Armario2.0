@@ -5950,6 +5950,91 @@ function renderTripLookEditor(look = null){
 
     renderTripLookSelectors();
 }
+function setTripLookSelection(look){
+    const prendas=look?.prendas||look||{};
+    tripLookSelection={
+        exterior:prendas.exterior||"",
+        interior:prendas.interior||"",
+        inferior:prendas.inferior||"",
+        vestido:prendas.vestido||"",
+        abrigo:prendas.abrigo||"",
+        calzado:prendas.calzado||"",
+        bolso:prendas.bolso||"",
+        accesorios:Array.isArray(prendas.accesorios)
+            ? [...prendas.accesorios]
+            : []
+    };
+}
+function tripChooseSavedLook(lookId=null){
+    if(lookId){
+        const look=savedLooks.find(item=>item.id===lookId);
+        if(!look)return;
+        setTripLookSelection(look);
+        tripLookMode="saved";
+        renderTripLookEditor(look);
+        return;
+    }
+
+    const modal=document.getElementById("tripLookModal");
+    const card=modal?.querySelector(".modal-card");
+    if(!card)return;
+    const looks=Array.isArray(savedLooks)?savedLooks:[];
+    card.innerHTML=`
+        <div class="modal-head">
+            <div>
+                <h2 class="section-title">💾 Elige un look guardado</h2>
+                <p class="muted">Selecciona un look para añadirlo a este viaje.</p>
+            </div>
+            <button type="button" class="ghost-btn" onclick="renderTripLookChooser()">✕</button>
+        </div>
+        <div class="calendar-saved-looks">
+            ${looks.length
+                ? looks.map(look=>{
+                    const display=idsToLook(look);
+                    const first=display.abrigo||display.exterior||display.interior||display.inferior||display.vestido||display.calzado||display.bolso||display.accesorios?.[0];
+                    return `<button type="button" class="calendar-saved-look" onclick="tripChooseSavedLook('${look.id}')">
+                        <img src="${first?.foto||placeholderImg}" alt="${esc(look.nombre||"Look")}">
+                        <span><strong>${esc(look.nombre||"Look sin nombre")}</strong><small>${esc(fmtOcc(look.ocasion||"Sin ocasión"))}</small></span>
+                    </button>`;
+                }).join("")
+                : '<div class="calendar-empty">Todavía no tienes looks guardados.</div>'}
+        </div>
+    `;
+}
+function tripChooseCreateLook(){
+    tripLookMode="manual";
+    tripLookSelection={
+        exterior:"",interior:"",inferior:"",vestido:"",abrigo:"",calzado:"",bolso:"",accesorios:[]
+    };
+    renderTripLookEditor();
+}
+function renderTripLookSaveStep(){
+    const modal=document.getElementById("tripLookModal");
+    const card=modal?.querySelector(".modal-card");
+    if(!card)return;
+    setTripLookSelection(tripLookDraft);
+    card.innerHTML=`
+        <div class="modal-head">
+            <div>
+                <h2 class="section-title">✨ Look propuesto</h2>
+                <p class="muted">Puedes editar la propuesta antes de guardarla en el viaje.</p>
+            </div>
+            <button type="button" class="ghost-btn" onclick="closeTripLookModal()">✕</button>
+        </div>
+        <div class="button-row" style="justify-content:flex-end;margin-bottom:14px;">
+            <button type="button" class="ghost-btn" onclick="tripRegenerateProposedLook()">🔄 Otra propuesta</button>
+            <button type="button" class="small-btn" onclick="renderTripLookEditor(tripLookDraft)">✏️ Editar</button>
+        </div>
+        <div class="mini-outfit">
+            ${Object.entries(calendarLookToDisplay(tripLookDraft)).flatMap(([slot,value])=>slot==="accesorios"?(value||[]).map(g=>["Accesorio",g]):value?[[slotTitles[slot],value]]:[]).map(([label,g])=>`
+                <div class="mini-card"><img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}"><div class="mini-title">${esc(label)}</div><div class="meta">${esc(g.nombre)}</div></div>
+            `).join("")||'<div class="empty">No se pudo montar una propuesta.</div>'}
+        </div>
+        <div class="button-row" style="justify-content:flex-end;margin-top:14px;">
+            <button type="button" class="primary-btn" onclick="renderTripLookEditor(tripLookDraft)">💾 Continuar</button>
+        </div>
+    `;
+}
 function tripChooseProposedLook(){
 
     const occasion =
