@@ -6552,15 +6552,16 @@ function tripChecklistCard(item){
                 ${esc(item.nombre)}
             </span>
 
+            <button
+                type="button"
+                class="small-btn danger-btn"
+                onclick="deleteTripChecklistItem('${item.id}')"
+            >
+                🗑️
+            </button>
+
         </div>
     `;
-    <button
-    type="button"
-    class="small-btn danger-btn"
-    onclick="deleteTripChecklistItem('${item.id}')"
->
-    🗑️
-</button>
 }
 
 
