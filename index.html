@@ -13539,6 +13539,8 @@ function renderCalendarPage(){
  renderHomeIndicators();
  const grid=document.getElementById("calendarGrid"), title=document.getElementById("calendarMonthTitle"), detail=document.getElementById("calendarDetail");
  if(!grid||!title||!detail)return;
+
+ const y=calendarViewDate.getFullYear(),m=calendarViewDate.getMonth();const first=new Date(y,m,1),days=new Date(y,m+1,0).getDate(),
  try{
    const raw=localStorage.getItem("bricloset_calendar_plans");
    const stored=raw?JSON.parse(raw):[];
