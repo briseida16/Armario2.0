@@ -13152,19 +13152,35 @@ async function syncCalendarPlansWithFirestore(){
     }
 }
 async function saveCalendarPlansToFirestore(){
-    if(!currentUser) return;
+    if(!currentUser){
+        return false;
+    }
 
     try{
         await setDoc(
             userMetaRef(),
-            {calendarPlans: calendarPlans},
+            {
+                calendarPlans: Array.isArray(calendarPlans)
+                    ? calendarPlans
+                    : []
+            },
             {merge:true}
         );
+
+        return true;
+
     }catch(error){
-        console.error("Error guardando calendario en Firestore:",error);
+
+        console.error(
+            "Error guardando calendario en Firestore:",
+            error
+        );
+
+        return false;
     }
 }
-function calKey(d){d=new Date(d);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
+function calKey(d){d=new Date(d);
+                   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
 function calEsc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function calPlans(k){return calendarPlans.filter(p=>p.date===k)}
 function calendarOpenPlanModal(k,editId=null){
