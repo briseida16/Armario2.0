@@ -13540,12 +13540,6 @@ function renderCalendarPage(){
  const grid=document.getElementById("calendarGrid"), title=document.getElementById("calendarMonthTitle"), detail=document.getElementById("calendarDetail");
  if(!grid||!title||!detail)return;
 
- const y=calendarViewDate.getFullYear(),m=calendarViewDate.getMonth();const first=new Date(y,m,1),days=new Date(y,m+1,0).getDate(),
- try{
-   const raw=localStorage.getItem("bricloset_calendar_plans");
-   const stored=raw?JSON.parse(raw):[];
-   if(Array.isArray(stored))calendarPlans=stored;
- }catch(e){}
  const y=calendarViewDate.getFullYear(),m=calendarViewDate.getMonth();
  title.textContent=new Intl.DateTimeFormat("es-ES",{month:"long",year:"numeric"}).format(calendarViewDate);
  const first=new Date(y,m,1),days=new Date(y,m+1,0).getDate(),prevDays=new Date(y,m,0).getDate(),start=(first.getDay()+6)%7,total=Math.ceil((start+days)/7)*7;
