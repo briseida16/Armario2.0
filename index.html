@@ -10996,11 +10996,7 @@ function weatherCodeInfo(code){
     return map[code]||["🌤️","Tiempo variable"];
 }
 async function reverseWeatherLocation(lat,lon){
-    try{
-        const r=await fetch(`https://geocoding-api.open-meteo.com/v1/reverse?latitude=${lat}&longitude=${lon}&count=1&language=es&format=json`);
-        const data=await r.json();
-        return data.results?.[0]?.name||"Tu ubicación";
-    }catch(e){return "Tu ubicación";}
+    return "Tu ubicación";
 }
 function useWeatherLocation(){
     if(!navigator.geolocation){loadHomeWeatherFallback();return;}
@@ -13613,6 +13609,7 @@ useWeatherLocation,
     cancelCalendarOwnLook,
 
     calendarShiftMonth,
+    calKey,
     calendarSelectDate,
     calendarOpenPlanModal,
     calendarOpenNewPlanModal,
@@ -13722,7 +13719,7 @@ deleteTripChecklistTemplate
         <div>L</div><div>M</div><div>X</div><div>J</div><div>V</div><div>S</div><div>D</div>
       </div>
       <div class="calendar-grid" id="calendarGrid"></div>
-<button type="button" class="calendar-add-main" onclick="calendarOpenPlanModal(calKey(calendarSelectedDate))">＋ Añadir plan</button>
+<button type="button" class="calendar-add-main" onclick="calendarOpenNewPlanModal()">＋ Añadir plan</button>
     </div>
     <div class="section-card calendar-detail" id="calendarDetail"></div>
   </div></section>
