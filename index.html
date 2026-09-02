@@ -3463,7 +3463,14 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
 let firebaseEnabled=false;
 let initializeApp,getAuth,onAuthStateChanged,signOut,createUserWithEmailAndPassword,signInWithEmailAndPassword;
 let getFirestore,initializeFirestore,persistentLocalCache,persistentMultipleTabManager,collection,doc,getDoc,getDocs,setDoc,writeBatch,onSnapshot;
-let firebaseConfig={};
+let firebaseConfig={
+    apiKey:"AIzaSyCThGwBnZfhIeN9T1woIjJH5JFiBWc7fkQ",
+    authDomain:"armario---bricloset.firebaseapp.com",
+    projectId:"armario---bricloset",
+    storageBucket:"armario---bricloset.firebasestorage.app",
+    messagingSenderId:"34156505129",
+    appId:"1:34156505129:web:54d67023e9994cc6409438"
+};
 
 async function setupFirebase(){
   try{
@@ -3471,7 +3478,7 @@ async function setupFirebase(){
       import("https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js"),
       import("https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js"),
       import("https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js"),
-      import("./firebase-config.js")
+    Promise.resolve({firebaseConfig})
     ]);
     ({initializeApp}=appMod);
     ({getAuth,onAuthStateChanged,signOut,createUserWithEmailAndPassword,signInWithEmailAndPassword}=authMod);
@@ -3543,12 +3550,14 @@ const jewelryTypeLabels = {
 // Se persiste en localStorage para poder reintentar el envío aunque se cierre o recargue la app.
 let pendingGarmentIds=new Set(safeParseGlobal());
 function safeParseGlobal(){try{const s=localStorage.getItem(STORAGE_PENDING_GARMENTS);return s?JSON.parse(s):[]}catch(e){return[]}}
+function pendingGarmentsLocalKey(){return currentUser?`${STORAGE_PENDING_GARMENTS}_${currentUser.uid}`:STORAGE_PENDING_GARMENTS}
+function loadPendingGarmentIds(){try{const value=safeParse(storage.get(pendingGarmentsLocalKey()),[]);pendingGarmentIds=new Set(Array.isArray(value)?value:[])}catch(e){pendingGarmentIds=new Set()}}
 // lastSyncedGarmentSnapshot: última versión de cada prenda que sabemos confirmada en Firestore (id -> JSON).
 // Se usa para calcular por diferencias qué documentos hay que escribir o borrar, en vez de reescribir el array entero.
 let lastSyncedGarmentSnapshot={};
 let garmentsSyncChain=Promise.resolve();
 const categoryOptions={abrigos:[["abrigo","Abrigo"],["chaqueta","Chaqueta"],["otros","Otros"]],jerseis_sudaderas:[["jersey","Jersey"],["sudadera","Sudadera"],["cardigan","Cárdigan"],["chaqueta_punto","Chaqueta de punto"],["otros","Otros"]],parte_superior:[["camiseta","Camiseta"],["top","Top"],["body","Body"],["camisa","Camisa"],["blusa","Blusa"],["polo","Polo"],["camiseta_termica","Camiseta térmica"],["camiseta_de_equipos","Camiseta de equipos"],["camiseta_deportiva","Camiseta deportiva"],["otros","Otros"]],parte_inferior:[["vaquero","Vaquero"],["pantalon_vestir","Pantalón vestir"],["pantalon_ancho","Pantalón ancho"],
-["pantalon_casual","Pantalón casual"],["pantalon_cargo","Pantalón cargo"],["pantalon_pirata","Pantalón pirata"],["chandal","Chándal"],["falda_corta","Falda corta"],["falda_midi","Falda midi"],["falda_larga","Falda larga"],["falda_pantalon","Falda pantalón"],["shorts","Pantalón corto"],["leggings","Leggings"],["leggings_deportivos","Leggings deportivos"],["mallas_termicas","Mallas térmicas"],["otros","Otros"]],vestidos_monos:[["vestido_largo","Vestido largo"],["vestido_corto","Vestido corto"],["vestido_midi","Vestido_midi"],["mono","Mono"],["otros","Otros"]],playa:[["bikini","Bikini"],["banador","Bañador"],["pareo","Pareo"],["otros","Otros"]],
+["pantalon_casual","Pantalón casual"],["pantalon_cargo","Pantalón cargo"],["pantalon_pirata","Pantalón pirata"],["chandal","Chándal"],["falda_corta","Falda corta"],["falda_midi","Falda midi"],["falda_larga","Falda larga"],["falda_pantalon","Falda pantalón"],["shorts","Pantalón corto"],["leggings","Leggings"],["leggings_deportivos","Leggings deportivos"],["mallas_termicas","Mallas térmicas"],["otros","Otros"]],vestidos_monos:[["vestido_largo","Vestido largo"],["vestido_corto","Vestido corto"],["vestido_midi","Vestido midi"],["mono","Mono"],["otros","Otros"]],playa:[["bikini","Bikini"],["banador","Bañador"],["pareo","Pareo"],["otros","Otros"]],
 dormir:[["camiseta_mc","Camiseta manga corta"],["camiseta_ml","Camiseta manga larga"],["camiseta_invierno","Camiseta invierno"],["pantalon_corto","Pantalón corto"],["pantalon_largo","Pantalón largo"],["pantalon_invierno","Pantalón invierno"],["camison","Camisón"],["bata","Bata"],["otros","Otros"]],
 calzado:[["bota","Botas"],["bota_cowboy","Botas cowboy"],["botin","Botines"],["tacones","Tacones"],["manoletinas","Manoletinas"],["sandalias","Sandalias"],["deportivas","Deportivas"],["running","Running"],["basket_interior","Baloncesto interior"],["basket_exterior","Baloncesto exterior"],["estar_por_casa","Estar por casa"],["zapatos","Zapatos"],["chanclas","Chanclas"],["otros","Otros"]],
 bolsos:[["bolso grande","Bolso"],["mochila","Mochila"],["bolso_pequeño","Bolso pequeño"],["bolso_mano","bolso de mano"],["otros","Otros"]],accesorios:[["pendiente","Pendientes"],["anillo","Anillos"],["collar","Collares"],["pulsera","Pulseras"],["reloj","Relojes"],["gafas","Gafas de sol"],["cinturon","Cinturones"],["bufanda","Bufandas"],["gorra","Gorra"],["gorro","Gorros"],["perfume","Perfumes"],["sombreros","Sombreros"],["lacito","Lacitos"],["otros","Otros"]]};
@@ -4061,7 +4070,7 @@ async function saveJewelryToFirestore() {
     }
 }
 function garmentsLocalKey(){return currentUser?`${STORAGE_GARMENTS}_${currentUser.uid}`:STORAGE_GARMENTS}
-function persistPendingGarmentIds(){storage.set(STORAGE_PENDING_GARMENTS,JSON.stringify([...pendingGarmentIds]))}
+function persistPendingGarmentIds(){storage.set(pendingGarmentsLocalKey(),JSON.stringify([...pendingGarmentIds]))}
 // Copia local inmediata del armario. Se hace SIEMPRE, haya o no conexión: es la garantía de que una prenda
 // nunca se pierde aunque Firestore falle, tarde o no exista sesión todavía.
 function persistGarmentsLocally(){try{storage.set(garmentsLocalKey(),JSON.stringify(garments))}catch(e){console.warn("No se pudo guardar el armario localmente",e)}}
@@ -6109,10 +6118,12 @@ function tripRegenerateProposedLook(){
         renderTripLookSaveStep();
     }
 }
-function lookAccessoryItems(){
+function lookAccessoryItems(category=""){
     const garmentAccessories=garments.filter(g=>g.disponible&&isPhysicalWardrobeItem(g)&&inferSlot(g)==="accesorios");
     const jewels=Array.isArray(jewelry)?jewelry.filter(j=>j.disponible!==false):[];
-    return [...garmentAccessories,...jewels];
+    if(!category)return [...garmentAccessories,...jewels];
+    const jewelCategory={pendiente:"pendientes",anillo:"anillo",collar:"collar",pulsera:"pulsera",reloj:"reloj",otros:"otros"}[category]||category;
+    return [...garmentAccessories.filter(g=>g.categoria===category),...jewels.filter(j=>j.tipo===jewelCategory)];
 }
 function findLookAccessory(id){
     return findGarment(id)||jewelry.find(j=>j.id===id)||null;
@@ -7322,7 +7333,7 @@ async function saveWardrobeToFirestore(){
 // cuando termina la carga remota, esas versiones locales ganan en la fusión para no perder ediciones hechas
 // mientras se cargaba o mientras no había conexión.
 async function loadWardrobeFromFirestore(user){
-    currentUser=user;wardrobeLoaded=false;setSyncStatus("Cargando armario");
+    currentUser=user;loadPendingGarmentIds();wardrobeLoaded=false;setSyncStatus("Cargando armario");
     garments=loadGarmentsLocally().map(migrateGarment);
     refreshAll();
     try{
@@ -7350,9 +7361,11 @@ async function loadWardrobeFromFirestore(user){
         lastSyncedGarmentSnapshot={};
         remoteGarments.forEach(g=>lastSyncedGarmentSnapshot[g.id]=JSON.stringify(g));
         const localById=new Map(garments.map(g=>[g.id,g]));
-        const merged=remoteGarments.map(rg=>pendingGarmentIds.has(rg.id)&&localById.has(rg.id)?localById.get(rg.id):rg);
+        const merged=remoteGarments.length
+            ? remoteGarments.map(rg=>pendingGarmentIds.has(rg.id)&&localById.has(rg.id)?localById.get(rg.id):rg)
+            : [...localById.values()];
         const remoteIds=new Set(remoteGarments.map(g=>g.id));
-        localById.forEach((g,id)=>{if(pendingGarmentIds.has(id)&&!remoteIds.has(id))merged.push(g)});
+        localById.forEach((g,id)=>{if(remoteGarments.length&&pendingGarmentIds.has(id)&&!remoteIds.has(id))merged.push(g)});
         garments=merged;
         purgeOldTrash();
         wardrobeLoaded=true;
@@ -7500,7 +7513,7 @@ function toggleRelated(id){
     renderRelatedSelect();
 }
 window.toggleRelated=toggleRelated;
-let relatedFilterMode="all";
+let relatedFilterMode="search";
 function setRelatedFilterMode(mode){
     relatedFilterMode=mode==="search"?"search":"all";
     const input=document.getElementById("relatedSearch");
@@ -7512,6 +7525,7 @@ function setRelatedFilterMode(mode){
     document.getElementById("relatedSearchBtn")?.classList.toggle("primary-btn",relatedFilterMode==="search");
     renderRelatedSelect();
 }
+window.setRelatedFilterMode=setRelatedFilterMode;
 function renderRelatedSelect(){
 
     const optionsBox =
@@ -7607,7 +7621,7 @@ window.renderRelatedSelect=renderRelatedSelect;
 function resetForm() {
     editingGarmentId = null;
     relatedSelectedIds = [];
-    relatedFilterMode="all";
+    relatedFilterMode="search";
 
     ["nombre","color","talla","comentarios","marca","precio"]
         .forEach(id => {
@@ -7656,6 +7670,7 @@ if (saveGarmentBtn) {
 
 }
     populateCategoryOptions("");
+    setRelatedFilterMode("search");
 }
 function readGarmentForm(old={}){return{id:editingGarmentId||uid(),nombre:document.getElementById("nombre").value.trim(),grupo:document.getElementById("grupo").value,categoria:document.getElementById("categoria").value,color:document.getElementById("color").value.trim(),marca:document.getElementById("marca").value.trim(),temporada: getChecks("temporadaChecks"),estado:document.getElementById("estado").value,
 opinion:document.getElementById("opinion").value,
@@ -7693,6 +7708,7 @@ function toggleGarmentDetails(id,button){
         button.setAttribute("aria-expanded",String(!hidden));
     }
 }
+window.toggleGarmentDetails=toggleGarmentDetails;
 function toggleAllGarmentDetails(){
     allGarmentDetailsVisible=!allGarmentDetailsVisible;
     document.querySelectorAll(".garment-details").forEach(el=>{
@@ -7898,6 +7914,7 @@ function handleWardrobeGroupFilterChange(){
     renderWardrobeCategoryFilter(previousCategory);
     renderWardrobe();
 }
+window.handleWardrobeGroupFilterChange=handleWardrobeGroupFilterChange;
 function fillFilterOptions(){
     const active=garments.filter(g=>!g.eliminado_en),cur={};
     ["filterGroup","filterCategory","filterOccasion","filterBrand","filterSeason","filterSize"].forEach(id=>cur[id]=document.getElementById(id)?.value||"");
@@ -9718,7 +9735,7 @@ function renderLooksSelectorCategories(){
 function renderLooksSelectorGarments(){
     const gs=document.getElementById("looksSelectorGroup"),cs=document.getElementById("looksSelectorCategory"),box=document.getElementById("looksSelectorGarments");
     if(!gs||!cs||!box||!currentSlot)return;
-    const list=currentSlot==="accesorios"?lookAccessoryItems():garments.filter(g=>g.disponible&&!g.vendida&&!g.eliminado_en&&g.grupo===gs.value&&g.categoria===cs.value&&( 
+    const list=currentSlot==="accesorios"?lookAccessoryItems(cs.value):garments.filter(g=>g.disponible&&!g.vendida&&!g.eliminado_en&&g.grupo===gs.value&&g.categoria===cs.value&&( 
         currentSlot==="accesorios" ? inferSlot(g)==="accesorios" : inferSlot(g)===currentSlot
     ));
     box.innerHTML=list.length?list.map(g=>`<div class="item-card"><img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}"><div class="item-body"><p class="item-name">${esc(g.nombre)}</p><p class="meta">${esc(fmtCat(g.categoria))}</p><button class="small-btn" onclick="selectLooksManualGarment('${g.id}')">Seleccionar</button></div></div>`).join(""):'<div class="empty">No hay prendas para esta parte del look.</div>';
@@ -9805,7 +9822,7 @@ function renderOwnSelectorCategories(){
 function renderOwnSelectorGarments(){
     const gs=document.getElementById("ownSelectorGroup"),cs=document.getElementById("ownSelectorCategory"),box=document.getElementById("ownSelectorGarments");
     if(!gs||!cs||!box||!ownCurrentSlot)return;
-    const list=ownCurrentSlot==="accesorios"?lookAccessoryItems():garments.filter(g=>g.disponible&&!g.vendida&&!g.eliminado_en&&g.grupo===gs.value&&g.categoria===cs.value&&inferSlot(g)===ownCurrentSlot);
+    const list=ownCurrentSlot==="accesorios"?lookAccessoryItems(cs.value):garments.filter(g=>g.disponible&&!g.vendida&&!g.eliminado_en&&g.grupo===gs.value&&g.categoria===cs.value&&inferSlot(g)===ownCurrentSlot);
     box.innerHTML=list.length?list.map(g=>`<div class="item-card"><img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}"><div class="item-body"><p class="item-name">${esc(g.nombre)}</p><p class="meta">${esc(fmtCat(g.categoria))}</p><button class="small-btn" onclick="selectOwnGarment('${g.id}')">Seleccionar</button></div></div>`).join(""):'<div class="empty">No hay prendas para esta parte del look.</div>';
 }
 function openOwnLookSelector(slot){
@@ -9849,7 +9866,7 @@ function renderLooksOwnSelectorGarments(){
     const box=document.getElementById("looksOwnSelectorGarments");
     if(!gs||!cs||!box||!looksOwnCurrentSlot)return;
 
-    const list=looksOwnCurrentSlot==="accesorios"?lookAccessoryItems():garments.filter(g=>
+    const list=looksOwnCurrentSlot==="accesorios"?lookAccessoryItems(cs.value):garments.filter(g=>
         g.disponible &&
         !g.vendida &&
         !g.eliminado_en &&
@@ -13204,7 +13221,7 @@ function renderCalendarOwnSelectorCategories(){
 function renderCalendarOwnSelectorGarments(){
   const gs=document.getElementById("calendarOwnSelectorGroup"),cs=document.getElementById("calendarOwnSelectorCategory"),box=document.getElementById("calendarOwnSelectorGarments");
   if(!gs||!cs||!box||!calendarOwnCurrentSlot)return;
-    const list=calendarOwnCurrentSlot==="accesorios"?lookAccessoryItems():garments.filter(g=>g.disponible&&!g.vendida&&!g.eliminado_en&&g.grupo===gs.value&&g.categoria===cs.value&&inferSlot(g)===calendarOwnCurrentSlot);
+    const list=calendarOwnCurrentSlot==="accesorios"?lookAccessoryItems(cs.value):garments.filter(g=>g.disponible&&!g.vendida&&!g.eliminado_en&&g.grupo===gs.value&&g.categoria===cs.value&&inferSlot(g)===calendarOwnCurrentSlot);
   box.innerHTML=list.length?list.map(g=>`<div class="item-card"><img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}"><div class="item-body"><p class="item-name">${esc(g.nombre)}</p><p class="meta">${esc(fmtCat(g.categoria))}</p><button class="small-btn" onclick="selectCalendarOwnGarment('${g.id}')">Seleccionar</button></div></div>`).join(""):'<div class="empty">No hay prendas para esta parte del look.</div>';
 }
 function selectCalendarOwnGarment(id){
