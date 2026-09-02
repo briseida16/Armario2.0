@@ -3462,7 +3462,7 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
 <script type="module">
 let firebaseEnabled=false;
 let initializeApp,getAuth,onAuthStateChanged,signOut,createUserWithEmailAndPassword,signInWithEmailAndPassword;
-let getFirestore,initializeFirestore,persistentLocalCache,persistentMultipleTabManager,collection,doc,getDoc,getDocs,setDoc,writeBatch,onSnapshot;
+let getFirestore,initializeFirestore,persistentLocalCache,persistentMultipleTabManager,collection,doc,getDoc,getDocs,getDocsFromServer,setDoc,writeBatch,onSnapshot;
 let firebaseConfig={
     apiKey:"AIzaSyCThGwBnZfhIeN9T1woIjJH5JFiBWc7fkQ",
     authDomain:"armario---bricloset.firebaseapp.com",
@@ -3482,8 +3482,7 @@ async function setupFirebase(){
     ]);
     ({initializeApp}=appMod);
     ({getAuth,onAuthStateChanged,signOut,createUserWithEmailAndPassword,signInWithEmailAndPassword}=authMod);
-    ({getFirestore,initializeFirestore,persistentLocalCache,persistentMultipleTabManager,collection,doc,getDoc,getDocs,setDoc,writeBatch,onSnapshot}=firestoreMod);
-    ({firebaseConfig}=configMod);
+({getFirestore,initializeFirestore,persistentLocalCache,persistentMultipleTabManager,collection,doc,getDoc,getDocs,getDocsFromServer,setDoc,writeBatch}=firestoreMod);    ({firebaseConfig}=configMod);
     firebaseEnabled=true;
     return true;
   }catch(e){
@@ -7338,8 +7337,7 @@ async function loadWardrobeFromFirestore(user){
     refreshAll();
     try{
         const metaRef=userMetaRef();
-        const [metaSnap,colSnap]=await Promise.all([getDoc(metaRef),getDocs(userGarmentsCol())]);
-        let remoteGarments;
+const [metaSnap,colSnap]=await Promise.all([getDoc(metaRef),getDocsFromServer(userGarmentsCol())]);        let remoteGarments;
         if(!colSnap.empty){
             remoteGarments=colSnap.docs.map(d=>({id:d.id,...d.data()}));
         }else if(metaSnap.exists()&&Array.isArray(metaSnap.data().garments)&&metaSnap.data().garments.length){
