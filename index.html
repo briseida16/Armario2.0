@@ -7996,6 +7996,7 @@ if(activeSummaryFilter==="amortized" && (g.usos||0)<AMORTIZED_USES)return false;
     document.getElementById("searchInput").value="";
     document.getElementById("filterGroup").value="";
     document.getElementById("filterCategory").value="";
+    renderWardrobeCategoryFilter("");
     document.getElementById("filterOccasion").value="";
     document.getElementById("filterFavorite").value="";
     document.getElementById("filterBrand").value="";
@@ -8623,6 +8624,7 @@ function renderShoes() {
   function applySummaryFilter(group){
     activeSummaryFilter = group;
     document.getElementById("filterGroup").value = group;
+    renderWardrobeCategoryFilter("");
     renderWardrobeSummary();
     renderWardrobe();
     document.getElementById("wardrobeGrid")
@@ -8635,6 +8637,7 @@ function renderShoes() {
     document.getElementById("searchInput").value="";
     document.getElementById("filterGroup").value="";
     document.getElementById("filterCategory").value="";
+    renderWardrobeCategoryFilter("");
     document.getElementById("filterOccasion").value="";
     document.getElementById("filterFavorite").value="";
     document.getElementById("filterBrand").value="";
