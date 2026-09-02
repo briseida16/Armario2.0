@@ -7683,37 +7683,6 @@ function editGarment(id){const g=findGarment(id);if(!g)return;editingGarmentId=i
 setChecks("temporadaChecks", temporadas);;document.getElementById("estado").value = g.estado||"bueno";document.getElementById("opinion").value =
     g.opinion || "me_gusta";document.getElementById("precio").value=g.precio||"";document.getElementById("cantidad").value=g.cantidad||1;document.getElementById("basico").checked=!!g.basico;document.getElementById("reversible").checked=!!g.reversible;document.getElementById("favorito").value=String(!!g.favorito);document.getElementById("disponible").checked=!!g.disponible;document.getElementById("enVinted").checked=!!g.en_vinted;document.getElementById("comentarios").value=g.comentarios||"";setChecks("occasionChecks",g.ocasiones);relatedSelectedIds=[...(g.relacionadas||[])];renderRelatedSelect();document.getElementById("formTitle").textContent="Editar prenda";switchView("anadir")}
 let allGarmentDetailsVisible=false;
-function openSelector(slot){
-    currentSlot=slot;
-    const selector=document.getElementById("selectorCard");
-    const box=document.getElementById("selectorGrid");
-    if(!selector||!box)return;
-    selector.classList.remove("hidden");
-    const list=slot==="accesorios"
-        ? lookAccessoryItems()
-        : garments.filter(g=>g.disponible&&!g.vendida&&!g.eliminado_en&&inferSlot(g)===slot);
-    if(!list.length){
-        box.innerHTML="<div class=\"empty\">No hay prendas disponibles.</div>";
-        return;
-    }
-    box.innerHTML=list.map(g=>{
-        const label=g.tipo?jewelryTypeLabels[g.tipo]||"Joya":fmtCat(g.categoria);
-        return `<div class="item-card"><img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}"><div class="item-body"><p class="item-name">${esc(g.nombre)}</p><p class="meta">${esc(label||"")}</p><button class="small-btn" onclick="selectGarmentForSlot('${g.id}')">Seleccionar</button></div></div>`;
-    }).join("");
-}
-function selectGarmentForSlot(id){
-    const g=currentSlot==="accesorios"?findLookAccessory(id):findGarment(id);
-    if(!g||!currentSlot)return;
-    if(currentSlot==="accesorios"){
-        if(!currentLook.accesorios.some(a=>a.id===id))currentLook.accesorios.push(g);
-    }else{
-        if(currentSlot==="vestido"){currentLook.interior=null;currentLook.inferior=null}
-        else if(["interior","inferior"].includes(currentSlot))currentLook.vestido=null;
-        currentLook[currentSlot]=g;
-    }
-    renderCurrentLook();
-    document.getElementById("selectorCard").classList.add("hidden");
-}
 function toggleGarmentDetails(id,button){
     const card=document.querySelector(`[data-garment-card="${CSS.escape(String(id))}"]`);
     const details=card?.querySelector(".garment-details");
