@@ -38,6 +38,7 @@ function getPendingCalendarPlan() {
         );
 
         return null;
+    }
 }
 
 function finishCalendarLookAssignment(lookId) {
@@ -3461,7 +3462,7 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
 <script type="module">
 let firebaseEnabled=false;
 let initializeApp,getAuth,onAuthStateChanged,signOut,createUserWithEmailAndPassword,signInWithEmailAndPassword;
-let getFirestore,initializeFirestore,persistentLocalCache,persistentMultipleTabManager,collection,doc,getDoc,getDocs,setDoc,writeBatch;
+let getFirestore,initializeFirestore,persistentLocalCache,persistentMultipleTabManager,collection,doc,getDoc,getDocs,setDoc,writeBatch,onSnapshot;
 let firebaseConfig={};
 
 async function setupFirebase(){
@@ -3474,7 +3475,7 @@ async function setupFirebase(){
     ]);
     ({initializeApp}=appMod);
     ({getAuth,onAuthStateChanged,signOut,createUserWithEmailAndPassword,signInWithEmailAndPassword}=authMod);
-    ({getFirestore,initializeFirestore,persistentLocalCache,persistentMultipleTabManager,collection,doc,getDoc,getDocs,setDoc,writeBatch}=firestoreMod);
+    ({getFirestore,initializeFirestore,persistentLocalCache,persistentMultipleTabManager,collection,doc,getDoc,getDocs,setDoc,writeBatch,onSnapshot}=firestoreMod);
     ({firebaseConfig}=configMod);
     firebaseEnabled=true;
     return true;
@@ -3491,7 +3492,7 @@ async function setupFirebase(){
     persistentLocalCache=()=>({});
     persistentMultipleTabManager=()=>({});
     collection=()=>null; doc=()=>null; getDoc=async()=>({exists:()=>false}); getDocs=async()=>({empty:true,docs:[]});
-    setDoc=async()=>{}; writeBatch=()=>({set(){},delete(){},commit:async()=>{}});
+    setDoc=async()=>{}; writeBatch=()=>({set(){},delete(){},commit:async()=>{}}); onSnapshot=()=>()=>{};
     return false;
   }
 }
@@ -3510,7 +3511,9 @@ try{
 console.warn("No se pudo activar la persistencia offline de Firestore, se usará solo memoria.",e);  db = getFirestore(firebaseApp);
 }
 let currentUser=null,wardrobeLoaded=false,pendingWardrobeSave=false;
+let stopUserSnapshot=()=>{},stopGarmentsSnapshot=()=>{},stopLooksSnapshot=()=>{},stopJewelrySnapshot=()=>{};
 const APP_DATA_VERSION=4,
+    AMORTIZED_USES=10,
   placeholderImg="data:image/svg+xml;utf8,"+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500"><rect width="100%" height="100%" fill="#efe7eb"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#9b8691" font-size="24" font-family="Arial">Sin imagen</text></svg>`);
   const storage={memory:{},get(k){try{return localStorage.getItem(k)}catch(e){return this.memory[k]??null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){this.memory[k]=v}}};
 const STORAGE_LOOKS = "looks_bricloset_24";
@@ -3811,6 +3814,56 @@ function userLooksCol(){
             "warn"
         );
     }
+}
+function stopFirestoreListeners(){
+    stopUserSnapshot();
+    stopGarmentsSnapshot();
+    stopLooksSnapshot();
+    stopJewelrySnapshot();
+    stopUserSnapshot=()=>{};
+    stopGarmentsSnapshot=()=>{};
+    stopLooksSnapshot=()=>{};
+    stopJewelrySnapshot=()=>{};
+}
+function startFirestoreListeners(user){
+    stopFirestoreListeners();
+    if(!user||!firebaseEnabled)return;
+    stopUserSnapshot=onSnapshot(userMetaRef(),snap=>{
+        if(!currentUser||currentUser.uid!==user.uid||!snap.exists())return;
+        const data=snap.data()||{};
+        if(Array.isArray(data.trips)&&data.trips.length){
+            trips=data.trips;
+            storage.set(tripsLocalKey(),JSON.stringify(trips));
+            renderTrips();
+        }
+        if(Array.isArray(data.calendarPlans)&&data.calendarPlans.length){
+            calendarPlans=data.calendarPlans;
+            localStorage.setItem(calendarLocalKey(),JSON.stringify(calendarPlans));
+            renderCalendarPage();
+        }
+    },error=>console.error("Error escuchando datos del usuario en Firebase:",error));
+    stopGarmentsSnapshot=onSnapshot(userGarmentsCol(),snap=>{
+        if(!currentUser||currentUser.uid!==user.uid||pendingGarmentIds.size)return;
+        const remote=snap.docs.map(item=>migrateGarment({id:item.id,...item.data()}));
+        lastSyncedGarmentSnapshot={};
+        remote.forEach(g=>lastSyncedGarmentSnapshot[g.id]=JSON.stringify(g));
+        garments=remote;
+        wardrobeLoaded=true;
+        persistGarmentsLocally();
+        refreshAll();
+    },error=>console.error("Error escuchando prendas en Firebase:",error));
+    stopLooksSnapshot=onSnapshot(userLooksCol(),snap=>{
+        if(!currentUser||currentUser.uid!==user.uid||snap.empty)return;
+        savedLooks=snap.docs.map(item=>({id:item.id,...item.data()}));
+        storage.set(STORAGE_LOOKS,JSON.stringify(savedLooks));
+        renderSavedLooksCarousel();
+    },error=>console.error("Error escuchando looks en Firebase:",error));
+    stopJewelrySnapshot=onSnapshot(userJewelryCol(),snap=>{
+        if(!currentUser||currentUser.uid!==user.uid||snap.empty)return;
+        jewelry=snap.docs.map(item=>({id:item.id,...item.data()}));
+        persistJewelryLocally();
+        renderJewelry();
+    },error=>console.error("Error escuchando joyas en Firebase:",error));
 }
 /* =========================================================
    💎 FIREBASE — JOYERO
@@ -6401,7 +6454,7 @@ function saveTripLookToCalendar(lookData,fecha,ocasion){
 }
 function tripLookCard(look){
     const garmentsInLook = tripLookIds(look)
-        .map(id => garments.find(g => g.id === id))
+        .map(id => findLookAccessory(id))
         .filter(Boolean);
 
     return `
@@ -9718,7 +9771,7 @@ function openLooksManualSelector(slot){
     renderLooksSelectorCategories();
 }
 function selectLooksManualGarment(id){
-    const g=findGarment(id);
+    const g=currentSlot==="accesorios"?findLookAccessory(id):findGarment(id);
     if(!g)return;
     if(currentSlot==="accesorios"){
         if(!(currentLook.accesorios||[]).some(a=>a.id===id))currentLook.accesorios.push(g);
@@ -9783,7 +9836,7 @@ function renderOwnSelectorCategories(){
 function renderOwnSelectorGarments(){
     const gs=document.getElementById("ownSelectorGroup"),cs=document.getElementById("ownSelectorCategory"),box=document.getElementById("ownSelectorGarments");
     if(!gs||!cs||!box||!ownCurrentSlot)return;
-    const list=garments.filter(g=>g.disponible&&!g.vendida&&!g.eliminado_en&&g.grupo===gs.value&&g.categoria===cs.value&&inferSlot(g)===ownCurrentSlot);
+    const list=ownCurrentSlot==="accesorios"?lookAccessoryItems():garments.filter(g=>g.disponible&&!g.vendida&&!g.eliminado_en&&g.grupo===gs.value&&g.categoria===cs.value&&inferSlot(g)===ownCurrentSlot);
     box.innerHTML=list.length?list.map(g=>`<div class="item-card"><img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}"><div class="item-body"><p class="item-name">${esc(g.nombre)}</p><p class="meta">${esc(fmtCat(g.categoria))}</p><button class="small-btn" onclick="selectOwnGarment('${g.id}')">Seleccionar</button></div></div>`).join(""):'<div class="empty">No hay prendas para esta parte del look.</div>';
 }
 function openOwnLookSelector(slot){
@@ -9799,7 +9852,7 @@ function openOwnLookSelector(slot){
     requestAnimationFrame(()=>selector?.scrollIntoView({behavior:"smooth",block:"center"}));
 }
 function selectOwnGarment(id){
-    const g=findGarment(id);
+    const g=ownCurrentSlot==="accesorios"?findLookAccessory(id):findGarment(id);
     if(!g)return;
     if(ownCurrentSlot==="accesorios"){
         if(!ownLook.accesorios.some(a=>a.id===id))ownLook.accesorios.push(g);
@@ -9827,7 +9880,7 @@ function renderLooksOwnSelectorGarments(){
     const box=document.getElementById("looksOwnSelectorGarments");
     if(!gs||!cs||!box||!looksOwnCurrentSlot)return;
 
-    const list=garments.filter(g=>
+    const list=looksOwnCurrentSlot==="accesorios"?lookAccessoryItems():garments.filter(g=>
         g.disponible &&
         !g.vendida &&
         !g.eliminado_en &&
@@ -9895,7 +9948,7 @@ function openLooksOwnLookSelector(slot){
 }
 
 function selectLooksOwnGarment(id){
-    const g=findGarment(id);
+    const g=looksOwnCurrentSlot==="accesorios"?findLookAccessory(id):findGarment(id);
     if(!g)return;
 
     if(looksOwnCurrentSlot==="accesorios"){
@@ -13101,6 +13154,7 @@ try{loadData();populateStaticSelects();loadTripChecklistTemplates();resetForm();
     loadTrips();
     syncTripsWithFirestore();
     loadWardrobeFromFirestore(user);
+    startFirestoreListeners(user);
       loadLooksFromFirestore(user);
     jewelry =
         loadJewelryLocally();
@@ -13112,6 +13166,7 @@ try{loadData();populateStaticSelects();loadTripChecklistTemplates();resetForm();
         syncCalendarPlansWithFirestore();
     }, 0);
 }else{
+    stopFirestoreListeners();
     currentUser = null;
     wardrobeLoaded = false;
     pendingWardrobeSave = false;
@@ -13180,11 +13235,11 @@ function renderCalendarOwnSelectorCategories(){
 function renderCalendarOwnSelectorGarments(){
   const gs=document.getElementById("calendarOwnSelectorGroup"),cs=document.getElementById("calendarOwnSelectorCategory"),box=document.getElementById("calendarOwnSelectorGarments");
   if(!gs||!cs||!box||!calendarOwnCurrentSlot)return;
-  const list=garments.filter(g=>g.disponible&&!g.vendida&&!g.eliminado_en&&g.grupo===gs.value&&g.categoria===cs.value&&inferSlot(g)===calendarOwnCurrentSlot);
+    const list=calendarOwnCurrentSlot==="accesorios"?lookAccessoryItems():garments.filter(g=>g.disponible&&!g.vendida&&!g.eliminado_en&&g.grupo===gs.value&&g.categoria===cs.value&&inferSlot(g)===calendarOwnCurrentSlot);
   box.innerHTML=list.length?list.map(g=>`<div class="item-card"><img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}"><div class="item-body"><p class="item-name">${esc(g.nombre)}</p><p class="meta">${esc(fmtCat(g.categoria))}</p><button class="small-btn" onclick="selectCalendarOwnGarment('${g.id}')">Seleccionar</button></div></div>`).join(""):'<div class="empty">No hay prendas para esta parte del look.</div>';
 }
 function selectCalendarOwnGarment(id){
-  const g=findGarment(id); if(!g)return;
+    const g=calendarOwnCurrentSlot==="accesorios"?findLookAccessory(id):findGarment(id); if(!g)return;
   if(calendarOwnCurrentSlot==="accesorios"){
     if(!calendarOwnLook.accesorios.some(a=>a.id===id))calendarOwnLook.accesorios.push(g);
   }else{
@@ -13374,8 +13429,8 @@ function calendarLookToDisplay(look){
     vestido:resolveGarment(look.vestido),
     calzado:resolveGarment(look.calzado),
     bolso:resolveGarment(look.bolso),
-    accesorios:(Array.isArray(look.accesorios)?look.accesorios:[])
-      .map(resolveGarment)
+        accesorios:(Array.isArray(look.accesorios)?look.accesorios:[])
+            .map(value=>typeof value==="object"?value:findLookAccessory(value))
       .filter(Boolean)
   };
 }function calendarFinishLookFlow(plan){
@@ -13644,7 +13699,7 @@ function calendarDeletePlan(id){
   calendarPlans=calendarPlans.filter(p=>p.id!==id);
   try{
     localStorage.setItem(
-      "bricloset_calendar_plans",
+    calendarLocalKey(),
       JSON.stringify(calendarPlans)
     );
     if(typeof saveCalendarPlansToFirestore==="function"){
