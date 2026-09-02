@@ -38,7 +38,6 @@ function getPendingCalendarPlan() {
         );
 
         return null;
-    }
 }
 
 function finishCalendarLookAssignment(lookId) {
@@ -3963,12 +3962,7 @@ async function saveJewelryToFirestore() {
         const batch =
             writeBatch(db);
 
-        /*
-         * Guardar / actualizar joyas
-         */
-
         jewelry.forEach(jewel => {
-
             batch.set(
                 doc(col, jewel.id),
                 jewel
@@ -6062,7 +6056,28 @@ function tripRegenerateProposedLook(){
         renderTripLookSaveStep();
     }
 }
+function lookAccessoryItems(){
+    const garmentAccessories=garments.filter(g=>g.disponible&&isPhysicalWardrobeItem(g)&&inferSlot(g)==="accesorios");
+    const jewels=Array.isArray(jewelry)?jewelry.filter(j=>j.disponible!==false):[];
+    return [...garmentAccessories,...jewels];
+}
+function findLookAccessory(id){
+    return findGarment(id)||jewelry.find(j=>j.id===id)||null;
+}
+function idsToLookWithJewelry(l){
+    return {
+        abrigo:findGarment(l.abrigo),
+        exterior:findGarment(l.exterior),
+        interior:findGarment(l.interior),
+        inferior:findGarment(l.inferior),
+        vestido:findGarment(l.vestido),
+        calzado:findGarment(l.calzado),
+        bolso:findGarment(l.bolso),
+        accesorios:normalizeIds(l.accesorios).map(findLookAccessory).filter(Boolean)
+    };
+}
 function tripLookGarmentsForSlot(slot){
+    if(slot === "accesorios") return lookAccessoryItems();
     return garments.filter(g =>
         isPhysicalWardrobeItem(g) &&
         inferSlot(g) === slot
@@ -6811,12 +6826,45 @@ function renderTrips(){
             nextContent.innerHTML = "";
         }
     }
-} function persistTrips(){
+} function tripsLocalKey(){
+    return currentUser ? `${STORAGE_TRIPS}_${currentUser.uid}` : STORAGE_TRIPS;
+}
+async function saveTripsToFirestore(){
+    if(!currentUser)return false;
+    try{
+        await setDoc(userMetaRef(),{trips:Array.isArray(trips)?trips:[]},{merge:true});
+        return true;
+    }catch(error){
+        console.error("Error guardando viajes en Firebase:",error);
+        setSyncStatus("Error de sincronización");
+        return false;
+    }
+}
+async function syncTripsWithFirestore(){
+    if(!currentUser)return;
+    try{
+        const snap=await getDoc(userMetaRef());
+        const localTrips=Array.isArray(trips)?trips:[];
+        const remoteTrips=snap.exists()&&Array.isArray(snap.data()?.trips)?snap.data().trips:[];
+        if(remoteTrips.length){
+            trips=remoteTrips;
+        }else if(localTrips.length){
+            await saveTripsToFirestore();
+        }
+        storage.set(tripsLocalKey(),JSON.stringify(trips));
+        renderTrips();
+    }catch(error){
+        console.error("Error sincronizando viajes con Firebase:",error);
+        toast("No he podido sincronizar los viajes con Firebase.","warn");
+    }
+}
+ function persistTrips(){
     try{
         storage.set(
-            STORAGE_TRIPS,
+            tripsLocalKey(),
             JSON.stringify(trips)
         );
+        if(currentUser) saveTripsToFirestore();
     }catch(e){
         console.warn(
             "No se pudieron guardar los viajes",
@@ -6828,7 +6876,7 @@ function renderTrips(){
 function loadTrips(){
     try{
         const raw =
-            storage.get(STORAGE_TRIPS);
+            storage.get(tripsLocalKey());
 
         if(!raw){
             trips=[];
@@ -7582,6 +7630,47 @@ function editGarment(id){const g=findGarment(id);if(!g)return;editingGarmentId=i
 setChecks("temporadaChecks", temporadas);;document.getElementById("estado").value = g.estado||"bueno";document.getElementById("opinion").value =
     g.opinion || "me_gusta";document.getElementById("precio").value=g.precio||"";document.getElementById("cantidad").value=g.cantidad||1;document.getElementById("basico").checked=!!g.basico;document.getElementById("reversible").checked=!!g.reversible;document.getElementById("favorito").value=String(!!g.favorito);document.getElementById("disponible").checked=!!g.disponible;document.getElementById("enVinted").checked=!!g.en_vinted;document.getElementById("comentarios").value=g.comentarios||"";setChecks("occasionChecks",g.ocasiones);relatedSelectedIds=[...(g.relacionadas||[])];renderRelatedSelect();document.getElementById("formTitle").textContent="Editar prenda";switchView("anadir")}
 let allGarmentDetailsVisible=false;
+function openSelector(slot){
+    currentSlot=slot;
+    const selector=document.getElementById("selectorCard");
+    const box=document.getElementById("selectorGrid");
+    if(!selector||!box)return;
+    selector.classList.remove("hidden");
+    const list=slot==="accesorios"
+        ? lookAccessoryItems()
+        : garments.filter(g=>g.disponible&&!g.vendida&&!g.eliminado_en&&inferSlot(g)===slot);
+    if(!list.length){
+        box.innerHTML="<div class=\"empty\">No hay prendas disponibles.</div>";
+        return;
+    }
+    box.innerHTML=list.map(g=>{
+        const label=g.tipo?jewelryTypeLabels[g.tipo]||"Joya":fmtCat(g.categoria);
+        return `<div class="item-card"><img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}"><div class="item-body"><p class="item-name">${esc(g.nombre)}</p><p class="meta">${esc(label||"")}</p><button class="small-btn" onclick="selectGarmentForSlot('${g.id}')">Seleccionar</button></div></div>`;
+    }).join("");
+}
+function selectGarmentForSlot(id){
+    const g=currentSlot==="accesorios"?findLookAccessory(id):findGarment(id);
+    if(!g||!currentSlot)return;
+    if(currentSlot==="accesorios"){
+        if(!currentLook.accesorios.some(a=>a.id===id))currentLook.accesorios.push(g);
+    }else{
+        if(currentSlot==="vestido"){currentLook.interior=null;currentLook.inferior=null}
+        else if(["interior","inferior"].includes(currentSlot))currentLook.vestido=null;
+        currentLook[currentSlot]=g;
+    }
+    renderCurrentLook();
+    document.getElementById("selectorCard").classList.add("hidden");
+}
+function toggleGarmentDetails(id,button){
+    const card=document.querySelector(`[data-garment-card="${CSS.escape(String(id))}"]`);
+    const details=card?.querySelector(".garment-details");
+    if(!details)return;
+    const hidden=details.classList.toggle("hidden");
+    if(button){
+        button.textContent=hidden?"ℹ️ Ver":"ℹ️ Ocultar";
+        button.setAttribute("aria-expanded",String(!hidden));
+    }
+}
 function toggleAllGarmentDetails(){
     allGarmentDetailsVisible=!allGarmentDetailsVisible;
     document.querySelectorAll(".garment-details").forEach(el=>{
@@ -7613,7 +7702,7 @@ function garmentCard(g){
         .join(", ");
 
     return `
-    <div class="item-card">
+    <div class="item-card" data-garment-card="${esc(g.id)}">
         <img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}">
         <div class="item-body">
             <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
@@ -7623,8 +7712,9 @@ function garmentCard(g){
                     class="small-btn"
                     type="button"
                     title="Ver descripción"
+                    aria-expanded="${allGarmentDetailsVisible}"
                     data-garment-details-toggle
-                    onclick="toggleAllGarmentDetails()">
+                    onclick="toggleGarmentDetails('${esc(g.id)}',this)">
                     ${allGarmentDetailsVisible?'ℹ️ Ocultar':'ℹ️ Ver'}
                 </button>
             </div>
@@ -9606,7 +9696,7 @@ function renderLooksSelectorCategories(){
 function renderLooksSelectorGarments(){
     const gs=document.getElementById("looksSelectorGroup"),cs=document.getElementById("looksSelectorCategory"),box=document.getElementById("looksSelectorGarments");
     if(!gs||!cs||!box||!currentSlot)return;
-    const list=garments.filter(g=>g.disponible&&!g.vendida&&!g.eliminado_en&&g.grupo===gs.value&&g.categoria===cs.value&&(
+    const list=currentSlot==="accesorios"?lookAccessoryItems():garments.filter(g=>g.disponible&&!g.vendida&&!g.eliminado_en&&g.grupo===gs.value&&g.categoria===cs.value&&( 
         currentSlot==="accesorios" ? inferSlot(g)==="accesorios" : inferSlot(g)===currentSlot
     ));
     box.innerHTML=list.length?list.map(g=>`<div class="item-card"><img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}"><div class="item-body"><p class="item-name">${esc(g.nombre)}</p><p class="meta">${esc(fmtCat(g.categoria))}</p><button class="small-btn" onclick="selectLooksManualGarment('${g.id}')">Seleccionar</button></div></div>`).join(""):'<div class="empty">No hay prendas para esta parte del look.</div>';
@@ -13008,6 +13098,8 @@ try{loadData();populateStaticSelects();loadTripChecklistTemplates();resetForm();
     renderTrips();
     document.getElementById("authUserBox")?.addEventListener("click",e=>{if(e.target.closest(".user-menu"))return;toggleUserMenu()});document.getElementById("authUserBox")?.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();toggleUserMenu()}else if(e.key==="Escape")closeUserMenu()});document.addEventListener("click",e=>{const box=document.getElementById("authUserBox");if(box&&!box.contains(e.target))closeUserMenu()});document.getElementById("logoutBtn")?.addEventListener("click",e=>{e.stopPropagation();closeUserMenu();logout()});
     onAuthStateChanged(auth,user=>{updateAuthUi(user);if(user){
+    loadTrips();
+    syncTripsWithFirestore();
     loadWardrobeFromFirestore(user);
       loadLooksFromFirestore(user);
     jewelry =
@@ -13109,10 +13201,13 @@ function removeCalendarOwnAccessory(i){calendarOwnLook.accesorios.splice(i,1);re
 function cancelCalendarOwnLook(){calendarOwnLook=emptyLook();closeCalendarOwnLookSelector();renderCalendarOwnLook()}
 
 // ---- Calendario: planes y flujo de looks ----
-var calendarViewDate=new Date(),calendarSelectedDate=new Date();
+function calendarLocalKey(){
+    return currentUser ? `bricloset_calendar_plans_${currentUser.uid}` : "bricloset_calendar_plans";
+}
+var calendarViewDate=new Date(),calendarSelectedDate=new Date(),calendarSaveInFlight=false;
 var calendarPlans=(function(){
   try{
-    var raw=localStorage.getItem("bricloset_calendar_plans");
+    var raw=localStorage.getItem(calendarLocalKey());
     var parsed=raw?JSON.parse(raw):[];
     return Array.isArray(parsed)?parsed:[];
   }catch(err){
@@ -13127,9 +13222,11 @@ async function syncCalendarPlansWithFirestore(){
         const ref = userMetaRef();
         const snap = await getDoc(ref);
 
-        const localPlans = Array.isArray(calendarPlans)
-            ? calendarPlans
-            : [];
+        const scopedLocal=localStorage.getItem(calendarLocalKey());
+        const localPlans = scopedLocal
+            ? safeParse(scopedLocal,[])
+            : (Array.isArray(calendarPlans)?calendarPlans:[]);
+        calendarPlans=Array.isArray(localPlans)?localPlans:[];
 
         if(snap.exists()){
             const data = snap.data() || {};
@@ -13140,7 +13237,7 @@ async function syncCalendarPlansWithFirestore(){
             if(remotePlans.length > 0){
                 calendarPlans = remotePlans;
                 localStorage.setItem(
-                    "bricloset_calendar_plans",
+                    calendarLocalKey(),
                     JSON.stringify(calendarPlans)
                 );
             }else if(localPlans.length > 0){
@@ -13252,10 +13349,10 @@ function calendarPendingPlan(){
   return calendarPlans.find(p=>p.id===id)||stored||window.__briclosetPendingCalendarPlan||null;
 }
 function calendarPersistPlans(){
-  localStorage.setItem("bricloset_calendar_plans",JSON.stringify(calendarPlans));
+    localStorage.setItem(calendarLocalKey(),JSON.stringify(calendarPlans));
   syncCalendarUsage();
   persist();
-  if(typeof saveCalendarPlansToFirestore==="function")saveCalendarPlansToFirestore();
+    return typeof saveCalendarPlansToFirestore==="function"?saveCalendarPlansToFirestore():Promise.resolve(true);
 }
 function calendarResolveLook(plan,lookId){
   if(!plan||!lookId)return null;
@@ -13352,21 +13449,24 @@ function assignLookToCalendarPlan(lookId, plan){
   if(!item)return false;
   return calendarAssignLookToPlan(item,plan,{savedReference:true});
 }
-function calendarSavePlan(){
+async function calendarSavePlan(){
+ if(calendarSaveInFlight)return;
+ calendarSaveInFlight=true;
  const editId=document.getElementById("calEditId")?.value||"";
  const name=(document.getElementById("calName")?.value||"").trim();
  const date=document.getElementById("calDate")?.value||"";
  const time=document.getElementById("calTime")?.value||"";
  const context=(document.getElementById("calContext")?.value||"").trim();
- if(!name||!date){if(typeof toast==="function")toast("Pon qué tienes y la fecha.","warn");else alert("Pon qué tienes y la fecha.");return}
+ if(!name||!date){calendarSaveInFlight=false;if(typeof toast==="function")toast("Pon qué tienes y la fecha.","warn");else alert("Pon qué tienes y la fecha.");return}
  if(editId){
    const idx=calendarPlans.findIndex(p=>p.id===editId);
-   if(idx<0){toast("No se encontró el plan.","warn");return}
+    if(idx<0){calendarSaveInFlight=false;toast("No se encontró el plan.","warn");return}
    calendarPlans[idx]={...calendarPlans[idx],name,date,time,context};
  }else{
    calendarPlans.push({id:(typeof uid==="function"?uid():Date.now().toString()),name,date,time,context,lookIds:[],lookItems:[]});
  }
- try{calendarPersistPlans()}catch(err){console.error("Error al guardar el plan:",err);if(typeof toast==="function")toast("No se ha podido guardar el plan. Prueba de nuevo.","warn");else alert("No se ha podido guardar el plan. Prueba de nuevo.");return}
+ try{await calendarPersistPlans()}catch(err){console.error("Error al guardar el plan:",err);if(typeof toast==="function")toast("No se ha podido guardar el plan. Prueba de nuevo.","warn");else alert("No se ha podido guardar el plan. Prueba de nuevo.");calendarSaveInFlight=false;return}
+ calendarSaveInFlight=false;
  calendarSelectedDate=new Date(date+"T12:00:00");
  calendarViewDate=new Date(date+"T12:00:00");
  calendarClosePlanModal();
@@ -13709,6 +13809,30 @@ closeTripChecklistTemplateEditor,
 saveTripChecklistTemplate,
 deleteTripChecklistTemplate
 });
+idsToLook=idsToLookWithJewelry;
+window.idsToLook=idsToLookWithJewelry;
+window.openSelector=function(slot){
+    currentSlot=slot;
+    const selector=document.getElementById("selectorCard");
+    const box=document.getElementById("selectorGrid");
+    if(!selector||!box)return;
+    selector.classList.remove("hidden");
+    const list=slot==="accesorios"?lookAccessoryItems():garments.filter(g=>g.disponible&&!g.vendida&&!g.eliminado_en&&inferSlot(g)===slot);
+    box.innerHTML=list.length?list.map(g=>`<div class="item-card"><img src="${g.foto||placeholderImg}" alt="${esc(g.nombre)}"><div class="item-body"><p class="item-name">${esc(g.nombre)}</p><p class="meta">${esc(g.tipo?jewelryTypeLabels[g.tipo]||"Joya":fmtCat(g.categoria)||"")}</p><button class="small-btn" onclick="selectGarmentForSlot('${g.id}')">Seleccionar</button></div></div>`).join(""):"<div class=\"empty\">No hay prendas disponibles.</div>";
+};
+window.selectGarmentForSlot=function(id){
+    const item=currentSlot==="accesorios"?findLookAccessory(id):findGarment(id);
+    if(!item||!currentSlot)return;
+    if(currentSlot==="accesorios"){
+        if(!currentLook.accesorios.some(a=>a.id===id))currentLook.accesorios.push(item);
+    }else{
+        if(currentSlot==="vestido"){currentLook.interior=null;currentLook.inferior=null}
+        else if(["interior","inferior"].includes(currentSlot))currentLook.vestido=null;
+        currentLook[currentSlot]=item;
+    }
+    renderCurrentLook();
+    document.getElementById("selectorCard")?.classList.add("hidden");
+};
 </script>
 <section id="calendar" class="view">
   <div id="calendarPage">
