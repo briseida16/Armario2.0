@@ -3482,8 +3482,7 @@ async function setupFirebase(){
     ]);
     ({initializeApp}=appMod);
     ({getAuth,onAuthStateChanged,signOut,createUserWithEmailAndPassword,signInWithEmailAndPassword}=authMod);
-({getFirestore,initializeFirestore,persistentLocalCache,persistentMultipleTabManager,collection,doc,getDoc,getDocs,getDocsFromServer,setDoc,writeBatch}=firestoreMod);    ({firebaseConfig}=configMod);
-    firebaseEnabled=true;
+({getFirestore,initializeFirestore,persistentLocalCache,persistentMultipleTabManager,collection,doc,getDoc,getDocs,getDocsFromServer,setDoc,writeBatch}=firestoreMod);    firebaseEnabled=true;
     return true;
   }catch(e){
     console.warn("Firebase no está disponible en esta copia local. BriCloset funcionará en modo local.",e);
