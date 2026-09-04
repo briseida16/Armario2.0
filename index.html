@@ -3721,6 +3721,67 @@ function markChangedSyncItems(kind,items){
         if(item?.id && snapshot[item.id]!==serialiseSyncItem(item))syncPending[kind].add(item.id);
     });
 }
+function syncEntityId(value){
+    if(!value)return null;
+    return typeof value==="object" ? (value.id||null) : value;
+}
+function compactLookReference(look){
+    if(!look?.id)return null;
+    const source=look.prendas&&typeof look.prendas==="object"?look.prendas:look;
+    return {
+        id:String(look.id),
+        nombre:String(look.nombre||"Look sin nombre"),
+        ocasion:String(look.ocasion||""),
+        fecha:look.fecha||null,
+        abrigo:syncEntityId(source.abrigo),
+        exterior:syncEntityId(source.exterior),
+        interior:syncEntityId(source.interior),
+        inferior:syncEntityId(source.inferior),
+        vestido:syncEntityId(source.vestido),
+        calzado:syncEntityId(source.calzado),
+        bolso:syncEntityId(source.bolso),
+        accesorios:(Array.isArray(source.accesorios)?source.accesorios:[]).map(syncEntityId).filter(Boolean)
+    };
+}
+function compactTripLook(look){
+    const ref=compactLookReference(look);
+    if(!ref)return null;
+    return {
+        id:ref.id,nombre:ref.nombre,ocasion:ref.ocasion,fecha:ref.fecha,
+        prendas:{abrigo:ref.abrigo,exterior:ref.exterior,interior:ref.interior,inferior:ref.inferior,vestido:ref.vestido,calzado:ref.calzado,bolso:ref.bolso,accesorios:ref.accesorios},
+        creado_en:look.creado_en||null
+    };
+}
+function compactTripItineraryItem(item){
+    if(!item?.id)return null;
+    return {id:String(item.id),fecha:item.fecha||"",hora:item.hora||"",lugar:String(item.lugar||""),actividad:String(item.actividad||""),notas:String(item.notas||""),creado_en:item.creado_en||null};
+}
+function compactTripChecklistItem(item){
+    if(!item?.id)return null;
+    return {id:String(item.id),nombre:String(item.nombre||""),completado:!!item.completado,creado_en:item.creado_en||null};
+}
+function compactTripForFirestore(trip){
+    if(!trip?.id)return null;
+    return {
+        id:String(trip.id),nombre:String(trip.nombre||""),destino:String(trip.destino||""),
+        fechaInicio:trip.fechaInicio||"",fechaFin:trip.fechaFin||"",alojamiento:String(trip.alojamiento||""),vuelos:String(trip.vuelos||""),estado:String(trip.estado||"planificando"),
+        maleta:(Array.isArray(trip.maleta)?trip.maleta:[]).map(syncEntityId).filter(Boolean),
+        looks:(Array.isArray(trip.looks)?trip.looks:[]).map(compactTripLook).filter(Boolean),
+        itinerario:(Array.isArray(trip.itinerario)?trip.itinerario:[]).map(compactTripItineraryItem).filter(Boolean),
+        checklist:(Array.isArray(trip.checklist)?trip.checklist:[]).map(compactTripChecklistItem).filter(Boolean),
+        creado_en:trip.creado_en||null,actualizado_en:trip.actualizado_en||null
+    };
+}
+function compactCalendarPlanForFirestore(plan){
+    if(!plan?.id||!plan?.date)return null;
+    const refs=(Array.isArray(plan.lookItems)?plan.lookItems:[]).map(compactLookReference).filter(Boolean);
+    const lookIds=[...new Set([...(Array.isArray(plan.lookIds)?plan.lookIds:[]),...refs.map(ref=>ref.id)].filter(Boolean))];
+    return {
+        id:String(plan.id),name:String(plan.name||"Plan"),date:plan.date,time:plan.time||"",context:String(plan.context||""),
+        sourceType:plan.sourceType||null,sourceTripId:plan.sourceTripId||null,sourceTripLookId:plan.sourceTripLookId||null,
+        lookIds,lookItems:refs,creado_en:plan.creado_en||null,actualizado_en:plan.actualizado_en||null
+    };
+}
 function mergeSyncItems(kind,remote,local){
     const remoteById=new Map((remote||[]).filter(x=>x?.id).map(x=>[x.id,x]));
     const localById=new Map((local||[]).filter(x=>x?.id).map(x=>[x.id,x]));
@@ -3919,13 +3980,13 @@ function startFirestoreListeners(user){
     },error=>console.error("Error escuchando joyas en Firebase:",error));
     stopTripsSnapshot=onSnapshot(userTripsCol(),snap=>{
         if(!currentUser||currentUser.uid!==user.uid)return;
-        trips=mergeSyncItems("trips",snap.docs.map(item=>({id:item.id,...item.data()})),trips);
+        trips=mergeSyncItems("trips",snap.docs.map(item=>compactTripForFirestore({id:item.id,...item.data()})).filter(Boolean),trips).map(compactTripForFirestore).filter(Boolean);
         storage.set(tripsLocalKey(),JSON.stringify(trips));
         renderTrips();
     },error=>console.error("Error escuchando viajes en Firebase:",error));
     stopCalendarSnapshot=onSnapshot(userCalendarPlansCol(),snap=>{
         if(!currentUser||currentUser.uid!==user.uid)return;
-        calendarPlans=mergeSyncItems("calendar",snap.docs.map(item=>({id:item.id,...item.data()})),calendarPlans);
+        calendarPlans=mergeSyncItems("calendar",snap.docs.map(item=>compactCalendarPlanForFirestore({id:item.id,...item.data()})).filter(Boolean),calendarPlans).map(compactCalendarPlanForFirestore).filter(Boolean);
         localStorage.setItem(calendarLocalKey(),JSON.stringify(calendarPlans));
         renderCalendarPage();
     },error=>console.error("Error escuchando calendario en Firebase:",error));
@@ -4583,10 +4644,9 @@ function renderTripCalendarLooks(trip){
 
     plans.forEach(plan => {
 
-        const looks =
-            Array.isArray(plan.lookItems)
-                ? plan.lookItems
-                : [];
+        const looks=(Array.isArray(plan.lookIds)?plan.lookIds:[])
+            .map(lookId=>calendarResolveLook(plan,lookId))
+            .filter(Boolean);
 
         looks.forEach(look => {
 
@@ -6852,6 +6912,7 @@ function renderTrips(){
 async function saveTripsToFirestore(){
     if(!currentUser)return false;
     try{
+        trips=(Array.isArray(trips)?trips:[]).map(compactTripForFirestore).filter(Boolean);
         await writePendingSyncItems("trips",userTripsCol(),trips);
         return true;
     }catch(error){
@@ -6864,16 +6925,23 @@ async function syncTripsWithFirestore(){
     if(!currentUser)return;
     try{
         const [collectionSnap,legacySnap]=await Promise.all([getDocs(userTripsCol()),getDoc(userMetaRef())]);
-        let remoteTrips=collectionSnap.docs.map(d=>({id:d.id,...d.data()}));
-        // Migración única desde las versiones que guardaban el array completo
-        // en users/{uid}; no borra el campo legado para permitir recuperación.
-        if(!remoteTrips.length&&legacySnap.exists()&&Array.isArray(legacySnap.data()?.trips)){
-            remoteTrips=legacySnap.data().trips.filter(t=>t?.id);
-            remoteTrips.forEach(t=>syncPending.trips.add(t.id));
-            trips=mergeSyncItems("trips",[],remoteTrips);
-            await saveTripsToFirestore();
+        const remoteTrips=collectionSnap.docs.map(d=>compactTripForFirestore({id:d.id,...d.data()})).filter(Boolean);
+        const localTrips=(Array.isArray(trips)?trips:[]).map(compactTripForFirestore).filter(Boolean);
+        trips=mergeSyncItems("trips",remoteTrips,localTrips).map(compactTripForFirestore).filter(Boolean);
+
+        // Migración única y aditiva del formato legado. Sólo se copian IDs que
+        // todavía no están en la subcolección ni en esta copia local; el array
+        // antiguo no se borra hasta que la aplicación pueda retirarlo en una
+        // versión posterior.
+        const data=legacySnap.exists()?legacySnap.data()||{}:{};
+        if(!data.tripsSubcollectionMigratedAt&&Array.isArray(data.trips)){
+            const existing=new Set(trips.map(item=>item.id));
+            data.trips.map(compactTripForFirestore).filter(Boolean).forEach(item=>{
+                if(!existing.has(item.id)){trips.push(item);syncPending.trips.add(item.id);}
+            });
+            const saved=await saveTripsToFirestore();
+            if(saved)await setDoc(userMetaRef(),{tripsSubcollectionMigratedAt:new Date().toISOString()},{merge:true});
         }else{
-            trips=mergeSyncItems("trips",remoteTrips,trips);
             await saveTripsToFirestore();
         }
         storage.set(tripsLocalKey(),JSON.stringify(trips));
@@ -6885,6 +6953,7 @@ async function syncTripsWithFirestore(){
 }
  function persistTrips(){
     try{
+        trips=(Array.isArray(trips)?trips:[]).map(compactTripForFirestore).filter(Boolean);
         storage.set(
             tripsLocalKey(),
             JSON.stringify(trips)
@@ -10333,17 +10402,8 @@ function normalizeCalendarPlans(){
         if(sourceKey&&seenTripSources.has(sourceKey))return;
         if(sourceKey)seenTripSources.add(sourceKey);
         plan.lookIds=[...new Set(Array.isArray(plan.lookIds)?plan.lookIds.filter(Boolean):[])];
-        if(Array.isArray(plan.lookItems)){
-            const seen=new Set();
-            plan.lookItems=plan.lookItems.filter(item=>{
-                if(!item?.id||seen.has(item.id))return false;
-                seen.add(item.id);
-                return true;
-            });
-        }else{
-            plan.lookItems=[];
-        }
-        normalized.push(plan);
+        const compact=compactCalendarPlanForFirestore(plan);
+        if(compact)normalized.push(compact);
     });
     calendarPlans=normalized;
 }
@@ -10357,7 +10417,7 @@ function syncCalendarUsage(){
 
         // Cada look dentro de un plan representa una utilización real.
         // El mismo look solo puede aparecer una vez gracias a normalizeCalendarPlans().
-        (Array.isArray(plan.lookItems)?plan.lookItems:[]).forEach(look=>{
+        (Array.isArray(plan.lookIds)?plan.lookIds:[]).map(lookId=>calendarResolveLook(plan,lookId)).filter(Boolean).forEach(look=>{
             const ids=new Set();
             ["abrigo","exterior","interior","inferior","vestido","calzado","bolso"].forEach(k=>{
                 const value=look?.[k];
@@ -13229,16 +13289,21 @@ async function syncCalendarPlansWithFirestore(){
             : (Array.isArray(calendarPlans)?calendarPlans:[]);
         calendarPlans=Array.isArray(localPlans)?localPlans:[];
 
-        let remotePlans=collectionSnap.docs.map(d=>({id:d.id,...d.data()}));
-        if(!remotePlans.length&&legacySnap.exists()&&Array.isArray(legacySnap.data()?.calendarPlans)){
-            remotePlans=legacySnap.data().calendarPlans.filter(plan=>plan?.id);
-            remotePlans.forEach(plan=>syncPending.calendar.add(plan.id));
-            calendarPlans=mergeSyncItems("calendar",[],remotePlans);
+        const remotePlans=collectionSnap.docs.map(d=>compactCalendarPlanForFirestore({id:d.id,...d.data()})).filter(Boolean);
+        calendarPlans=mergeSyncItems("calendar",remotePlans,localPlans).map(compactCalendarPlanForFirestore).filter(Boolean);
+
+        const data=legacySnap.exists()?legacySnap.data()||{}:{};
+        if(!data.calendarPlansSubcollectionMigratedAt&&Array.isArray(data.calendarPlans)){
+            const existing=new Set(calendarPlans.map(item=>item.id));
+            data.calendarPlans.map(compactCalendarPlanForFirestore).filter(Boolean).forEach(item=>{
+                if(!existing.has(item.id)){calendarPlans.push(item);syncPending.calendar.add(item.id);}
+            });
+            const saved=await saveCalendarPlansToFirestore();
+            if(saved)await setDoc(userMetaRef(),{calendarPlansSubcollectionMigratedAt:new Date().toISOString()},{merge:true});
         }else{
-            calendarPlans=mergeSyncItems("calendar",remotePlans,localPlans);
+            await saveCalendarPlansToFirestore();
         }
         localStorage.setItem(calendarLocalKey(),JSON.stringify(calendarPlans));
-        await saveCalendarPlansToFirestore();
 
         renderCalendarPage();
     }catch(error){
@@ -13251,6 +13316,7 @@ async function saveCalendarPlansToFirestore(){
     }
 
     try{
+        calendarPlans=(Array.isArray(calendarPlans)?calendarPlans:[]).map(compactCalendarPlanForFirestore).filter(Boolean);
         await writePendingSyncItems("calendar",userCalendarPlansCol(),calendarPlans);
 
         return true;
@@ -13326,6 +13392,7 @@ function calendarPendingPlan(){
   return calendarPlans.find(p=>p.id===id)||stored||window.__briclosetPendingCalendarPlan||null;
 }
 function calendarPersistPlans(){
+    calendarPlans=(Array.isArray(calendarPlans)?calendarPlans:[]).map(compactCalendarPlanForFirestore).filter(Boolean);
     localStorage.setItem(calendarLocalKey(),JSON.stringify(calendarPlans));
   syncCalendarUsage();
   persist();
@@ -13390,11 +13457,10 @@ function calendarAssignLookToPlan(lookData, plan, options={}){
   if(!target.lookIds.includes(lookData.id))target.lookIds.push(lookData.id);
   if(!options.savedReference){
     target.lookItems=Array.isArray(target.lookItems)?target.lookItems:[];
+    const compact=compactLookReference(lookData);
     const itemIdx=target.lookItems.findIndex(l=>l.id===lookData.id);
-    if(itemIdx>=0)target.lookItems[itemIdx]=lookData;
-    else target.lookItems.push(lookData);
+    if(compact){if(itemIdx>=0)target.lookItems[itemIdx]=compact;else target.lookItems.push(compact);}
   }
-  target.look=calendarResolveLook(target,lookData.id)||lookData;
   calendarPersistPlans();
   return true;
 }
@@ -13403,11 +13469,10 @@ function calendarUpdateLookInPlan(planId,lookId,lookData){
   if(!plan)return false;
   plan.lookItems=Array.isArray(plan.lookItems)?plan.lookItems:[];
   const idx=plan.lookItems.findIndex(l=>l.id===lookId);
-  if(idx>=0)plan.lookItems[idx]=lookData;
-  else plan.lookItems.push(lookData);
+  const compact=compactLookReference(lookData);
+  if(compact){if(idx>=0)plan.lookItems[idx]=compact;else plan.lookItems.push(compact);}
   plan.lookIds=Array.isArray(plan.lookIds)?plan.lookIds:[];
   if(!plan.lookIds.includes(lookId))plan.lookIds.push(lookId);
-  if(plan.look?.id===lookId)plan.look=lookData;
   calendarPersistPlans();
   return true;
 }
@@ -13442,7 +13507,7 @@ async function calendarSavePlan(){
  }else{
    calendarPlans.push({id:(typeof uid==="function"?uid():Date.now().toString()),name,date,time,context,lookIds:[],lookItems:[]});
  }
- try{await calendarPersistPlans()}catch(err){console.error("Error al guardar el plan:",err);if(typeof toast==="function")toast("No se ha podido guardar el plan. Prueba de nuevo.","warn");else alert("No se ha podido guardar el plan. Prueba de nuevo.");calendarSaveInFlight=false;return}
+ try{const saved=await calendarPersistPlans();if(!saved)throw new Error("No se pudo confirmar el plan en Firestore")}catch(err){console.error("Error al guardar el plan:",err);if(typeof toast==="function")toast("No se ha podido guardar el plan. Prueba de nuevo.","warn");else alert("No se ha podido guardar el plan. Prueba de nuevo.");calendarSaveInFlight=false;return}
  calendarSaveInFlight=false;
  calendarSelectedDate=new Date(date+"T12:00:00");
  calendarViewDate=new Date(date+"T12:00:00");
