@@ -3513,14 +3513,14 @@ const auth = getAuth(firebaseApp);
 // cae a Firestore en memoria sin romper la app.
 let db;
 try{
-  // En iPhone/iPad Safari el canal WebChannel de Firestore puede responder 400
-  // aunque la red y las reglas estén bien. Forzar long-polling evita ese canal.
-  // En los demás navegadores mantenemos el transporte y la caché habituales.
+  // Safari iOS puede fallar internamente al combinar IndexedDB persistente,
+  // gestión multi-pestaña y el canal de Firestore. BriCloset ya mantiene su
+  // propia copia local, así que en iPhone/iPad usamos Firestore en memoria y
+  // long-polling; así no se pierde nada y evitamos esa ruta defectuosa.
   const isAppleMobile=/iPad|iPhone|iPod/.test(navigator.userAgent);
-  db = initializeFirestore(firebaseApp,{
-    localCache:persistentLocalCache({tabManager:persistentMultipleTabManager()}),
-    ...(isAppleMobile?{experimentalForceLongPolling:true}:{})
-  });
+  db = isAppleMobile
+    ? initializeFirestore(firebaseApp,{experimentalForceLongPolling:true})
+    : initializeFirestore(firebaseApp,{localCache:persistentLocalCache({tabManager:persistentMultipleTabManager()})});
 }catch(e){
 console.warn("No se pudo activar la persistencia offline de Firestore, se usará solo memoria.",e);  db = getFirestore(firebaseApp);
 }
@@ -7341,8 +7341,9 @@ async function loadWardrobeFromFirestore(user){
         garments.forEach(g=>pendingGarmentIds.add(g.id));
         persistPendingGarmentIds();
         refreshAll();
-        setSyncStatus("Sin conexión (usando datos locales)");
-        toast("No he podido conectar con Firestore. Sigo trabajando con la copia guardada en este dispositivo.","warn");
+        const firestoreReason=e?.code||e?.name||"sin código";
+        setSyncStatus(`Error de Firestore: ${firestoreReason}`);
+        toast(`No he podido conectar con Firestore (${firestoreReason}). Sigo trabajando con la copia guardada en este dispositivo.`,"warn");
         console.error(e);}}
 // Reintento automático: en cuanto vuelve la conexión, o cada 45s mientras haya cambios sin confirmar, se
 // reintenta la sincronización sin necesidad de que la usuaria haga nada más.
