@@ -3513,7 +3513,14 @@ const auth = getAuth(firebaseApp);
 // cae a Firestore en memoria sin romper la app.
 let db;
 try{
-  db = initializeFirestore(firebaseApp,{localCache:persistentLocalCache({tabManager:persistentMultipleTabManager()})});
+  // En iPhone/iPad Safari el canal WebChannel de Firestore puede responder 400
+  // aunque la red y las reglas estén bien. Forzar long-polling evita ese canal.
+  // En los demás navegadores mantenemos el transporte y la caché habituales.
+  const isAppleMobile=/iPad|iPhone|iPod/.test(navigator.userAgent);
+  db = initializeFirestore(firebaseApp,{
+    localCache:persistentLocalCache({tabManager:persistentMultipleTabManager()}),
+    ...(isAppleMobile?{experimentalForceLongPolling:true}:{})
+  });
 }catch(e){
 console.warn("No se pudo activar la persistencia offline de Firestore, se usará solo memoria.",e);  db = getFirestore(firebaseApp);
 }
