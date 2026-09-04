@@ -7336,7 +7336,11 @@ async function loadWardrobeFromFirestore(user){
     refreshAll();
     try{
         const metaRef=userMetaRef();
-const [metaSnap,colSnap]=await Promise.all([getDoc(metaRef),getDocsFromServer(userGarmentsCol())]);        let remoteGarments;
+const [metaSnap,colSnap]=await Promise.all([
+    getDoc(metaRef),
+    getDocs(userGarmentsCol())
+]);     
+      let remoteGarments;
         if(!colSnap.empty){
             remoteGarments=colSnap.docs.map(d=>({id:d.id,...d.data()}));
         }else if(metaSnap.exists()&&Array.isArray(metaSnap.data().garments)&&metaSnap.data().garments.length){
