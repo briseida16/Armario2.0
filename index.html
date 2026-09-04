@@ -3462,7 +3462,7 @@ header.compact ~ #subnavFloatingMenu{top:108px !important}
 <script type="module">
 let firebaseEnabled=false;
 let initializeApp,getAuth,onAuthStateChanged,signOut,createUserWithEmailAndPassword,signInWithEmailAndPassword;
-let getFirestore,initializeFirestore,persistentLocalCache,persistentMultipleTabManager,collection,doc,getDoc,getDocs,getDocsFromServer,setDoc,writeBatch,onSnapshot;
+let getFirestore,initializeFirestore,persistentLocalCache,persistentMultipleTabManager,collection,doc,getDoc,getDocs,setDoc,writeBatch,onSnapshot;
 let firebaseConfig={
     apiKey:"AIzaSyCThGwBnZfhIeN9T1woIjJH5JFiBWc7fkQ",
     authDomain:"armario---bricloset.firebaseapp.com",
@@ -3482,7 +3482,9 @@ async function setupFirebase(){
     ]);
     ({initializeApp}=appMod);
     ({getAuth,onAuthStateChanged,signOut,createUserWithEmailAndPassword,signInWithEmailAndPassword}=authMod);
-({getFirestore,initializeFirestore,persistentLocalCache,persistentMultipleTabManager,collection,doc,getDoc,getDocs,setDoc,writeBatch,onSnapshot}=firestoreMod);
+    ({getFirestore,initializeFirestore,persistentLocalCache,persistentMultipleTabManager,collection,doc,getDoc,getDocs,setDoc,writeBatch,onSnapshot}=firestoreMod);
+    ({firebaseConfig}=configMod);
+    firebaseEnabled=true;
     return true;
   }catch(e){
     console.warn("Firebase no está disponible en esta copia local. BriCloset funcionará en modo local.",e);
@@ -3516,7 +3518,7 @@ try{
 console.warn("No se pudo activar la persistencia offline de Firestore, se usará solo memoria.",e);  db = getFirestore(firebaseApp);
 }
 let currentUser=null,wardrobeLoaded=false,pendingWardrobeSave=false;
-let stopUserSnapshot=()=>{},stopGarmentsSnapshot=()=>{},stopLooksSnapshot=()=>{},stopJewelrySnapshot=()=>{};
+let stopUserSnapshot=()=>{},stopGarmentsSnapshot=()=>{},stopLooksSnapshot=()=>{},stopJewelrySnapshot=()=>{},stopTripsSnapshot=()=>{},stopCalendarSnapshot=()=>{},stopWishlistSnapshot=()=>{};
 const APP_DATA_VERSION=4,
     AMORTIZED_USES=10,
   placeholderImg="data:image/svg+xml;utf8,"+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500"><rect width="100%" height="100%" fill="#efe7eb"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#9b8691" font-size="24" font-family="Arial">Sin imagen</text></svg>`);
@@ -3636,7 +3638,7 @@ function costPerUse(g){
 } else {
     x.temporada = [x.temporada || "todo_anio"];
 };x.precio=x.precio??"";x.cantidad=Math.max(1,Number(x.cantidad||1));x.basico=!!x.basico;x.reversible=!!x.reversible;x.schema_version=APP_DATA_VERSION;return x}
-function migrateBackup(data){return{garments:Array.isArray(data.garments)?data.garments.map(migrateGarment):[],savedLooks:Array.isArray(data.savedLooks)?data.savedLooks:[],recentLooks:Array.isArray(data.recentLooks)?data.recentLooks:[],wishlist:Array.isArray(data.wishlist)?data.wishlist.map(migrateWish):[]}}function migrateWish(w){return{id:w.id||uid(),foto:w.foto||placeholderImg,nombre:w.nombre||"",marca:w.marca||w.tienda||"",precio:w.precio??"",enlace:w.enlace||w.enlace_compra||"",prioridad:w.prioridad||"Media",comentarios:w.comentarios||"",fecha:w.fecha||new Date().toISOString(),schema_version:APP_DATA_VERSION}}
+function migrateBackup(data){return{garments:Array.isArray(data.garments)?data.garments.map(g=>migrateGarment({...g,id:g.id||uid()})):[],savedLooks:Array.isArray(data.savedLooks)?data.savedLooks.map(l=>({...l,id:l.id||uid()})):[],recentLooks:Array.isArray(data.recentLooks)?data.recentLooks:[],wishlist:Array.isArray(data.wishlist)?data.wishlist.map(migrateWish):[]}}function mergeImportedById(existing,incoming){const byId=new Map((existing||[]).filter(x=>x?.id).map(x=>[x.id,x]));(incoming||[]).forEach(item=>{if(item?.id)byId.set(item.id,item)});return [...byId.values()]}function migrateWish(w){return{id:w.id||uid(),foto:w.foto||placeholderImg,nombre:w.nombre||"",marca:w.marca||w.tienda||"",precio:w.precio??"",enlace:w.enlace||w.enlace_compra||"",prioridad:w.prioridad||"Media",comentarios:w.comentarios||"",fecha:w.fecha||new Date().toISOString(),schema_version:APP_DATA_VERSION}}
 function userWardrobeRef(){return currentUser?doc(db,"users",currentUser.uid):null}function setSyncStatus(text){const el=document.getElementById("syncStatus");if(el)el.textContent=text}function closeUserMenu(){const box=document.getElementById("authUserBox"),menu=document.getElementById("userMenu");if(!box||!menu)return;menu.classList.add("hidden");box.classList.remove("menu-open");box.setAttribute("aria-expanded","false")}function toggleUserMenu(){const box=document.getElementById("authUserBox"),menu=document.getElementById("userMenu");if(!box||!menu)return;const isOpen=!menu.classList.contains("hidden");menu.classList.toggle("hidden",isOpen);box.classList.toggle("menu-open",!isOpen);box.setAttribute("aria-expanded",String(!isOpen))}function userInitials(user){const name=(user?.displayName||user?.email||"Usuario").trim();const parts=name.split(/\s+/).filter(Boolean);return (parts.length>1?parts[0][0]+parts[1][0]:name.slice(0,2)).toUpperCase()}function updateAuthUi(user){
     const loginBtn=document.getElementById("loginBtn");
     const box=document.getElementById("authUserBox");
@@ -3686,12 +3688,77 @@ function userWardrobeRef(){return currentUser?doc(db,"users",currentUser.uid):nu
     }
 }async function logout(){try{await signOut(auth)}catch(e){toast("No he podido cerrar sesión.","warn");console.error(e)}}
 function userGarmentsCol(){return currentUser?collection(db,"users",currentUser.uid,"garments"):null}
+function userTripsCol(){return currentUser?collection(db,"users",currentUser.uid,"trips"):null}
+function userCalendarPlansCol(){return currentUser?collection(db,"users",currentUser.uid,"calendarPlans"):null}
+function userWishlistCol(){return currentUser?collection(db,"users",currentUser.uid,"wishlist"):null}
 function userMetaRef(){return currentUser?doc(db,"users",currentUser.uid):null}
 function userLooksCol(){
     return currentUser
         ? collection(db,"users",currentUser.uid,"looks")
         : null;
-}async function saveLooksToFirestore(){
+}
+// Cada dato sincronizable vive en su propio documento.  Así una importación o
+// un dispositivo atrasado nunca puede borrar los documentos que sólo existen
+// en otro dispositivo. Las bajas permanentes se tratan de forma explícita en
+// la UI; nunca se infieren al comparar dos listas.
+const syncSnapshots={garments:{},jewelry:{},looks:{},trips:{},calendar:{},wishlist:{}};
+const syncPending={garments:new Set(),jewelry:new Set(),looks:new Set(),trips:new Set(),calendar:new Set(),wishlist:new Set()};
+function serialiseSyncItem(item){return JSON.stringify(item)}
+function rememberSyncSnapshot(kind,items){
+    syncSnapshots[kind]={};
+    (items||[]).forEach(item=>{if(item?.id)syncSnapshots[kind][item.id]=serialiseSyncItem(item)});
+}
+function markChangedSyncItems(kind,items){
+    const snapshot=syncSnapshots[kind]||{};
+    (items||[]).forEach(item=>{
+        if(item?.id && snapshot[item.id]!==serialiseSyncItem(item))syncPending[kind].add(item.id);
+    });
+}
+function mergeSyncItems(kind,remote,local){
+    const remoteById=new Map((remote||[]).filter(x=>x?.id).map(x=>[x.id,x]));
+    const localById=new Map((local||[]).filter(x=>x?.id).map(x=>[x.id,x]));
+    const merged=[...remoteById.values()];
+    localById.forEach((item,id)=>{
+        // Los datos locales sólo vencen si son un cambio pendiente; los que
+        // sólo están locales son una importación/mudanza y también se conservan.
+        const remoteItem=remoteById.get(id);
+        if(!remoteItem || syncPending[kind].has(id)){
+            const index=merged.findIndex(x=>x.id===id);
+            if(index>=0)merged[index]=item; else merged.push(item);
+            syncPending[kind].add(id);
+        }
+    });
+    rememberSyncSnapshot(kind,remote||[]);
+    return merged;
+}
+async function writePendingSyncItems(kind,col,items){
+    if(!col)return false;
+    markChangedSyncItems(kind,items);
+    const byId=new Map((items||[]).filter(x=>x?.id).map(x=>[x.id,x]));
+    const pending=[...syncPending[kind]].map(id=>byId.get(id)).filter(Boolean);
+    if(!pending.length)return true;
+    for(let i=0;i<pending.length;i+=450){
+        const batch=writeBatch(db);
+        pending.slice(i,i+450).forEach(item=>batch.set(doc(col,item.id),item));
+        await batch.commit();
+    }
+    pending.forEach(item=>{syncSnapshots[kind][item.id]=serialiseSyncItem(item);syncPending[kind].delete(item.id)});
+    return true;
+}
+async function deleteSyncItem(kind,col,id){
+    if(!currentUser||!col||!id)return;
+    try{
+        const batch=writeBatch(db);
+        batch.delete(doc(col,id));
+        await batch.commit();
+        delete syncSnapshots[kind][id];
+        syncPending[kind].delete(id);
+    }catch(error){
+        console.error("No se pudo borrar el elemento en Firebase:",error);
+        toast("El borrado se ha guardado en este dispositivo, pero no se ha podido sincronizar.","warn");
+    }
+}
+async function saveLooksToFirestore(){
 
     if(!currentUser){
         return;
@@ -3705,46 +3772,7 @@ function userLooksCol(){
             return;
         }
 
-        const remoteSnap = await getDocs(col);
-
-        const remoteIds = new Set(
-            remoteSnap.docs.map(
-                docSnap => docSnap.id
-            )
-        );
-
-        const localIds = new Set(
-            savedLooks.map(
-                look => look.id
-            )
-        );
-
-        const batch = writeBatch(db);
-
-        // Guardar / actualizar Looks
-        savedLooks.forEach(look => {
-
-            batch.set(
-                doc(col, look.id),
-                look
-            );
-
-        });
-
-        // Eliminar de Firebase los Looks que ya no existen localmente
-        remoteIds.forEach(id => {
-
-            if(!localIds.has(id)){
-
-                batch.delete(
-                    doc(col, id)
-                );
-
-            }
-
-        });
-
-        await batch.commit();
+        await writePendingSyncItems("looks",col,savedLooks);
 
         console.log(
             "✨ Looks guardados en Firebase:",
@@ -3781,10 +3809,11 @@ function userLooksCol(){
 
         if(!snap.empty){
 
-            savedLooks = snap.docs.map(docSnap => ({
+            const remoteLooks=snap.docs.map(docSnap => ({
                 id: docSnap.id,
                 ...docSnap.data()
             }));
+            savedLooks=mergeSyncItems("looks",remoteLooks,savedLooks);
 
             storage.set(
                 STORAGE_LOOKS,
@@ -3822,15 +3851,31 @@ function userLooksCol(){
         );
     }
 }
+async function syncWishlistWithFirestore(){
+    if(!currentUser)return;
+    try{
+        const snap=await getDocs(userWishlistCol());
+        wishlist=mergeSyncItems("wishlist",snap.docs.map(item=>migrateWish({id:item.id,...item.data()})),wishlist);
+        storage.set(STORAGE_WISHLIST,JSON.stringify(wishlist));
+        await writePendingSyncItems("wishlist",userWishlistCol(),wishlist);
+        renderWishlist();
+    }catch(error){console.error("Error sincronizando wishlist:",error)}
+}
 function stopFirestoreListeners(){
     stopUserSnapshot();
     stopGarmentsSnapshot();
     stopLooksSnapshot();
     stopJewelrySnapshot();
+    stopTripsSnapshot();
+    stopCalendarSnapshot();
+    stopWishlistSnapshot();
     stopUserSnapshot=()=>{};
     stopGarmentsSnapshot=()=>{};
     stopLooksSnapshot=()=>{};
     stopJewelrySnapshot=()=>{};
+    stopTripsSnapshot=()=>{};
+    stopCalendarSnapshot=()=>{};
+    stopWishlistSnapshot=()=>{};
 }
 function startFirestoreListeners(user){
     stopFirestoreListeners();
@@ -3838,39 +3883,51 @@ function startFirestoreListeners(user){
     stopUserSnapshot=onSnapshot(userMetaRef(),snap=>{
         if(!currentUser||currentUser.uid!==user.uid||!snap.exists())return;
         const data=snap.data()||{};
-        if(Array.isArray(data.trips)&&data.trips.length){
-            trips=data.trips;
-            storage.set(tripsLocalKey(),JSON.stringify(trips));
-            renderTrips();
-        }
-        if(Array.isArray(data.calendarPlans)&&data.calendarPlans.length){
-            calendarPlans=data.calendarPlans;
-            localStorage.setItem(calendarLocalKey(),JSON.stringify(calendarPlans));
-            renderCalendarPage();
-        }
+        // Las antiguas listas del documento de usuario se migran al cargar.
     },error=>console.error("Error escuchando datos del usuario en Firebase:",error));
     stopGarmentsSnapshot=onSnapshot(userGarmentsCol(),snap=>{
-        if(!currentUser||currentUser.uid!==user.uid||pendingGarmentIds.size)return;
+        if(!currentUser||currentUser.uid!==user.uid)return;
         const remote=snap.docs.map(item=>migrateGarment({id:item.id,...item.data()}));
         lastSyncedGarmentSnapshot={};
         remote.forEach(g=>lastSyncedGarmentSnapshot[g.id]=JSON.stringify(g));
-        garments=remote;
+        const localById=new Map(garments.map(g=>[g.id,g]));
+        const merged=remote.map(g=>pendingGarmentIds.has(g.id)&&localById.has(g.id)?localById.get(g.id):g);
+        localById.forEach((g,id)=>{if(!remote.some(r=>r.id===id)){merged.push(g);pendingGarmentIds.add(id)}});
+        garments=merged;
         wardrobeLoaded=true;
         persistGarmentsLocally();
         refreshAll();
     },error=>console.error("Error escuchando prendas en Firebase:",error));
     stopLooksSnapshot=onSnapshot(userLooksCol(),snap=>{
-        if(!currentUser||currentUser.uid!==user.uid||snap.empty)return;
-        savedLooks=snap.docs.map(item=>({id:item.id,...item.data()}));
+        if(!currentUser||currentUser.uid!==user.uid)return;
+        savedLooks=mergeSyncItems("looks",snap.docs.map(item=>({id:item.id,...item.data()})),savedLooks);
         storage.set(STORAGE_LOOKS,JSON.stringify(savedLooks));
         renderSavedLooksCarousel();
     },error=>console.error("Error escuchando looks en Firebase:",error));
     stopJewelrySnapshot=onSnapshot(userJewelryCol(),snap=>{
-        if(!currentUser||currentUser.uid!==user.uid||snap.empty)return;
-        jewelry=snap.docs.map(item=>({id:item.id,...item.data()}));
+        if(!currentUser||currentUser.uid!==user.uid)return;
+        jewelry=mergeSyncItems("jewelry",snap.docs.map(item=>({id:item.id,...item.data()})),jewelry);
         persistJewelryLocally();
         renderJewelry();
     },error=>console.error("Error escuchando joyas en Firebase:",error));
+    stopTripsSnapshot=onSnapshot(userTripsCol(),snap=>{
+        if(!currentUser||currentUser.uid!==user.uid)return;
+        trips=mergeSyncItems("trips",snap.docs.map(item=>({id:item.id,...item.data()})),trips);
+        storage.set(tripsLocalKey(),JSON.stringify(trips));
+        renderTrips();
+    },error=>console.error("Error escuchando viajes en Firebase:",error));
+    stopCalendarSnapshot=onSnapshot(userCalendarPlansCol(),snap=>{
+        if(!currentUser||currentUser.uid!==user.uid)return;
+        calendarPlans=mergeSyncItems("calendar",snap.docs.map(item=>({id:item.id,...item.data()})),calendarPlans);
+        localStorage.setItem(calendarLocalKey(),JSON.stringify(calendarPlans));
+        renderCalendarPage();
+    },error=>console.error("Error escuchando calendario en Firebase:",error));
+    stopWishlistSnapshot=onSnapshot(userWishlistCol(),snap=>{
+        if(!currentUser||currentUser.uid!==user.uid)return;
+        wishlist=mergeSyncItems("wishlist",snap.docs.map(item=>migrateWish({id:item.id,...item.data()})),wishlist);
+        storage.set(STORAGE_WISHLIST,JSON.stringify(wishlist));
+        renderWishlist();
+    },error=>console.error("Error escuchando wishlist en Firebase:",error));
 }
 /* =========================================================
    💎 FIREBASE — JOYERO
@@ -3905,71 +3962,10 @@ async function syncJewelryWithFirestore() {
                 ...docSnap.data()
             }));
 
-        const localJewelry =
-            Array.isArray(jewelry)
-                ? jewelry
-                : [];
-
-        /*
-         * CASO 1:
-         * Firebase tiene joyas.
-         *
-         * Las recuperamos y las usamos como fuente
-         * principal para reconstruir el joyero.
-         */
-
-        if (remoteJewelry.length) {
-
-            jewelry = remoteJewelry;
-
-            persistJewelryLocally();
-
-            renderJewelry();
-
-            console.log(
-                "💎 Joyero recuperado desde Firebase:",
-                jewelry.length
-            );
-
-            return;
-        }
-
-        /*
-         * CASO 2:
-         * Firebase está vacío pero este dispositivo
-         * tiene joyas guardadas localmente.
-         *
-         * Las subimos a Firebase.
-         */
-
-        if (localJewelry.length) {
-
-            await saveJewelryToFirestore();
-
-            renderJewelry();
-
-            console.log(
-                "💎 Joyero local subido a Firebase:",
-                localJewelry.length
-            );
-
-            return;
-        }
-
-        /*
-         * CASO 3:
-         * No hay joyas ni localmente ni en Firebase.
-         */
-
-        jewelry = [];
-
+        jewelry=mergeSyncItems("jewelry",remoteJewelry,jewelry);
         persistJewelryLocally();
-
         renderJewelry();
-
-        console.log(
-            "💎 No había joyas guardadas."
-        );
+        await saveJewelryToFirestore();
 
     } catch (error) {
 
@@ -4002,52 +3998,7 @@ async function saveJewelryToFirestore() {
             return;
         }
 
-        const remoteSnap =
-            await getDocs(col);
-
-        const remoteIds =
-            new Set(
-                remoteSnap.docs.map(
-                    docSnap => docSnap.id
-                )
-            );
-
-        const localIds =
-            new Set(
-                jewelry.map(
-                    jewel => jewel.id
-                )
-            );
-
-        const batch =
-            writeBatch(db);
-
-        jewelry.forEach(jewel => {
-            batch.set(
-                doc(col, jewel.id),
-                jewel
-            );
-
-        });
-
-        /*
-         * Eliminar de Firebase las que ya no existen
-         * localmente.
-         */
-
-        remoteIds.forEach(id => {
-
-            if (!localIds.has(id)) {
-
-                batch.delete(
-                    doc(col, id)
-                );
-
-            }
-
-        });
-
-        await batch.commit();
+        await writePendingSyncItems("jewelry",col,jewelry);
 
         console.log(
             "💎 Joyero guardado en Firebase:",
@@ -6894,7 +6845,7 @@ function renderTrips(){
 async function saveTripsToFirestore(){
     if(!currentUser)return false;
     try{
-        await setDoc(userMetaRef(),{trips:Array.isArray(trips)?trips:[]},{merge:true});
+        await writePendingSyncItems("trips",userTripsCol(),trips);
         return true;
     }catch(error){
         console.error("Error guardando viajes en Firebase:",error);
@@ -6905,12 +6856,17 @@ async function saveTripsToFirestore(){
 async function syncTripsWithFirestore(){
     if(!currentUser)return;
     try{
-        const snap=await getDoc(userMetaRef());
-        const localTrips=Array.isArray(trips)?trips:[];
-        const remoteTrips=snap.exists()&&Array.isArray(snap.data()?.trips)?snap.data().trips:[];
-        if(remoteTrips.length){
-            trips=remoteTrips;
-        }else if(localTrips.length){
+        const [collectionSnap,legacySnap]=await Promise.all([getDocs(userTripsCol()),getDoc(userMetaRef())]);
+        let remoteTrips=collectionSnap.docs.map(d=>({id:d.id,...d.data()}));
+        // Migración única desde las versiones que guardaban el array completo
+        // en users/{uid}; no borra el campo legado para permitir recuperación.
+        if(!remoteTrips.length&&legacySnap.exists()&&Array.isArray(legacySnap.data()?.trips)){
+            remoteTrips=legacySnap.data().trips.filter(t=>t?.id);
+            remoteTrips.forEach(t=>syncPending.trips.add(t.id));
+            trips=mergeSyncItems("trips",[],remoteTrips);
+            await saveTripsToFirestore();
+        }else{
+            trips=mergeSyncItems("trips",remoteTrips,trips);
             await saveTripsToFirestore();
         }
         storage.set(tripsLocalKey(),JSON.stringify(trips));
@@ -7275,10 +7231,9 @@ function closeTripChecklistTemplates(){
     }
 }
     function loadGarmentsLocally(){const scoped=safeParse(storage.get(garmentsLocalKey()),null);if(scoped)return scoped;return safeParse(storage.get(STORAGE_GARMENTS),[])}
-// Sincroniza el armario con Firestore escribiendo SOLO las prendas que cambiaron desde la última confirmación
-// (comparando contra lastSyncedGarmentSnapshot) y borrando solo las que ya no existen localmente. Esto evita
-// reescribir todo el array en cada guardado (menos riesgo de choque entre dispositivos y de superar el límite
-// de tamaño de un documento de Firestore).
+// Sincroniza únicamente las prendas modificadas. La ausencia en la copia local
+// nunca equivale a una orden de borrado: esa distinción es lo que protege las
+// prendas existentes al restaurar una mudanza/importación.
 async function saveWardrobeToFirestore(){
     persistGarmentsLocally();
     mirrorToIndexedDB();
@@ -7296,20 +7251,17 @@ async function saveWardrobeToFirestore(){
         setSyncStatus("Sincronización pausada");
         return{ok:false,reason:"empty-guard"};
     }
-    const currentIds=new Set(garments.map(g=>g.id));
-    const toWrite=garments.filter(g=>lastSyncedGarmentSnapshot[g.id]!==JSON.stringify(g));
-    const toDelete=Object.keys(lastSyncedGarmentSnapshot).filter(id=>!currentIds.has(id));
-    if(!toWrite.length&&!toDelete.length){setSyncStatus("Firestore conectado");return{ok:true}}
+    garments.forEach(g=>{if(lastSyncedGarmentSnapshot[g.id]!==JSON.stringify(g))pendingGarmentIds.add(g.id)});
+    const toWrite=garments.filter(g=>pendingGarmentIds.has(g.id));
+    if(!toWrite.length){setSyncStatus("Firestore conectado");return{ok:true}}
     try{
         setSyncStatus("Sincronizando...");
-        const ops=[...toWrite.map(g=>({type:"set",g})),...toDelete.map(id=>({type:"del",id}))];
-        for(let i=0;i<ops.length;i+=450){ // los batch de Firestore admiten máx. 500 operaciones
+        for(let i=0;i<toWrite.length;i+=450){ // los batch de Firestore admiten máx. 500 operaciones
             const batch=writeBatch(db);
-            ops.slice(i,i+450).forEach(op=>op.type==="set"?batch.set(doc(col,op.g.id),op.g):batch.delete(doc(col,op.id)));
+            toWrite.slice(i,i+450).forEach(g=>batch.set(doc(col,g.id),g));
             await batch.commit();
         }
         toWrite.forEach(g=>{lastSyncedGarmentSnapshot[g.id]=JSON.stringify(g);pendingGarmentIds.delete(g.id)});
-        toDelete.forEach(id=>{delete lastSyncedGarmentSnapshot[id];pendingGarmentIds.delete(id)});
         persistPendingGarmentIds();
         setSyncStatus("Firestore conectado");
         return{ok:true};
@@ -7336,11 +7288,8 @@ async function loadWardrobeFromFirestore(user){
     refreshAll();
     try{
         const metaRef=userMetaRef();
-const [metaSnap,colSnap]=await Promise.all([
-    getDoc(metaRef),
-    getDocs(userGarmentsCol())
-]);     
-      let remoteGarments;
+        const [metaSnap,colSnap]=await Promise.all([getDoc(metaRef),getDocs(userGarmentsCol())]);
+        let remoteGarments;
         if(!colSnap.empty){
             remoteGarments=colSnap.docs.map(d=>({id:d.id,...d.data()}));
         }else if(metaSnap.exists()&&Array.isArray(metaSnap.data().garments)&&metaSnap.data().garments.length){
@@ -7366,7 +7315,11 @@ const [metaSnap,colSnap]=await Promise.all([
             ? remoteGarments.map(rg=>pendingGarmentIds.has(rg.id)&&localById.has(rg.id)?localById.get(rg.id):rg)
             : [...localById.values()];
         const remoteIds=new Set(remoteGarments.map(g=>g.id));
-        localById.forEach((g,id)=>{if(remoteGarments.length&&pendingGarmentIds.has(id)&&!remoteIds.has(id))merged.push(g)});
+        localById.forEach((g,id)=>{
+            // Un ID local que no existe en Firebase es una prenda nueva o una
+            // importación; se añade, nunca se descarta.
+            if(!remoteIds.has(id)){merged.push(g);pendingGarmentIds.add(id)}
+        });
         garments=merged;
         purgeOldTrash();
         wardrobeLoaded=true;
@@ -7396,7 +7349,8 @@ function persist(){
     // se pisen entre sí; cada llamada devuelve la promesa de SU turno para que quien la necesite pueda esperarla.
 garmentsSyncChain=garmentsSyncChain
     .then(()=>saveWardrobeToFirestore())
-    .then(()=>saveLooksToFirestore());
+    .then(()=>saveLooksToFirestore())
+    .then(()=>writePendingSyncItems("wishlist",userWishlistCol(),wishlist));
     return garmentsSyncChain;
 }
 function loadData(){
@@ -9005,7 +8959,7 @@ modal.querySelector(".repair-recycle-card").innerHTML=`
 
 }
   function restoreGarment(id){const g=findGarment(id);if(g){g.eliminado_en=null;persist();refreshAll();toast("Prenda restaurada ✅")}}
-  function deleteGarmentForever(id){const g=findGarment(id);if(!g||!confirm(`Esto borrará "${g.nombre}" para siempre. ¿Seguro?`))return;garments=garments.filter(x=>x.id!==id);savedLooks=savedLooks.map(l=>cleanLookIds(l,id));recentLooks=recentLooks.map(l=>cleanLookIds(l,id));persist();refreshAll()}
+  function deleteGarmentForever(id){const g=findGarment(id);if(!g||!confirm(`Esto borrará "${g.nombre}" para siempre. ¿Seguro?`))return;garments=garments.filter(x=>x.id!==id);savedLooks=savedLooks.map(l=>cleanLookIds(l,id));recentLooks=recentLooks.map(l=>cleanLookIds(l,id));deleteSyncItem("garments",userGarmentsCol(),id);persist();refreshAll()}
   function purgeOldTrash(){const limit=Date.now()-30*24*60*60*1000;garments=garments.filter(g=>!g.eliminado_en||new Date(g.eliminado_en).getTime()>=limit)}
   function cleanLookIds(l,id){const x={...l};["abrigo","exterior","interior","inferior","vestido","calzado","bolso"].forEach(k=>{if(x[k]===id)x[k]=null});x.accesorios=normalizeIds(x.accesorios).filter(a=>a!==id);return x}
 function outfitSlotsHtml(prefix){return Object.keys(emptyLook()).map(k=>`<div class="slot" id="${prefix}_${k}"></div>`).join("")}
@@ -10212,6 +10166,7 @@ function deleteSavedLook(id){
     if(!item)return;
     if(!confirm(`¿Eliminar el look "${item.nombre||"sin nombre"}"?\n\nLas prendas de tu armario NO se eliminarán.`))return;
     savedLooks=savedLooks.filter(l=>l.id!==id);
+    deleteSyncItem("looks",userLooksCol(),id);
     persist();
     refreshAll();
     toast("Look eliminado. Las prendas siguen en tu armario ✅");
@@ -11123,7 +11078,7 @@ const active = garments.filter(g =>
                 : `${average.toFixed(2)} €`;
     }
 };
-function exportData(){const backup={version:APP_DATA_VERSION,exportado_en:new Date().toISOString(),garments,savedLooks,recentLooks,wishlist};const blob=new Blob([JSON.stringify(backup,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`bricloset-backup-${new Date().toISOString().slice(0,10)}.json`;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url)}function importData(e){const file=e.target.files?.[0];if(!file)return;const r=new FileReader();r.onload=x=>{try{const migrated=migrateBackup(JSON.parse(x.target.result));garments=migrated.garments;savedLooks=migrated.savedLooks;recentLooks=migrated.recentLooks;wishlist=migrated.wishlist;persist();refreshAll();toast("Armario importado correctamente ✅")}catch(err){toast("No he podido importar el archivo.","warn");console.error(err)}finally{e.target.value=""}};r.readAsText(file)}
+function exportData(){const backup={version:APP_DATA_VERSION,exportado_en:new Date().toISOString(),garments,savedLooks,recentLooks,wishlist};const blob=new Blob([JSON.stringify(backup,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`bricloset-backup-${new Date().toISOString().slice(0,10)}.json`;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url)}function importData(e){const file=e.target.files?.[0];if(!file)return;const r=new FileReader();r.onload=x=>{try{const migrated=migrateBackup(JSON.parse(x.target.result));garments=mergeImportedById(garments,migrated.garments);savedLooks=mergeImportedById(savedLooks,migrated.savedLooks);recentLooks=mergeImportedById(recentLooks,migrated.recentLooks);wishlist=mergeImportedById(wishlist,migrated.wishlist);migrated.garments.forEach(g=>pendingGarmentIds.add(g.id));migrated.savedLooks.forEach(l=>syncPending.looks.add(l.id));migrated.wishlist.forEach(w=>syncPending.wishlist.add(w.id));persist();refreshAll();toast("Copia importada y fusionada correctamente ✅")}catch(err){toast("No he podido importar el archivo.","warn");console.error(err)}finally{e.target.value=""}};r.readAsText(file)}
 function weatherCodeInfo(code){
     const map={0:["☀️","Despejado"],1:["🌤️","Mayormente despejado"],2:["⛅","Parcialmente nublado"],3:["☁️","Nublado"],45:["🌫️","Niebla"],48:["🌫️","Niebla"],51:["🌦️","Llovizna"],53:["🌦️","Llovizna"],55:["🌧️","Llovizna intensa"],61:["🌦️","Lluvia"],63:["🌧️","Lluvia"],65:["🌧️","Lluvia intensa"],71:["🌨️","Nieve"],73:["🌨️","Nieve"],75:["❄️","Nieve intensa"],80:["🌦️","Chubascos"],81:["🌧️","Chubascos"],82:["⛈️","Chubascos fuertes"],95:["⛈️","Tormenta"],96:["⛈️","Tormenta con granizo"],99:["⛈️","Tormenta con granizo"]};
     return map[code]||["🌤️","Tiempo variable"];
@@ -13048,6 +13003,7 @@ function deleteJewel(id) {
     jewelry = jewelry.filter(function(j) {
         return j.id !== id;
     });
+    deleteSyncItem("jewelry",userJewelryCol(),id);
     persistJewelryLocally();
 saveJewelryToFirestore();
     renderJewelry();
@@ -13106,6 +13062,7 @@ function deleteTrip(tripId){
     }
 
     trips = trips.filter(t => t.id !== tripId);
+    deleteSyncItem("trips",userTripsCol(),tripId);
     calendarPlans=calendarPlans.filter(p=>p?.sourceType!=="trip-look"||p.sourceTripId!==tripId);
     calendarPersistPlans();
 
@@ -13137,21 +13094,16 @@ markGarmentForRepair,putGarmentOnVinted,deleteGarment,restoreGarment,deleteGarme
 try{loadData();populateStaticSelects();loadTripChecklistTemplates();resetForm();resetWishForm();refreshAll();loadHomeWeather();loadTrips();
     renderTrips();
     document.getElementById("authUserBox")?.addEventListener("click",e=>{if(e.target.closest(".user-menu"))return;toggleUserMenu()});document.getElementById("authUserBox")?.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();toggleUserMenu()}else if(e.key==="Escape")closeUserMenu()});document.addEventListener("click",e=>{const box=document.getElementById("authUserBox");if(box&&!box.contains(e.target))closeUserMenu()});document.getElementById("logoutBtn")?.addEventListener("click",e=>{e.stopPropagation();closeUserMenu();logout()});
-    onAuthStateChanged(auth,user=>{updateAuthUi(user);if(user){
+    onAuthStateChanged(auth,async user=>{updateAuthUi(user);if(user){
+    // Establecer primero el UID evita leer/escribir accidentalmente las claves
+    // locales anónimas o las de otra cuenta durante el arranque.
+    currentUser=user;
     loadTrips();
-    syncTripsWithFirestore();
-    loadWardrobeFromFirestore(user);
+    jewelry=loadJewelryLocally();
+    await loadWardrobeFromFirestore(user);
+    await Promise.all([syncTripsWithFirestore(),loadLooksFromFirestore(user),syncJewelryWithFirestore(),syncCalendarPlansWithFirestore(),syncWishlistWithFirestore()]);
     startFirestoreListeners(user);
-      loadLooksFromFirestore(user);
-    jewelry =
-        loadJewelryLocally();
     renderJewelry();
-    setTimeout(() => {
-        syncJewelryWithFirestore();
-    }, 0);
-    setTimeout(() => {
-        syncCalendarPlansWithFirestore();
-    }, 0);
 }else{
     stopFirestoreListeners();
     currentUser = null;
@@ -13261,8 +13213,7 @@ async function syncCalendarPlansWithFirestore(){
     if(!currentUser) return;
 
     try{
-        const ref = userMetaRef();
-        const snap = await getDoc(ref);
+        const [collectionSnap,legacySnap]=await Promise.all([getDocs(userCalendarPlansCol()),getDoc(userMetaRef())]);
 
         const scopedLocal=localStorage.getItem(calendarLocalKey());
         const localPlans = scopedLocal
@@ -13270,32 +13221,16 @@ async function syncCalendarPlansWithFirestore(){
             : (Array.isArray(calendarPlans)?calendarPlans:[]);
         calendarPlans=Array.isArray(localPlans)?localPlans:[];
 
-        if(snap.exists()){
-            const data = snap.data() || {};
-            const remotePlans = Array.isArray(data.calendarPlans)
-                ? data.calendarPlans
-                : [];
-
-            if(remotePlans.length > 0){
-                calendarPlans = remotePlans;
-                localStorage.setItem(
-                    calendarLocalKey(),
-                    JSON.stringify(calendarPlans)
-                );
-            }else if(localPlans.length > 0){
-                await setDoc(
-                    ref,
-                    {calendarPlans: localPlans},
-                    {merge:true}
-                );
-            }
-        }else if(localPlans.length > 0){
-            await setDoc(
-                ref,
-                {calendarPlans: localPlans},
-                {merge:true}
-            );
+        let remotePlans=collectionSnap.docs.map(d=>({id:d.id,...d.data()}));
+        if(!remotePlans.length&&legacySnap.exists()&&Array.isArray(legacySnap.data()?.calendarPlans)){
+            remotePlans=legacySnap.data().calendarPlans.filter(plan=>plan?.id);
+            remotePlans.forEach(plan=>syncPending.calendar.add(plan.id));
+            calendarPlans=mergeSyncItems("calendar",[],remotePlans);
+        }else{
+            calendarPlans=mergeSyncItems("calendar",remotePlans,localPlans);
         }
+        localStorage.setItem(calendarLocalKey(),JSON.stringify(calendarPlans));
+        await saveCalendarPlansToFirestore();
 
         renderCalendarPage();
     }catch(error){
@@ -13308,15 +13243,7 @@ async function saveCalendarPlansToFirestore(){
     }
 
     try{
-        await setDoc(
-            userMetaRef(),
-            {
-                calendarPlans: Array.isArray(calendarPlans)
-                    ? calendarPlans
-                    : []
-            },
-            {merge:true}
-        );
+        await writePendingSyncItems("calendar",userCalendarPlansCol(),calendarPlans);
 
         return true;
 
@@ -13684,6 +13611,7 @@ function calendarDeletePlan(id){
   if(!ok)return;
 
   calendarPlans=calendarPlans.filter(p=>p.id!==id);
+  deleteSyncItem("calendar",userCalendarPlansCol(),id);
   try{
     localStorage.setItem(
     calendarLocalKey(),
