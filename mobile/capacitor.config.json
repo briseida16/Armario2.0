@@ -1,0 +1,8 @@
+{
+  "appId": "com.bricloset.app",
+  "appName": "BriCloset",
+  "webDir": "..",
+  "server": {
+    "androidScheme": "https"
+  }
+}
