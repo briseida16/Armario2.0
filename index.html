@@ -3783,19 +3783,46 @@ function compactCalendarPlanForFirestore(plan){
     };
 }
 function mergeSyncItems(kind,remote,local){
-    const remoteById=new Map((remote||[]).filter(x=>x?.id).map(x=>[x.id,x]));
-    const localById=new Map((local||[]).filter(x=>x?.id).map(x=>[x.id,x]));
+    const remoteById=new Map(
+        (remote||[])
+            .filter(x=>x?.id)
+            .map(x=>[x.id,x])
+    );
+
+    const localById=new Map(
+        (local||[])
+            .filter(x=>x?.id)
+            .map(x=>[x.id,x])
+    );
+
+    const previousSnapshot=syncSnapshots[kind]||{};
     const merged=[...remoteById.values()];
+
     localById.forEach((item,id)=>{
-        // Los datos locales sólo vencen si son un cambio pendiente; los que
-        // sólo están locales son una importación/mudanza y también se conservan.
         const remoteItem=remoteById.get(id);
-        if(!remoteItem || syncPending[kind].has(id)){
-            const index=merged.findIndex(x=>x.id===id);
-            if(index>=0)merged[index]=item; else merged.push(item);
-            syncPending[kind].add(id);
+
+        if(remoteItem){
+            // Si existe en Firebase, conservamos el cambio local únicamente
+            // si todavía está pendiente de sincronizar.
+            if(syncPending[kind].has(id)){
+                const index=merged.findIndex(x=>x.id===id);
+                if(index>=0)merged[index]=item;
+            }
+            return;
         }
+
+        // Si Firebase ya no tiene el elemento y nosotros sabemos que antes
+        // estaba sincronizado, significa que se ha eliminado en otro dispositivo.
+        if(previousSnapshot[id]){
+            syncPending[kind].delete(id);
+            return;
+        }
+
+        // Si nunca estuvo confirmado en Firebase, sí es un elemento nuevo local.
+        merged.push(item);
+        syncPending[kind].add(id);
     });
+
     rememberSyncSnapshot(kind,remote||[]);
     return merged;
 }
