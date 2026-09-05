@@ -1,0 +1,23 @@
+workflows:
+  ios-release:
+    name: BriCloset iOS
+    environment:
+      xcode: latest
+      node: 24
+    scripts:
+      - name: Instalar dependencias
+        script: npm ci
+      - name: Sincronizar Capacitor
+        script: npx cap sync ios
+      - name: Compilar BriCloset
+        script: |
+          xcodebuild \
+            -project ios/App/App.xcodeproj \
+            -scheme App \
+            -configuration Release \
+            -sdk iphoneos \
+            -archivePath build/BriCloset.xcarchive \
+            archive
+    artifacts:
+      - build/**/*.ipa
+      - build/**/*.xcarchive
