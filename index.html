@@ -3805,9 +3805,9 @@ async function writePendingSyncItems(kind,col,items){
     const byId=new Map((items||[]).filter(x=>x?.id).map(x=>[x.id,x]));
     const pending=[...syncPending[kind]].map(id=>byId.get(id)).filter(Boolean);
     if(!pending.length)return true;
-    for(let i=0;i<pending.length;i+=450){
+    for(let i=0;i<pending.length;i+=20){
         const batch=writeBatch(db);
-        pending.slice(i,i+450).forEach(item=>batch.set(doc(col,item.id),item));
+        pending.slice(i,i+20).forEach(item=>batch.set(doc(col,item.id),item));
         await batch.commit();
     }
     pending.forEach(item=>{syncSnapshots[kind][item.id]=serialiseSyncItem(item);syncPending[kind].delete(item.id)});
@@ -7332,9 +7332,9 @@ async function saveWardrobeToFirestore(){
     if(!toWrite.length){setSyncStatus("Firestore conectado");return{ok:true}}
     try{
         setSyncStatus("Sincronizando...");
-        for(let i=0;i<toWrite.length;i+=450){ // los batch de Firestore admiten máx. 500 operaciones
+        for(let i=0;i<toWrite.length;i+=20){ // los batch de Firestore admiten máx. 500 operaciones
             const batch=writeBatch(db);
-            toWrite.slice(i,i+450).forEach(g=>batch.set(doc(col,g.id),g));
+            toWrite.slice(i,i+20).forEach(g=>batch.set(doc(col,g.id),g));
             await batch.commit();
         }
         toWrite.forEach(g=>{lastSyncedGarmentSnapshot[g.id]=JSON.stringify(g);pendingGarmentIds.delete(g.id)});
@@ -7374,9 +7374,9 @@ async function loadWardrobeFromFirestore(user){
             // vez, sin perder ninguna prenda y sin que la usuaria tenga que hacer nada.
             remoteGarments=metaSnap.data().garments.map(migrateGarment);
             const col=userGarmentsCol();
-            for(let i=0;i<remoteGarments.length;i+=450){
+            for(let i=0;i<remoteGarments.length;i+=20){
                 const batch=writeBatch(db);
-                remoteGarments.slice(i,i+450).forEach(g=>batch.set(doc(col,g.id),g));
+                remoteGarments.slice(i,i+20).forEach(g=>batch.set(doc(col,g.id),g));
                 await batch.commit();
             }
             await setDoc(metaRef,{migrado_a_subcoleccion:true,migrado_en:new Date().toISOString()},{merge:true});
